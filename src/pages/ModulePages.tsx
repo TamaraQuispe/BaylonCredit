@@ -13,10 +13,6 @@ export function NuevoFiadoPage() {
   return <Module title="Registrar Fiado" icon="receipt_long" />
 }
 
-export function InventarioPage() {
-  return <Module title="Inventario" icon="inventory" />
-}
-
 export function PagosPage() {
   return <Module title="Pagos" icon="payments" />
 }
