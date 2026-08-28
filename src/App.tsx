@@ -16,9 +16,9 @@ import NuevoPagoPage from '@/pages/NuevoPagoPage'
 import EvaluacionCrediticiaPage from '@/pages/EvaluacionCrediticiaPage'
 import ReportesPage from '@/pages/ReportesPage'
 import UsuariosPage from '@/pages/UsuariosPage'
+import ConfiguracionPage from '@/pages/ConfiguracionPage'
 import {
   NuevoFiadoPage,
-  ConfiguracionPage,
   PerfilPage,
 } from '@/pages/ModulePages'
 
