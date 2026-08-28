@@ -9,16 +9,8 @@ function Module({ title, icon }: ModuleProps) {
   return <ModulePlaceholder title={title} icon={icon} />
 }
 
-export function FiadosPage() {
-  return <Module title="Fiados" icon="receipt_long" />
-}
-
 export function NuevoFiadoPage() {
   return <Module title="Registrar Fiado" icon="receipt_long" />
-}
-
-export function DetalleFiadoPage() {
-  return <Module title="Detalle del Fiado" icon="receipt_long" />
 }
 
 export function ClientesPage() {

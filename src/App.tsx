@@ -4,10 +4,10 @@ import ProtectedRoute from '@/routes/ProtectedRoute'
 import LoginPage from '@/pages/LoginPage'
 import HomePage from '@/pages/HomePage'
 import VentasPage from '@/pages/VentasPage'
+import FiadosPage from '@/pages/FiadosPage'
+import DetalleFiadoPage from '@/pages/DetalleFiadoPage'
 import {
-  FiadosPage,
   NuevoFiadoPage,
-  DetalleFiadoPage,
   ClientesPage,
   NuevoClientePage,
   DetalleClientePage,
