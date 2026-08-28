@@ -13,14 +13,6 @@ export function NuevoFiadoPage() {
   return <Module title="Registrar Fiado" icon="receipt_long" />
 }
 
-export function PagosPage() {
-  return <Module title="Pagos" icon="payments" />
-}
-
-export function NuevoPagoPage() {
-  return <Module title="Registrar Pago" icon="payments" />
-}
-
 export function EvaluacionCrediticiaPage() {
   return <Module title="Evaluación crediticia" icon="psychology_alt" />
 }
