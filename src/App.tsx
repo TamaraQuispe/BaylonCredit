@@ -17,9 +17,9 @@ import EvaluacionCrediticiaPage from '@/pages/EvaluacionCrediticiaPage'
 import ReportesPage from '@/pages/ReportesPage'
 import UsuariosPage from '@/pages/UsuariosPage'
 import ConfiguracionPage from '@/pages/ConfiguracionPage'
+import PerfilPage from '@/pages/PerfilPage'
 import {
   NuevoFiadoPage,
-  PerfilPage,
 } from '@/pages/ModulePages'
 
 export default function App() {

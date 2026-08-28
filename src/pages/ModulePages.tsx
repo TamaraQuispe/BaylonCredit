@@ -12,7 +12,3 @@ function Module({ title, icon }: ModuleProps) {
 export function NuevoFiadoPage() {
   return <Module title="Registrar Fiado" icon="receipt_long" />
 }
-
-export function PerfilPage() {
-  return <Module title="Perfil" icon="account_circle" />
-}
