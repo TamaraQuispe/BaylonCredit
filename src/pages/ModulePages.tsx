@@ -13,18 +13,6 @@ export function NuevoFiadoPage() {
   return <Module title="Registrar Fiado" icon="receipt_long" />
 }
 
-export function ClientesPage() {
-  return <Module title="Clientes" icon="group" />
-}
-
-export function NuevoClientePage() {
-  return <Module title="Registrar Cliente" icon="group" />
-}
-
-export function DetalleClientePage() {
-  return <Module title="Perfil del Cliente" icon="group" />
-}
-
 export function ProductosPage() {
   return <Module title="Productos" icon="inventory_2" />
 }

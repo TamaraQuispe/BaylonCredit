@@ -6,11 +6,11 @@ import HomePage from '@/pages/HomePage'
 import VentasPage from '@/pages/VentasPage'
 import FiadosPage from '@/pages/FiadosPage'
 import DetalleFiadoPage from '@/pages/DetalleFiadoPage'
+import ClientesPage from '@/pages/ClientesPage'
+import NuevoClientePage from '@/pages/NuevoClientePage'
+import DetalleClientePage from '@/pages/DetalleClientePage'
 import {
   NuevoFiadoPage,
-  ClientesPage,
-  NuevoClientePage,
-  DetalleClientePage,
   ProductosPage,
   InventarioPage,
   PagosPage,
