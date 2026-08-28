@@ -14,9 +14,9 @@ import InventarioPage from '@/pages/InventarioPage'
 import PagosPage from '@/pages/PagosPage'
 import NuevoPagoPage from '@/pages/NuevoPagoPage'
 import EvaluacionCrediticiaPage from '@/pages/EvaluacionCrediticiaPage'
+import ReportesPage from '@/pages/ReportesPage'
 import {
   NuevoFiadoPage,
-  ReportesPage,
   UsuariosPage,
   ConfiguracionPage,
   PerfilPage,
