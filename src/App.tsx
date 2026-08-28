@@ -3,8 +3,8 @@ import AppLayout from '@/components/layout/AppLayout'
 import ProtectedRoute from '@/routes/ProtectedRoute'
 import LoginPage from '@/pages/LoginPage'
 import HomePage from '@/pages/HomePage'
+import VentasPage from '@/pages/VentasPage'
 import {
-  VentasPage,
   FiadosPage,
   NuevoFiadoPage,
   DetalleFiadoPage,

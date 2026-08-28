@@ -9,10 +9,6 @@ function Module({ title, icon }: ModuleProps) {
   return <ModulePlaceholder title={title} icon={icon} />
 }
 
-export function VentasPage() {
-  return <Module title="Ventas" icon="point_of_sale" />
-}
-
 export function FiadosPage() {
   return <Module title="Fiados" icon="receipt_long" />
 }
