@@ -9,9 +9,9 @@ import DetalleFiadoPage from '@/pages/DetalleFiadoPage'
 import ClientesPage from '@/pages/ClientesPage'
 import NuevoClientePage from '@/pages/NuevoClientePage'
 import DetalleClientePage from '@/pages/DetalleClientePage'
+import ProductosPage from '@/pages/ProductosPage'
 import {
   NuevoFiadoPage,
-  ProductosPage,
   InventarioPage,
   PagosPage,
   NuevoPagoPage,
