@@ -8,11 +8,11 @@ import DataTable, { type Column } from '@/components/ui/DataTable'
 import Icon from '@/components/ui/Icon'
 import DonutChart from '@/components/dashboard/DonutChart'
 import ActivityFeed from '@/components/dashboard/ActivityFeed'
-import { homeStats } from '@/data/home'
 import type { CustomerAttention } from '@/data/home'
 import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
 import { selectDashboardMetrics } from '@/services/dashboardSelectors'
+import { selectSalesMetrics, useSalesState } from '@/services/salesRepository'
 import { formatCurrency } from '@/utils/format'
 
 const attentionColumns: Column<CustomerAttention>[] = [
@@ -78,9 +78,18 @@ function Card({ title, action, children }: { title: string; action?: React.React
 export default function HomePage() {
   const { clients } = useClientState()
   const { credits, payments } = useCreditState()
-  const metrics = selectDashboardMetrics(credits, payments, clients)
+  const { sales } = useSalesState()
+  const metrics = selectDashboardMetrics(credits, payments, clients, sales)
+  const salesToday = selectSalesMetrics(sales, 'hoy')
   const stats = [
-    { ...homeStats[0], label: 'Ventas de hoy (demo)' },
+    {
+      label: 'Ventas de hoy',
+      value: formatCurrency(salesToday.total),
+      detail: `${salesToday.count} ventas registradas`,
+      detailTone: salesToday.total > 0 ? 'positive' as const : 'neutral' as const,
+      icon: 'point_of_sale',
+      iconTone: 'primary' as const,
+    },
     {
       label: 'Total fiado',
       value: formatCurrency(metrics.totalPending),

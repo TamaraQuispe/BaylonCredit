@@ -4,6 +4,7 @@ import type { RiskLevel } from '@/types'
 import { formatCurrency } from '@/utils/format'
 import type { StoredClient } from './clientRepository'
 import type { StoredCredit, StoredPayment } from './creditRepository'
+import type { StoredSale } from './salesRepository'
 
 interface DashboardMetrics {
   totalPending: number
@@ -28,6 +29,10 @@ interface DashboardMetrics {
 const DAY_IN_MS = 86_400_000
 
 function parseStoredDate(value: string): Date | null {
+  if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    const timestamp = new Date(value)
+    return Number.isNaN(timestamp.getTime()) ? null : timestamp
+  }
   const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
   if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]))
 
@@ -66,9 +71,19 @@ function selectRecentActivity(
   credits: StoredCredit[],
   payments: StoredPayment[],
   clients: StoredClient[],
+  sales: StoredSale[],
   now: Date,
 ): ActivityEntry[] {
   const entries: Array<ActivityEntry & { timestamp: number }> = [
+    ...sales.map((sale) => ({
+      id: `activity-${sale.id}`,
+      title: `Venta de ${formatCurrency(sale.total)} registrada`,
+      description: `${sale.code} · ${sale.paymentMode === 'contado' ? 'Venta al contado' : `Fiado a ${sale.clientName}`}`,
+      time: '',
+      icon: 'point_of_sale',
+      tone: 'primary' as const,
+      timestamp: parseStoredDate(sale.createdAt)?.getTime() ?? 0,
+    })),
     ...payments.map((payment) => ({
       id: `activity-${payment.id}`,
       title: `Pago de ${formatCurrency(payment.amount)} registrado`,
@@ -108,6 +123,7 @@ export function selectDashboardMetrics(
   credits: StoredCredit[],
   payments: StoredPayment[],
   clients: StoredClient[],
+  sales: StoredSale[] = [],
   now = new Date(),
 ): DashboardMetrics {
   const today = new Date(now)
@@ -183,7 +199,7 @@ export function selectDashboardMetrics(
     delinquencyRate: percentage(totalOverdue, totalPending),
     attention,
     fiadoSegments,
-    recentActivity: selectRecentActivity(credits, payments, clients, now),
+    recentActivity: selectRecentActivity(credits, payments, clients, sales, now),
     risk: {
       low: percentage(riskCounts.low, clients.length),
       medium: percentage(riskCounts.medium, clients.length),

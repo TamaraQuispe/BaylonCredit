@@ -1,18 +1,21 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { reportsByPeriod, topProducts, type ReportPeriod } from '@/data/reportes'
+import { reportsByPeriod } from '@/data/reportes'
 import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
 import { selectDashboardMetrics } from '@/services/dashboardSelectors'
+import { selectSalesMetrics, useSalesState, type SalesPeriod } from '@/services/salesRepository'
 import { formatCurrency } from '@/utils/format'
 
 export default function ReportesPage() {
-  const [period, setPeriod] = useState<ReportPeriod>('mes')
+  const [period, setPeriod] = useState<SalesPeriod>('mes')
   const { clients } = useClientState()
   const { credits, payments } = useCreditState()
+  const { sales } = useSalesState()
   const report = reportsByPeriod[period]
-  const metrics = selectDashboardMetrics(credits, payments, clients)
+  const metrics = selectDashboardMetrics(credits, payments, clients, sales)
+  const salesMetrics = selectSalesMetrics(sales, period)
   const riskGradient = `conic-gradient(#10b981 0% ${metrics.risk.low}%, #fe932c ${metrics.risk.low}% ${metrics.risk.low + metrics.risk.medium}%, #ef4444 ${metrics.risk.low + metrics.risk.medium}% 100%)`
   const linePoints = report.delinquency
     .map((value, index) => `${(index / (report.delinquency.length - 1)) * 100},${100 - value * 7}`)
@@ -21,14 +24,14 @@ export default function ReportesPage() {
   const exportReport = () => {
     const rows = [
       ['Reporte', report.label],
-      ['Ventas totales', report.kpis.sales],
+      ['Ventas totales', salesMetrics.total],
       ['Cartera fiada actual', metrics.totalPending],
       ['Total recuperado acumulado', metrics.totalRecovered],
       ['Monto vencido actual', metrics.totalOverdue],
       ['Tasa de morosidad actual', `${metrics.delinquencyRate}%`],
       [],
       ['Producto', 'Cantidad', 'Ingresos'],
-      ...topProducts.map((product) => [product.name, product.quantity, product.revenue]),
+      ...salesMetrics.topProducts.map((product) => [product.name, product.quantity, product.revenue]),
     ]
     const csv = rows.map((row) => row.join(',')).join('\n')
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
@@ -40,7 +43,7 @@ export default function ReportesPage() {
   }
 
   const kpis = [
-    { label: 'Ventas totales (S/.)', value: report.kpis.sales, trend: report.salesTrend, tone: 'text-emerald-600' },
+    { label: 'Ventas totales (S/.)', value: salesMetrics.total, trend: salesMetrics.trend, tone: salesMetrics.trend >= 0 ? 'text-emerald-600' : 'text-error' },
     { label: 'Cartera fiada actual (S/.)', value: metrics.totalPending, detail: `${metrics.activeCredits} activos`, tone: 'text-on-surface-variant' },
     { label: 'Recuperado acumulado (S/.)', value: metrics.totalRecovered, detail: `${payments.length} pagos`, tone: 'text-emerald-600' },
     { label: 'Monto vencido actual (S/.)', value: metrics.totalOverdue, detail: 'de cartera', tone: metrics.totalOverdue > 0 ? 'text-error' : 'text-emerald-600' },
@@ -51,10 +54,10 @@ export default function ReportesPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <h1 className="font-h1-display text-h1-display text-on-background">Panel de Reportes</h1>
-          <p className="font-body-md text-on-surface-variant mt-1">Cartera en tiempo real; ventas y productos usan datos demostrativos.</p>
+          <p className="font-body-md text-on-surface-variant mt-1">Ventas, cartera y métricas de riesgo actualizadas en tiempo real.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <select value={period} onChange={(event) => setPeriod(event.target.value as ReportPeriod)} className="bg-surface-container-lowest border border-outline-variant text-on-surface-variant py-2 px-4 rounded-lg focus:ring-2 focus:ring-primary shadow-sm">
+          <select value={period} onChange={(event) => setPeriod(event.target.value as SalesPeriod)} className="bg-surface-container-lowest border border-outline-variant text-on-surface-variant py-2 px-4 rounded-lg focus:ring-2 focus:ring-primary shadow-sm">
             <option value="hoy">Hoy</option><option value="semana">Esta semana</option><option value="mes">Este mes</option>
           </select>
           <button type="button" onClick={exportReport} className="flex items-center gap-2 bg-primary-container text-on-primary font-label-sm px-4 py-2 rounded-lg hover:shadow-md">
@@ -84,10 +87,10 @@ export default function ReportesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <section className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high lg:col-span-2 flex flex-col">
-          <h3 className="font-h3-title text-h3-title text-on-background mb-6">Ventas al contado vs. ventas fiadas (demo)</h3>
+          <h3 className="font-h3-title text-h3-title text-on-background mb-6">Ventas al contado vs. ventas fiadas</h3>
           <div className="relative flex-1 min-h-[300px] flex items-end justify-around gap-3 px-2 pb-6">
             <div className="absolute inset-0 pb-8 pt-2 flex flex-col justify-between pointer-events-none">{[1, 2, 3, 4].map((line) => <div key={line} className="border-b border-outline-variant border-dashed opacity-30" />)}</div>
-            {report.bars.map((bar) => (
+            {salesMetrics.bars.map((bar) => (
               <div key={bar.label} className="flex flex-col items-center gap-2 z-10 flex-1 max-w-28">
                 <div className="flex items-end justify-center gap-1 h-[210px] w-full">
                   <div className="w-7 md:w-10 bg-primary rounded-t-sm hover:opacity-80" style={{ height: `${bar.cash}%` }} title={`Contado: ${bar.cash}%`} />
@@ -132,11 +135,14 @@ export default function ReportesPage() {
         </section>
 
         <section className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high flex flex-col">
-          <div className="flex justify-between items-center mb-6"><h3 className="font-h3-title text-h3-title text-on-background">Top 5 productos más vendidos (demo)</h3><Link to="/productos" className="font-label-sm text-label-sm text-primary hover:underline">Ver todos</Link></div>
+          <div className="flex justify-between items-center mb-6"><h3 className="font-h3-title text-h3-title text-on-background">Top 5 productos más vendidos</h3><Link to="/productos" className="font-label-sm text-label-sm text-primary hover:underline">Ver todos</Link></div>
           <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[500px]">
               <thead><tr className="border-b border-surface-container-high"><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2">PRODUCTO</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">CANTIDAD</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">INGRESOS</th></tr></thead>
-              <tbody>{topProducts.map((product) => <tr key={product.name} className="border-b border-surface-container-high last:border-0 hover:bg-surface-container-low h-[56px]"><td className="py-3 px-2"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-surface-container flex items-center justify-center text-primary font-bold">{product.name[0]}</div><div><p className="font-medium text-on-background">{product.name}</p><p className="font-label-sm text-on-surface-variant">Categoría: {product.category}</p></div></div></td><td className="py-3 px-2 text-right">{product.quantity.toLocaleString('es-PE')}</td><td className="py-3 px-2 text-right font-semibold text-primary">{formatCurrency(product.revenue)}</td></tr>)}</tbody>
+              <tbody>
+                {salesMetrics.topProducts.map((product) => <tr key={product.name} className="border-b border-surface-container-high last:border-0 hover:bg-surface-container-low h-[56px]"><td className="py-3 px-2"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-surface-container flex items-center justify-center text-primary font-bold">{product.name[0]}</div><div><p className="font-medium text-on-background">{product.name}</p><p className="font-label-sm text-on-surface-variant">Categoría: {product.category}</p></div></div></td><td className="py-3 px-2 text-right">{product.quantity.toLocaleString('es-PE')}</td><td className="py-3 px-2 text-right font-semibold text-primary">{formatCurrency(product.revenue)}</td></tr>)}
+                {salesMetrics.topProducts.length === 0 && <tr><td colSpan={3} className="py-12 text-center text-on-surface-variant">No hay ventas registradas en este período.</td></tr>}
+              </tbody>
             </table>
           </div>
         </section>
