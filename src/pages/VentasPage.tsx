@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react'
 import Icon from '@/components/ui/Icon'
 import { productCategories, products, type Product } from '@/data/products'
+import { useClientState } from '@/services/clientRepository'
+import { creditRepository } from '@/services/creditRepository'
+import { localScoringService } from '@/services/scoringService'
+import { getAvailableStock, salesRepository, useSalesState } from '@/services/salesRepository'
 import { formatCurrency } from '@/utils/format'
 
 interface CartLine {
@@ -10,11 +14,23 @@ interface CartLine {
 
 const TAX_RATE = 0.18
 
+function isoDate(date: Date) {
+  const offset = date.getTimezoneOffset()
+  return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 10)
+}
+
 export default function VentasPage() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Todos')
   const [cart, setCart] = useState<CartLine[]>([])
   const [paymentMode, setPaymentMode] = useState<'contado' | 'fiado'>('contado')
+  const [clientId, setClientId] = useState('')
+  const [processing, setProcessing] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const { clients } = useClientState()
+  const { sales } = useSalesState()
+  const client = clients.find((item) => item.id === clientId)
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -29,8 +45,15 @@ export default function VentasPage() {
   }, [search, category])
 
   const addToCart = (product: Product) => {
+    const available = getAvailableStock(product, sales)
     setCart((prev) => {
       const existing = prev.find((line) => line.product.id === product.id)
+      if ((existing?.quantity ?? 0) >= available) {
+        setError(`No hay más stock disponible de ${product.name}.`)
+        return prev
+      }
+      setError('')
+      setSuccess('')
       if (existing) {
         return prev.map((line) =>
           line.product.id === product.id
@@ -47,7 +70,13 @@ export default function VentasPage() {
       prev
         .map((line) =>
           line.product.id === productId
-            ? { ...line, quantity: line.quantity + delta }
+            ? {
+                ...line,
+                quantity: Math.min(
+                  line.quantity + delta,
+                  getAvailableStock(line.product, sales),
+                ),
+              }
             : line,
         )
         .filter((line) => line.quantity > 0),
@@ -59,6 +88,51 @@ export default function VentasPage() {
   const subtotal = cart.reduce((sum, line) => sum + line.product.price * line.quantity, 0)
   const igv = subtotal * TAX_RATE
   const total = subtotal + igv
+
+  const registerSale = async () => {
+    setError('')
+    setSuccess('')
+    const input = {
+      paymentMode,
+      clientId: client?.id,
+      clientName: client?.business,
+      items: cart,
+      subtotal,
+      tax: igv,
+      total,
+    }
+
+    try {
+      salesRepository.validate(input)
+      setProcessing(true)
+      let creditId: string | undefined
+      if (paymentMode === 'fiado') {
+        if (!client) throw new Error('Selecciona el cliente para la venta fiada.')
+        const evaluation = await localScoringService.evaluate(client, total)
+        if (!evaluation.approved) throw new Error(evaluation.recommendation)
+        const creditDate = new Date()
+        const dueDate = new Date(creditDate)
+        dueDate.setDate(dueDate.getDate() + 15)
+        creditId = creditRepository.create({
+          client,
+          amount: total,
+          creditDate: isoDate(creditDate),
+          dueDate: isoDate(dueDate),
+          evaluation,
+        }).id
+      }
+
+      const sale = salesRepository.create({ ...input, creditId })
+      setCart([])
+      setClientId('')
+      setPaymentMode('contado')
+      setSuccess(`Venta ${sale.code} registrada correctamente.`)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No se pudo registrar la venta.')
+    } finally {
+      setProcessing(false)
+    }
+  }
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-[calc(100dvh-8rem)]">
@@ -102,11 +176,13 @@ export default function VentasPage() {
         {/* Product grid */}
         <div className="flex-1 overflow-y-auto p-4 md:p-5">
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="group bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden hover:shadow-sm transition-all duration-200 flex flex-col cursor-pointer"
-              >
+            {filteredProducts.map((product) => {
+              const available = getAvailableStock(product, sales)
+              return (
+                <div
+                  key={product.id}
+                  className={`group bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden transition-all duration-200 flex flex-col ${available > 0 ? 'hover:shadow-sm' : 'opacity-60'}`}
+                >
                 <div className="aspect-square bg-surface-container-low relative overflow-hidden p-4 flex items-center justify-center">
                   <Icon
                     name={product.icon}
@@ -120,6 +196,9 @@ export default function VentasPage() {
                       {product.name}
                     </h3>
                     <p className="text-on-surface-variant text-xs mt-1">{product.category}</p>
+                    <p className={`text-xs mt-1 ${available > 0 ? 'text-on-surface-variant' : 'text-error'}`}>
+                      {available > 0 ? `${available} disponibles` : 'Sin stock'}
+                    </p>
                   </div>
                   <div className="flex items-center justify-between mt-3">
                     <span className="font-h3-title text-h3-title text-primary">
@@ -128,15 +207,17 @@ export default function VentasPage() {
                     <button
                       type="button"
                       onClick={() => addToCart(product)}
+                      disabled={available === 0}
                       aria-label={`Agregar ${product.name}`}
-                      className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-colors"
+                      className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-colors disabled:cursor-not-allowed disabled:hover:bg-surface-container disabled:hover:text-primary"
                     >
                       <Icon name="add" size="18px" />
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
+                </div>
+              )
+            })}
             {filteredProducts.length === 0 && (
               <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
                 <Icon name="search_off" size="40px" className="text-outline" />
@@ -210,8 +291,9 @@ export default function VentasPage() {
                     <button
                       type="button"
                       onClick={() => changeQuantity(line.product.id, 1)}
+                      disabled={line.quantity >= getAvailableStock(line.product, sales)}
                       aria-label="Aumentar cantidad"
-                      className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"
+                      className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Icon name="add" size="16px" />
                     </button>
@@ -269,34 +351,43 @@ export default function VentasPage() {
               <label className="font-label-sm text-label-sm text-primary-container">
                 Seleccionar Cliente
               </label>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">
-                  <Icon name="person_search" size="18px" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Buscar cliente..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-                />
-              </div>
-              <div className="mt-1 p-3 bg-surface-container-lowest rounded border border-outline-variant flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm text-on-surface">Juan Pérez</p>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Límite: S/ 500.00</p>
+              <select
+                value={clientId}
+                disabled={processing}
+                onChange={(event) => {
+                  setClientId(event.target.value)
+                  setError('')
+                }}
+                className="w-full px-3 py-2 text-sm rounded border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+              >
+                <option value="">Seleccione un cliente...</option>
+                {clients.map((item) => <option key={item.id} value={item.id}>{item.business} · {item.name}</option>)}
+              </select>
+              {client && (
+                <div className="mt-1 p-3 bg-surface-container-lowest rounded border border-outline-variant flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm text-on-surface">{client.business}</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">Deuda actual: {formatCurrency(client.debt)}</p>
+                  </div>
+                  <div className="flex flex-col items-center justify-center w-10 h-10 rounded-full border-2 border-primary text-primary bg-primary-fixed">
+                    <Icon name="psychology_alt" size="20px" />
+                  </div>
                 </div>
-                <div className="flex flex-col items-center justify-center w-10 h-10 rounded-full border-2 border-green-600 text-green-600 bg-green-50">
-                  <span className="font-bold text-xs">85</span>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
+          {error && <p className="p-3 rounded-lg bg-error-container text-on-error-container text-sm">{error}</p>}
+          {success && <p className="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-sm">{success}</p>}
+
           <button
             type="button"
-            className="w-full py-4 rounded-lg bg-primary text-on-primary font-h3-title text-body-lg font-semibold hover:bg-primary-container hover:shadow-md transition-all flex items-center justify-center gap-2"
+            onClick={registerSale}
+            disabled={processing || cart.length === 0 || (paymentMode === 'fiado' && !client)}
+            className="w-full py-4 rounded-lg bg-primary text-on-primary font-h3-title text-body-lg font-semibold hover:bg-primary-container hover:shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Icon name="check_circle" />
-            Registrar venta
+            <Icon name={processing ? 'progress_activity' : 'check_circle'} className={processing ? 'animate-spin' : ''} />
+            {processing ? 'Validando y registrando...' : 'Registrar venta'}
           </button>
         </div>
       </aside>
