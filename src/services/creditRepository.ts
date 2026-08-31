@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { fiados as seedFiados, type Fiado } from '@/data/fiados'
 import type { Cliente } from '@/data/clientes'
+import { paymentRecords, type PaymentRecord } from '@/data/pagos'
 import type { CreditEvaluation } from './scoringService'
 
 export interface CreditTimelineEntry {
@@ -19,8 +20,17 @@ export interface StoredCredit extends Fiado {
   timeline: CreditTimelineEntry[]
 }
 
+export interface StoredPayment extends PaymentRecord {
+  clientId?: string
+  creditIds: string[]
+  paymentDate: string
+  method: string
+  reference?: string
+}
+
 interface CreditState {
   credits: StoredCredit[]
+  payments: StoredPayment[]
 }
 
 export interface CreateCreditInput {
@@ -29,6 +39,14 @@ export interface CreateCreditInput {
   creditDate: string
   dueDate: string
   evaluation: CreditEvaluation
+}
+
+export interface ApplyPaymentInput {
+  client: Cliente
+  allocations: { creditId: string; amount: number }[]
+  paymentDate: string
+  method: string
+  reference?: string
 }
 
 const STORAGE_KEY = 'baylon_credit_state_v1'
@@ -73,6 +91,12 @@ function seedState(): CreditState {
           : []),
       ],
     })),
+    payments: paymentRecords.map((payment) => ({
+      ...payment,
+      creditIds: [],
+      paymentDate: payment.paidAt,
+      method: 'No especificado',
+    })),
   }
 }
 
@@ -81,7 +105,12 @@ function loadState(): CreditState {
   const saved = window.localStorage.getItem(STORAGE_KEY)
   if (!saved) return seedState()
   try {
-    return JSON.parse(saved) as CreditState
+    const parsed = JSON.parse(saved) as Partial<CreditState>
+    const seed = seedState()
+    return {
+      credits: parsed.credits ?? seed.credits,
+      payments: parsed.payments ?? seed.payments,
+    }
   } catch {
     return seedState()
   }
@@ -153,8 +182,96 @@ export const creditRepository = {
         },
       ],
     }
-    persist({ credits: [credit, ...state.credits] })
+    persist({ ...state, credits: [credit, ...state.credits] })
     return credit
+  },
+  applyPayment(input: ApplyPaymentInput) {
+    const allocations = input.allocations.filter((allocation) => allocation.amount > 0)
+    if (allocations.length === 0) throw new Error('El pago no tiene asignaciones válidas.')
+    if (input.paymentDate > new Date().toISOString().slice(0, 10)) {
+      throw new Error('La fecha del pago no puede estar en el futuro.')
+    }
+
+    const paymentId = `pay-${Date.now()}`
+    const now = new Date()
+    const allocationMap = new Map(allocations.map((allocation) => [allocation.creditId, allocation.amount]))
+
+    for (const allocation of allocations) {
+      const credit = state.credits.find((item) => item.id === allocation.creditId)
+      if (!credit || credit.clientId !== input.client.id) {
+        throw new Error('Uno de los fiados seleccionados no pertenece al cliente.')
+      }
+      if (allocation.amount > credit.pendingAmount + 0.001) {
+        throw new Error(`El pago supera el saldo de ${credit.code}.`)
+      }
+    }
+
+    const updatedCredits = state.credits.map((credit) => {
+      const appliedAmount = allocationMap.get(credit.id)
+      if (!appliedAmount) return credit
+
+      const pendingAmount = Math.max(0, Number((credit.pendingAmount - appliedAmount).toFixed(2)))
+      const paidAmount = Number((credit.paidAmount + appliedAmount).toFixed(2))
+      const paidPercent = Math.min(100, Number(((paidAmount / credit.originalAmount) * 100).toFixed(1)))
+      const paymentEntry: CreditTimelineEntry = {
+        id: `${paymentId}-${credit.id}`,
+        title: pendingAmount === 0 ? 'Pago completado' : 'Pago parcial',
+        description: `${input.method}${input.reference ? ` · Ref. ${input.reference}` : ''}`,
+        amount: -appliedAmount,
+        date: `${formatDate(input.paymentDate)}, ${now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`,
+        type: 'payment',
+      }
+      const timelineWithoutPending = credit.timeline.filter((entry) => entry.type !== 'pending')
+
+      return {
+        ...credit,
+        pendingAmount,
+        paidAmount,
+        paidPercent,
+        status: pendingAmount === 0 ? 'pagado' as const : credit.status,
+        timeline: [
+          ...timelineWithoutPending,
+          paymentEntry,
+          ...(pendingAmount > 0
+            ? [
+                {
+                  id: `${credit.id}-pending-${paymentId}`,
+                  title: 'Pago completado',
+                  description: 'Pendiente de cancelación total.',
+                  amount: pendingAmount,
+                  date: 'Restante',
+                  type: 'pending' as const,
+                },
+              ]
+            : []),
+        ],
+      }
+    })
+
+    const appliedCredits = updatedCredits.filter((credit) => allocationMap.has(credit.id))
+    const amount = Number(allocations.reduce((sum, allocation) => sum + allocation.amount, 0).toFixed(2))
+    const remainingBalance = updatedCredits
+      .filter((credit) => credit.clientId === input.client.id)
+      .reduce((sum, credit) => sum + credit.pendingAmount, 0)
+    const payment: StoredPayment = {
+      id: paymentId,
+      clientId: input.client.id,
+      client: input.client.business,
+      amount,
+      creditIds: allocations.map((allocation) => allocation.creditId),
+      creditCode: appliedCredits.map((credit) => credit.code).join(', '),
+      creditDate: appliedCredits.map((credit) => credit.createdAt).join(', '),
+      paidAt: `${formatDate(input.paymentDate)}, ${now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`,
+      paymentDate: input.paymentDate,
+      remainingBalance,
+      registeredBy: 'Administrador',
+      initials: 'AD',
+      method: input.method,
+      reference: input.reference,
+    }
+
+    persist({ credits: updatedCredits, payments: [payment, ...state.payments] })
+    return payment
   },
 }
 

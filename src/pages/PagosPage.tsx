@@ -1,20 +1,21 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { paymentRecords } from '@/data/pagos'
 import { formatCurrency } from '@/utils/format'
+import { useCreditState } from '@/services/creditRepository'
 
 export default function PagosPage() {
   const [search, setSearch] = useState('')
+  const { payments } = useCreditState()
   const filteredPayments = useMemo(() => {
     const term = search.trim().toLowerCase()
-    return paymentRecords.filter(
+    return payments.filter(
       (payment) =>
         !term ||
         payment.client.toLowerCase().includes(term) ||
         payment.creditCode.toLowerCase().includes(term),
     )
-  }, [search])
+  }, [payments, search])
 
   return (
     <div>
@@ -80,9 +81,17 @@ export default function PagosPage() {
                     </div>
                   </td>
                   <td className="py-3 px-6 text-right">
-                    <button type="button" className="text-on-surface-variant hover:text-primary opacity-100 sm:opacity-0 group-hover:opacity-100" aria-label="Opciones del pago">
-                      <Icon name="more_vert" size="18px" />
-                    </button>
+                    {payment.creditIds[0] ? (
+                      <Link
+                        to={`/fiados/${payment.creditIds[0]}`}
+                        className="text-on-surface-variant hover:text-primary opacity-100 sm:opacity-0 group-hover:opacity-100"
+                        aria-label="Ver fiado relacionado"
+                      >
+                        <Icon name="visibility" size="18px" />
+                      </Link>
+                    ) : (
+                      <Icon name="more_vert" size="18px" className="text-on-surface-variant" />
+                    )}
                   </td>
                 </tr>
               ))}
@@ -93,7 +102,7 @@ export default function PagosPage() {
           </table>
         </div>
         <div className="border-t border-surface-container-high px-6 py-4 flex items-center justify-between bg-surface-bright/50">
-          <span className="font-label-sm text-label-sm text-on-surface-variant">Mostrando {filteredPayments.length} de 128 registros</span>
+          <span className="font-label-sm text-label-sm text-on-surface-variant">Mostrando {filteredPayments.length} de {payments.length} registros</span>
           <div className="flex items-center gap-2">
             <button type="button" disabled className="p-1 rounded text-on-surface-variant disabled:opacity-50"><Icon name="chevron_left" size="18px" /></button>
             <span className="font-label-sm text-label-sm text-on-surface font-medium px-2">1</span>

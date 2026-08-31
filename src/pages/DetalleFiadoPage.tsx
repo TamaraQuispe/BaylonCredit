@@ -58,7 +58,11 @@ export default function DetalleFiadoPage() {
           )}
         </div>
         <div>
-          <Link to={`/pagos/nuevo${detail.clientId ? `?cliente=${detail.clientId}` : ''}`}>
+          <Link
+            to={`/pagos/nuevo${
+              detail.clientId ? `?cliente=${detail.clientId}&fiado=${detail.id}` : ''
+            }`}
+          >
             <Button variant="primary" size="lg" className="bg-primary-container">
               <span className="material-symbols-outlined fill-icon">payments</span>
               Registrar pago
