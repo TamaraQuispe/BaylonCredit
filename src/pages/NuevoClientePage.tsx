@@ -1,15 +1,30 @@
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { clientRepository } from '@/services/clientRepository'
 
 const baseInput =
   'w-full h-11 px-4 rounded-lg bg-surface-bright border border-outline-variant text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow placeholder:text-outline'
 
 export default function NuevoClientePage() {
-  const [success, setSuccess] = useState(false)
+  const navigate = useNavigate()
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setSuccess(true)
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const data = new FormData(event.currentTarget)
+    try {
+      const client = clientRepository.create({
+        firstName: String(data.get('nombres')),
+        lastName: String(data.get('apellidos')),
+        business: String(data.get('negocio') ?? ''),
+        document: String(data.get('documento')),
+        phone: `+51 ${String(data.get('telefono'))}`,
+        address: String(data.get('direccion') ?? ''),
+      })
+      navigate(`/clientes/${client.id}`, { replace: true })
+    } catch (clientError) {
+      setError(clientError instanceof Error ? clientError.message : 'No se pudo registrar el cliente.')
+    }
   }
 
   return (
@@ -30,17 +45,10 @@ export default function NuevoClientePage() {
         </Link>
       </div>
 
-      {success && (
-        <div className="mb-6 p-4 rounded-lg bg-surface-container-high border border-primary-fixed flex items-start gap-3">
-          <span className="material-symbols-outlined fill-icon text-primary-container">check_circle</span>
-          <div>
-            <h3 className="font-h3-title text-body-lg font-semibold text-on-surface">
-              Cliente registrado exitosamente
-            </h3>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-              El perfil está listo para la evaluación crediticia inicial por IA.
-            </p>
-          </div>
+      {error && (
+        <div className="mb-6 p-4 rounded-lg bg-error-container border border-error/20 text-on-error-container flex items-center gap-3">
+          <span className="material-symbols-outlined">error</span>
+          <div>{error}</div>
         </div>
       )}
 
@@ -74,17 +82,17 @@ export default function NuevoClientePage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="font-label-sm text-label-sm text-on-surface" htmlFor="dni">
-                DNI
+              <label className="font-label-sm text-label-sm text-on-surface" htmlFor="documento">
+                DNI / RUC
               </label>
               <input
                 required
-                id="dni"
-                name="dni"
+                id="documento"
+                name="documento"
                 type="text"
-                maxLength={8}
-                pattern="[0-9]{8}"
-                placeholder="8 dígitos numéricos"
+                maxLength={11}
+                pattern="([0-9]{8}|[0-9]{11})"
+                placeholder="8 u 11 dígitos numéricos"
                 className={baseInput}
               />
             </div>
@@ -105,6 +113,18 @@ export default function NuevoClientePage() {
                   className={`${baseInput} pl-12`}
                 />
               </div>
+            </div>
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="font-label-sm text-label-sm text-on-surface" htmlFor="negocio">
+                Nombre comercial <span className="text-on-surface-variant font-normal">(opcional)</span>
+              </label>
+              <input
+                id="negocio"
+                name="negocio"
+                type="text"
+                placeholder="Ej. Bodega Don Pepe"
+                className={baseInput}
+              />
             </div>
             <div className="flex flex-col gap-1.5 md:col-span-2">
               <label className="font-label-sm text-label-sm text-on-surface" htmlFor="direccion">
@@ -128,7 +148,7 @@ export default function NuevoClientePage() {
                   id="fecha"
                   name="fecha"
                   type="text"
-                  value="24 de Octubre, 2023"
+                  value={new Intl.DateTimeFormat('es-PE', { dateStyle: 'long' }).format(new Date())}
                   className="w-full h-11 px-4 pl-10 rounded-lg bg-surface-container-low border border-outline-variant border-dashed text-on-surface-variant font-body-md text-body-md cursor-not-allowed opacity-80"
                 />
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">

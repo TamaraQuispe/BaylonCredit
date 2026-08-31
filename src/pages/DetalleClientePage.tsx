@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { clientProfile, clients } from '@/data/clientes'
+import { clientProfile } from '@/data/clientes'
 import { formatCurrency } from '@/utils/format'
+import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
 
 type HistoryTab = 'compras' | 'fiados' | 'pagos'
@@ -16,6 +17,7 @@ const tabs: { key: HistoryTab; label: string }[] = [
 export default function DetalleClientePage() {
   const [activeTab, setActiveTab] = useState<HistoryTab>('compras')
   const { id } = useParams()
+  const { clients } = useClientState()
   const { credits } = useCreditState()
   const client = clients.find((item) => item.id === id)
 
@@ -23,14 +25,19 @@ export default function DetalleClientePage() {
 
   const clientCredits = credits.filter((credit) => credit.clientId === client.id)
   const latestEvaluation = clientCredits.find((credit) => credit.evaluation)?.evaluation
+  const hasEvaluation = Boolean(latestEvaluation) || client.hasEvaluation
   const scoreByRisk = { 'muy-bajo': 92, bajo: 84, medio: 68, alto: 50, critico: 36 }
   const score = latestEvaluation?.score ?? scoreByRisk[client.risk]
-  const risk = latestEvaluation?.risk.toUpperCase() ?? client.risk.toUpperCase()
+  const risk = hasEvaluation
+    ? latestEvaluation?.risk.toUpperCase() ?? client.risk.toUpperCase()
+    : 'SIN EVALUAR'
   const additionalDebt = clientCredits.reduce((sum, credit) => sum + credit.pendingAmount, 0)
   const totalFiado = clientCredits.reduce((sum, credit) => sum + credit.originalAmount, 0)
   const displayedHistory =
     activeTab === 'compras'
-      ? clientProfile.history
+      ? client.purchases > 0
+        ? clientProfile.history
+        : []
       : activeTab === 'fiados'
         ? clientCredits.map((credit) => ({
             date: credit.createdAt,
@@ -125,7 +132,7 @@ export default function DetalleClientePage() {
           </h3>
 
           <div className="flex justify-center mb-6 relative">
-            <svg className="w-40 h-40 -rotate-90" viewBox="0 0 36 36" aria-label={`Puntaje ${score}`}>
+            <svg className="w-40 h-40 -rotate-90" viewBox="0 0 36 36" aria-label={hasEvaluation ? `Puntaje ${score}` : 'Evaluación pendiente'}>
               <path
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
@@ -138,12 +145,12 @@ export default function DetalleClientePage() {
                 stroke="#10b981"
                 strokeWidth="3.8"
                 strokeLinecap="round"
-                strokeDasharray={`${score}, 100`}
+                strokeDasharray={`${hasEvaluation ? score : 0}, 100`}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="font-h1-display text-h1-display text-primary-container">
-                {score}
+                {hasEvaluation ? score : '--'}
               </span>
               <span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide">
                 Puntaje Baylón
@@ -158,16 +165,20 @@ export default function DetalleClientePage() {
               </span>
             </CreditRow>
             <CreditRow label="Probabilidad de impago">
-              <span className="font-semibold text-on-background">{latestEvaluation?.defaultProbability ?? 100 - score}%</span>
+              <span className="font-semibold text-on-background">
+                {hasEvaluation ? `${latestEvaluation?.defaultProbability ?? 100 - score}%` : '--'}
+              </span>
             </CreditRow>
             <CreditRow label="Límite recomendado">
               <span className="font-bold text-primary-container">
-                {formatCurrency(latestEvaluation?.recommendedLimit ?? Math.max(100, score * 10))}
+                {hasEvaluation
+                  ? formatCurrency(latestEvaluation?.recommendedLimit ?? Math.max(100, score * 10))
+                  : '--'}
               </span>
             </CreditRow>
           </div>
 
-          {(latestEvaluation?.approved ?? !['alto', 'critico'].includes(client.risk)) && (
+          {hasEvaluation && (latestEvaluation?.approved ?? !['alto', 'critico'].includes(client.risk)) && (
             <div className="mt-6 bg-surface-container-low p-4 rounded-lg border border-primary-fixed">
               <p className="font-body-md text-body-md font-medium text-primary-container flex items-start gap-2">
                 <Icon name="check_circle" size="20px" />

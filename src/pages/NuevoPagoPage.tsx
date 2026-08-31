@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { clients } from '@/data/clientes'
 import { formatCurrency } from '@/utils/format'
+import { useClientState } from '@/services/clientRepository'
 import {
   creditRepository,
   useCreditState,
@@ -24,6 +24,7 @@ const riskLabels = {
 
 export default function NuevoPagoPage() {
   const [searchParams] = useSearchParams()
+  const { clients } = useClientState()
   const { credits } = useCreditState()
   const requestedClient = searchParams.get('cliente') ?? ''
   const requestedCredit = searchParams.get('fiado') ?? ''

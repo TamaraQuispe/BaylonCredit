@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { clients, type Cliente } from '@/data/clientes'
+import type { Cliente } from '@/data/clientes'
 import { formatCurrency } from '@/utils/format'
+import { useClientState } from '@/services/clientRepository'
+import { useCreditState } from '@/services/creditRepository'
 
 type FilterKey = 'todos' | 'sin-deuda' | 'con-deuda' | 'vencido' | 'riesgo-alto'
 
@@ -44,10 +46,38 @@ const riskMap: Record<Cliente['risk'], { label: string; className: string }> = {
 export default function ClientesPage() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<FilterKey>('todos')
+  const { clients } = useClientState()
+  const { credits } = useCreditState()
+
+  const displayedClients = clients.map((client) => {
+    const clientCredits = credits.filter((credit) => credit.clientId === client.id)
+    const creditDebt = clientCredits.reduce((sum, credit) => sum + credit.pendingAmount, 0)
+    const debt = client.debt + creditDebt
+    const latestEvaluation = clientCredits.find((credit) => credit.evaluation)?.evaluation
+    const hasOverdue = clientCredits.some(
+      (credit) => credit.status === 'vencido' && credit.pendingAmount > 0,
+    )
+    const status =
+      clientCredits.length === 0
+        ? client.status
+        : hasOverdue
+          ? 'vencido' as const
+          : debt === 0
+            ? 'sin-deuda' as const
+            : 'pendiente' as const
+    return {
+      ...client,
+      debt,
+      purchases: client.purchases + clientCredits.length,
+      status,
+      risk: latestEvaluation?.risk ?? client.risk,
+      hasEvaluation: latestEvaluation ? true : client.hasEvaluation,
+    }
+  })
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
-    return clients.filter((client) => {
+    return displayedClients.filter((client) => {
       const matchesFilter =
         filter === 'todos' ||
         (filter === 'sin-deuda' && client.debt === 0) ||
@@ -62,7 +92,7 @@ export default function ClientesPage() {
         client.phone.replace(/\s/g, '').includes(term.replace(/\s/g, ''))
       return matchesFilter && matchesSearch
     })
-  }, [search, filter])
+  }, [displayedClients, search, filter])
 
   return (
     <div>
@@ -184,18 +214,24 @@ export default function ClientesPage() {
                       </span>
                     </td>
                     <td className="px-4 align-middle">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-[11px] font-medium ${risk.className}`}>
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            client.risk === 'alto' || client.risk === 'critico'
-                              ? 'bg-error'
-                              : client.risk === 'medio'
-                                ? 'bg-secondary'
-                                : 'bg-primary-fixed-dim'
-                          }`}
-                        />
-                        {risk.label}
-                      </span>
+                      {client.hasEvaluation ? (
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-[11px] font-medium ${risk.className}`}>
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              client.risk === 'alto' || client.risk === 'critico'
+                                ? 'bg-error'
+                                : client.risk === 'medio'
+                                  ? 'bg-secondary'
+                                  : 'bg-primary-fixed-dim'
+                            }`}
+                          />
+                          {risk.label}
+                        </span>
+                      ) : (
+                        <span className="inline-flex px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-[11px] font-medium">
+                          Sin evaluar
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 align-middle text-right">
                       <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -232,7 +268,7 @@ export default function ClientesPage() {
         {/* Pagination */}
         <div className="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between">
           <span className="font-label-sm text-label-sm text-on-surface-variant">
-            Mostrando 1-5 de 245 clientes
+            Mostrando {filtered.length} de {clients.length} clientes
           </span>
           <div className="flex items-center gap-2">
             <button

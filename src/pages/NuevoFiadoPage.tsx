@@ -2,8 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import RiskBadge from '@/components/ui/RiskBadge'
-import { clients } from '@/data/clientes'
 import { formatCurrency } from '@/utils/format'
+import { useClientState } from '@/services/clientRepository'
 import { creditRepository } from '@/services/creditRepository'
 import {
   localScoringService,
@@ -22,6 +22,7 @@ defaultDueDate.setDate(defaultDueDate.getDate() + 15)
 export default function NuevoFiadoPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { clients } = useClientState()
   const requestedClient = searchParams.get('cliente') ?? ''
   const [clientId, setClientId] = useState(
     clients.some((client) => client.id === requestedClient) ? requestedClient : '',
