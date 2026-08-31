@@ -5,6 +5,7 @@ import LoginPage from '@/pages/LoginPage'
 import HomePage from '@/pages/HomePage'
 import VentasPage from '@/pages/VentasPage'
 import FiadosPage from '@/pages/FiadosPage'
+import NuevoFiadoPage from '@/pages/NuevoFiadoPage'
 import DetalleFiadoPage from '@/pages/DetalleFiadoPage'
 import ClientesPage from '@/pages/ClientesPage'
 import NuevoClientePage from '@/pages/NuevoClientePage'
@@ -18,9 +19,6 @@ import ReportesPage from '@/pages/ReportesPage'
 import UsuariosPage from '@/pages/UsuariosPage'
 import ConfiguracionPage from '@/pages/ConfiguracionPage'
 import PerfilPage from '@/pages/PerfilPage'
-import {
-  NuevoFiadoPage,
-} from '@/pages/ModulePages'
 
 export default function App() {
   return (

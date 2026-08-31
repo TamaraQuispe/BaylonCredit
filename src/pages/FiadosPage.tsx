@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
-import { fiadoStats, fiados, type Fiado } from '@/data/fiados'
 import { formatCurrency } from '@/utils/format'
+import { useCreditState } from '@/services/creditRepository'
 import type { RiskLevel, FiadoStatus } from '@/types'
 
 type StatusFilter = 'todos' | FiadoStatus
@@ -58,8 +58,76 @@ const statusFilters: { key: StatusFilter; label: string }[] = [
 
 export default function FiadosPage() {
   const [filter, setFilter] = useState<StatusFilter>('todos')
+  const { credits } = useCreditState()
 
-  const filtered = filter === 'todos' ? fiados : fiados.filter((f) => f.status === filter)
+  const filtered = filter === 'todos' ? credits : credits.filter((credit) => credit.status === filter)
+  const activeCredits = credits.filter((credit) => credit.status !== 'pagado')
+  const totalToCollect = activeCredits.reduce((sum, credit) => sum + credit.pendingAmount, 0)
+  const currentDebt = activeCredits
+    .filter((credit) => ['al-dia', 'proximo-a-vencer'].includes(credit.status))
+    .reduce((sum, credit) => sum + credit.pendingAmount, 0)
+  const overdueDebt = activeCredits
+    .filter((credit) => credit.status === 'vencido')
+    .reduce((sum, credit) => sum + credit.pendingAmount, 0)
+  const delinquentClients = new Set(
+    activeCredits
+      .filter((credit) => credit.status === 'vencido')
+      .map((credit) => credit.clientId ?? credit.client.name),
+  ).size
+  const stats = [
+    {
+      label: 'Total por cobrar',
+      value: formatCurrency(totalToCollect),
+      detail: `En ${activeCredits.length} fiados activos`,
+      icon: 'account_balance_wallet',
+      tone: 'primary-fixed' as const,
+    },
+    {
+      label: 'Deuda al día',
+      value: formatCurrency(currentDebt),
+      detail: totalToCollect > 0 ? `${Math.round((currentDebt / totalToCollect) * 100)}% del total` : 'Sin deuda activa',
+      icon: 'check_circle',
+      tone: 'highest' as const,
+    },
+    {
+      label: 'Deuda vencida',
+      value: formatCurrency(overdueDebt),
+      detail: overdueDebt > 0 ? 'Requiere atención' : 'Sin deuda vencida',
+      icon: 'warning',
+      tone: 'error-container' as const,
+    },
+    {
+      label: 'Clientes morosos',
+      value: String(delinquentClients),
+      detail: delinquentClients > 0 ? 'Requieren gestión inmediata' : 'Sin clientes morosos',
+      icon: 'group_off',
+      tone: 'secondary-container' as const,
+    },
+  ]
+
+  const exportCredits = () => {
+    const rows = [
+      ['Código', 'Cliente', 'Monto original', 'Saldo pendiente', 'Fecha', 'Vencimiento', 'Estado', 'Riesgo'],
+      ...credits.map((credit) => [
+        credit.code,
+        credit.client.business,
+        credit.originalAmount,
+        credit.pendingAmount,
+        credit.createdAt,
+        credit.dueAt,
+        credit.status,
+        credit.risk,
+      ]),
+    ]
+    const url = URL.createObjectURL(
+      new Blob([rows.map((row) => row.join(',')).join('\n')], { type: 'text/csv;charset=utf-8' }),
+    )
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'fiados.csv'
+    link.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -80,7 +148,7 @@ export default function FiadosPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
-        {Object.values(fiadoStats).map((stat) => {
+        {stats.map((stat) => {
           const tone = statToneClasses[stat.tone as FiadoTone]
           return (
             <div
@@ -145,6 +213,7 @@ export default function FiadosPage() {
             </button>
             <button
               type="button"
+              onClick={exportCredits}
               className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant font-label-sm hover:bg-surface-container-high transition-colors w-full md:w-auto"
             >
               <Icon name="download" size="18px" />
@@ -169,7 +238,7 @@ export default function FiadosPage() {
               </tr>
             </thead>
             <tbody className="font-body-md text-body-md text-on-surface divide-y divide-outline-variant">
-              {filtered.map((row: Fiado) => {
+              {filtered.map((row) => {
                 const st = statusBadge[row.status]
                 const overduedays = row.status === 'vencido' ? 15 : row.status === 'proximo-a-vencer' ? 4 : null
                 const pagado = row.status === 'pagado'
@@ -235,7 +304,7 @@ export default function FiadosPage() {
         {/* Pagination */}
         <div className="p-4 border-t border-outline-variant flex items-center justify-between bg-surface-bright">
           <span className="font-label-sm text-label-sm text-on-surface-variant">
-            Mostrando 1-4 de 124 fiados
+            Mostrando {filtered.length} de {credits.length} fiados
           </span>
           <div className="flex gap-1">
             <button

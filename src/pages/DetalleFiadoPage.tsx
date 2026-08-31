@@ -1,11 +1,33 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
-import { fiadoDetail } from '@/data/fiados'
 import { formatCurrency } from '@/utils/format'
+import { useCreditState } from '@/services/creditRepository'
+
+const statusLabels = {
+  'al-dia': 'Al día',
+  'proximo-a-vencer': 'Próximo a vencer',
+  vencido: 'Vencido',
+  pagado: 'Pagado',
+}
+
+function daysUntil(date: string) {
+  const [day, month, year] = date.split('/').map(Number)
+  if (!day || !month || !year) return null
+  const target = new Date(year, month - 1, day)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return Math.ceil((target.getTime() - today.getTime()) / 86_400_000)
+}
 
 export default function DetalleFiadoPage() {
-  const detail = fiadoDetail
+  const { id } = useParams()
+  const { credits } = useCreditState()
+  const detail = credits.find((credit) => credit.id === id)
+
+  if (!detail) return <Navigate to="/fiados" replace />
+
+  const daysLeft = daysUntil(detail.dueAt)
 
   return (
     <div className="max-w-6xl mx-auto space-y-gutter">
@@ -22,18 +44,26 @@ export default function DetalleFiadoPage() {
             <h1 className="font-h1-display text-h1-display text-on-surface">Detalle del Fiado</h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
               <span className="w-2 h-2 rounded-full bg-on-secondary-container" />
-              Pago en proceso
+              {statusLabels[detail.status]}
             </span>
           </div>
           <p className="font-body-md text-body-md text-on-surface-variant">
             Referencia de crédito: {detail.code}
           </p>
+          {detail.evaluation && (
+            <p className="font-label-sm text-label-sm text-on-surface-variant">
+              Score de origen: <strong className="text-primary">{detail.evaluation.score}</strong> ·
+              Respuesta en {detail.evaluation.responseTimeMs} ms
+            </p>
+          )}
         </div>
         <div>
-          <Button variant="primary" size="lg" className="bg-primary-container">
-            <span className="material-symbols-outlined fill-icon">payments</span>
-            Registrar pago
-          </Button>
+          <Link to={`/pagos/nuevo${detail.clientId ? `?cliente=${detail.clientId}` : ''}`}>
+            <Button variant="primary" size="lg" className="bg-primary-container">
+              <span className="material-symbols-outlined fill-icon">payments</span>
+              Registrar pago
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -101,12 +131,15 @@ export default function DetalleFiadoPage() {
                 <h4 className="font-h3-title text-h3-title text-on-surface">{detail.client.name}</h4>
                 <p className="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-1">
                   <Icon name="call" size="16px" />
-                  {detail.phone}
+                  {detail.phone ?? 'Teléfono no registrado'}
                 </p>
-                {detail.hasHistory && (
-                  <p className="font-label-sm text-label-sm text-primary mt-1 cursor-pointer hover:underline">
+                {detail.clientId && (
+                  <Link
+                    to={`/clientes/${detail.clientId}`}
+                    className="block font-label-sm text-label-sm text-primary mt-1 hover:underline"
+                  >
                     Ver historial crediticio
-                  </p>
+                  </Link>
                 )}
               </div>
             </div>
@@ -136,9 +169,15 @@ export default function DetalleFiadoPage() {
                   {detail.dueAt}
                 </span>
               </div>
-              <p className="font-label-sm text-label-sm text-on-surface-variant text-right">
-                Faltan {detail.daysLeft} días
-              </p>
+              {daysLeft !== null && (
+                <p className={`font-label-sm text-label-sm text-right ${daysLeft < 0 ? 'text-error' : 'text-on-surface-variant'}`}>
+                  {daysLeft < 0
+                    ? `Venció hace ${Math.abs(daysLeft)} días`
+                    : daysLeft === 0
+                      ? 'Vence hoy'
+                      : `Faltan ${daysLeft} días`}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -155,10 +194,10 @@ export default function DetalleFiadoPage() {
           <div className="relative">
             <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-outline-variant" />
             <div className="space-y-8 pt-2 pb-2">
-              {detail.payments.map((payment) => {
+              {detail.timeline.map((payment) => {
                 const isPending = payment.type === 'pending'
                 return (
-                  <div key={payment.title} className="relative pl-6">
+                  <div key={payment.id} className="relative pl-6">
                     <div
                       className={`absolute -left-[15px] top-0 bg-surface-container-lowest p-1 rounded-full border flex items-center justify-center ${
                         isPending ? 'border-outline border-dashed' : 'border-outline-variant'
