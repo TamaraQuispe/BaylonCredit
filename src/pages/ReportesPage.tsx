@@ -2,12 +2,18 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import { reportsByPeriod, topProducts, type ReportPeriod } from '@/data/reportes'
+import { useClientState } from '@/services/clientRepository'
+import { useCreditState } from '@/services/creditRepository'
+import { selectDashboardMetrics } from '@/services/dashboardSelectors'
 import { formatCurrency } from '@/utils/format'
 
 export default function ReportesPage() {
   const [period, setPeriod] = useState<ReportPeriod>('mes')
+  const { clients } = useClientState()
+  const { credits, payments } = useCreditState()
   const report = reportsByPeriod[period]
-  const riskGradient = `conic-gradient(#10b981 0% ${report.risk.low}%, #fe932c ${report.risk.low}% ${report.risk.low + report.risk.medium}%, #ef4444 ${report.risk.low + report.risk.medium}% 100%)`
+  const metrics = selectDashboardMetrics(credits, payments, clients)
+  const riskGradient = `conic-gradient(#10b981 0% ${metrics.risk.low}%, #fe932c ${metrics.risk.low}% ${metrics.risk.low + metrics.risk.medium}%, #ef4444 ${metrics.risk.low + metrics.risk.medium}% 100%)`
   const linePoints = report.delinquency
     .map((value, index) => `${(index / (report.delinquency.length - 1)) * 100},${100 - value * 7}`)
     .join(' ')
@@ -16,10 +22,10 @@ export default function ReportesPage() {
     const rows = [
       ['Reporte', report.label],
       ['Ventas totales', report.kpis.sales],
-      ['Total fiado', report.kpis.credit],
-      ['Total recuperado', report.kpis.recovered],
-      ['Monto vencido', report.kpis.overdue],
-      ['Tasa de morosidad', `${report.kpis.delinquency}%`],
+      ['Cartera fiada actual', metrics.totalPending],
+      ['Total recuperado acumulado', metrics.totalRecovered],
+      ['Monto vencido actual', metrics.totalOverdue],
+      ['Tasa de morosidad actual', `${metrics.delinquencyRate}%`],
       [],
       ['Producto', 'Cantidad', 'Ingresos'],
       ...topProducts.map((product) => [product.name, product.quantity, product.revenue]),
@@ -35,9 +41,9 @@ export default function ReportesPage() {
 
   const kpis = [
     { label: 'Ventas totales (S/.)', value: report.kpis.sales, trend: report.salesTrend, tone: 'text-emerald-600' },
-    { label: 'Total fiado (S/.)', value: report.kpis.credit, trend: report.creditTrend, tone: 'text-error' },
-    { label: 'Total recuperado (S/.)', value: report.kpis.recovered, trend: report.recoveredTrend, tone: 'text-emerald-600' },
-    { label: 'Monto vencido (S/.)', value: report.kpis.overdue, trend: report.overdueTrend, tone: report.overdueTrend <= 0 ? 'text-emerald-600' : 'text-error' },
+    { label: 'Cartera fiada actual (S/.)', value: metrics.totalPending, detail: `${metrics.activeCredits} activos`, tone: 'text-on-surface-variant' },
+    { label: 'Recuperado acumulado (S/.)', value: metrics.totalRecovered, detail: `${payments.length} pagos`, tone: 'text-emerald-600' },
+    { label: 'Monto vencido actual (S/.)', value: metrics.totalOverdue, detail: 'de cartera', tone: metrics.totalOverdue > 0 ? 'text-error' : 'text-emerald-600' },
   ]
 
   return (
@@ -45,7 +51,7 @@ export default function ReportesPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <h1 className="font-h1-display text-h1-display text-on-background">Panel de Reportes</h1>
-          <p className="font-body-md text-on-surface-variant mt-1">Resumen financiero y métricas de riesgo.</p>
+          <p className="font-body-md text-on-surface-variant mt-1">Cartera en tiempo real; ventas y productos usan datos demostrativos.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <select value={period} onChange={(event) => setPeriod(event.target.value as ReportPeriod)} className="bg-surface-container-lowest border border-outline-variant text-on-surface-variant py-2 px-4 rounded-lg focus:ring-2 focus:ring-primary shadow-sm">
@@ -63,20 +69,22 @@ export default function ReportesPage() {
             <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">{kpi.label}</p>
             <div className="flex items-end gap-2">
               <h3 className="font-h2-headline text-h2-headline text-on-background">{kpi.value.toLocaleString('es-PE')}</h3>
-              <span className={`font-label-sm text-label-sm flex items-center mb-1 ${kpi.tone}`}><Icon name={kpi.trend < 0 ? 'trending_down' : 'trending_up'} size="14px" /> {Math.abs(kpi.trend)}%</span>
+               <span className={`font-label-sm text-label-sm flex items-center mb-1 ${kpi.tone}`}>
+                 {kpi.trend !== undefined ? <><Icon name={kpi.trend < 0 ? 'trending_down' : 'trending_up'} size="14px" /> {Math.abs(kpi.trend)}%</> : kpi.detail}
+               </span>
             </div>
           </div>
         ))}
         <div className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high relative overflow-hidden">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-error-container rounded-full opacity-20 blur-xl" />
           <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">Tasa de morosidad</p>
-          <div className="flex items-end gap-2 relative"><h3 className="font-h2-headline text-h2-headline text-error">{report.kpis.delinquency}%</h3><span className="font-label-sm text-label-sm text-on-surface-variant mb-1">Promedio</span></div>
+          <div className="flex items-end gap-2 relative"><h3 className="font-h2-headline text-h2-headline text-error">{metrics.delinquencyRate}%</h3><span className="font-label-sm text-label-sm text-on-surface-variant mb-1">Actual</span></div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <section className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high lg:col-span-2 flex flex-col">
-          <h3 className="font-h3-title text-h3-title text-on-background mb-6">Ventas al contado vs. Ventas fiadas</h3>
+          <h3 className="font-h3-title text-h3-title text-on-background mb-6">Ventas al contado vs. ventas fiadas (demo)</h3>
           <div className="relative flex-1 min-h-[300px] flex items-end justify-around gap-3 px-2 pb-6">
             <div className="absolute inset-0 pb-8 pt-2 flex flex-col justify-between pointer-events-none">{[1, 2, 3, 4].map((line) => <div key={line} className="border-b border-outline-variant border-dashed opacity-30" />)}</div>
             {report.bars.map((bar) => (
@@ -99,20 +107,21 @@ export default function ReportesPage() {
           <h3 className="font-h3-title text-h3-title text-on-background mb-6 relative">Clientes según nivel de riesgo</h3>
           <div className="flex-1 flex items-center justify-center min-h-[250px]">
             <div className="relative w-48 h-48 rounded-full flex items-center justify-center" style={{ background: riskGradient }}>
-              <div className="w-32 h-32 bg-surface-container-lowest rounded-full flex flex-col items-center justify-center shadow-inner"><span className="font-h2-headline text-h2-headline">{report.risk.total}</span><span className="font-label-sm text-label-sm text-on-surface-variant">Total</span></div>
+               <div className="w-32 h-32 bg-surface-container-lowest rounded-full flex flex-col items-center justify-center shadow-inner"><span className="font-h2-headline text-h2-headline">{metrics.risk.total}</span><span className="font-label-sm text-label-sm text-on-surface-variant">Total</span></div>
             </div>
           </div>
           <div className="flex flex-col gap-3 mt-6">
-            <RiskLegend color="bg-emerald-500" label="Riesgo Bajo" value={report.risk.low} />
-            <RiskLegend color="bg-secondary-container" label="Riesgo Medio" value={report.risk.medium} />
-            <RiskLegend color="bg-red-500" label="Riesgo Alto" value={report.risk.high} />
+             <RiskLegend color="bg-emerald-500" label="Riesgo Bajo" value={metrics.risk.low} />
+             <RiskLegend color="bg-secondary-container" label="Riesgo Medio" value={metrics.risk.medium} />
+             <RiskLegend color="bg-red-500" label="Riesgo Alto" value={metrics.risk.high} />
           </div>
         </section>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <section className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high flex flex-col">
-          <h3 className="font-h3-title text-h3-title text-on-background mb-6">Evolución de la morosidad</h3>
+          <h3 className="font-h3-title text-h3-title text-on-background mb-1">Evolución referencial de la morosidad</h3>
+          <p className="font-label-sm text-label-sm text-on-surface-variant mb-6">Datos demo hasta contar con historial mensual persistido.</p>
           <div className="relative min-h-[250px]">
             <div className="absolute inset-0 pb-8 pt-2 flex flex-col justify-between">{[1, 2, 3, 4].map((line) => <div key={line} className="border-b border-outline-variant border-dashed opacity-30" />)}</div>
             <svg className="absolute inset-0 w-full h-[calc(100%-2rem)] z-10" preserveAspectRatio="none" viewBox="0 0 100 100">
@@ -123,7 +132,7 @@ export default function ReportesPage() {
         </section>
 
         <section className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high flex flex-col">
-          <div className="flex justify-between items-center mb-6"><h3 className="font-h3-title text-h3-title text-on-background">Top 5 productos más vendidos</h3><Link to="/productos" className="font-label-sm text-label-sm text-primary hover:underline">Ver todos</Link></div>
+          <div className="flex justify-between items-center mb-6"><h3 className="font-h3-title text-h3-title text-on-background">Top 5 productos más vendidos (demo)</h3><Link to="/productos" className="font-label-sm text-label-sm text-primary hover:underline">Ver todos</Link></div>
           <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[500px]">
               <thead><tr className="border-b border-surface-container-high"><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2">PRODUCTO</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">CANTIDAD</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">INGRESOS</th></tr></thead>

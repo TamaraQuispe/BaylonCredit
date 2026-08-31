@@ -8,8 +8,12 @@ import DataTable, { type Column } from '@/components/ui/DataTable'
 import Icon from '@/components/ui/Icon'
 import DonutChart from '@/components/dashboard/DonutChart'
 import ActivityFeed from '@/components/dashboard/ActivityFeed'
-import { homeStats, customersAttention, fiadoDonut, recentActivity } from '@/data/home'
+import { homeStats } from '@/data/home'
 import type { CustomerAttention } from '@/data/home'
+import { useClientState } from '@/services/clientRepository'
+import { useCreditState } from '@/services/creditRepository'
+import { selectDashboardMetrics } from '@/services/dashboardSelectors'
+import { formatCurrency } from '@/utils/format'
 
 const attentionColumns: Column<CustomerAttention>[] = [
   {
@@ -49,7 +53,7 @@ const attentionColumns: Column<CustomerAttention>[] = [
     align: 'right',
     cell: (row) => (
       <Link
-        to={`/clientes/${row.id}`}
+        to={`/fiados/${row.id}`}
         className="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline"
       >
         Ver
@@ -72,7 +76,41 @@ function Card({ title, action, children }: { title: string; action?: React.React
 }
 
 export default function HomePage() {
-  const totalFiado = homeStats[1].value
+  const { clients } = useClientState()
+  const { credits, payments } = useCreditState()
+  const metrics = selectDashboardMetrics(credits, payments, clients)
+  const stats = [
+    { ...homeStats[0], label: 'Ventas de hoy (demo)' },
+    {
+      label: 'Total fiado',
+      value: formatCurrency(metrics.totalPending),
+      detail: `En ${metrics.activeCredits} fiados activos`,
+      icon: 'account_balance_wallet',
+      iconTone: 'secondary' as const,
+    },
+    {
+      label: 'Deuda vencida',
+      value: formatCurrency(metrics.totalOverdue),
+      detail: metrics.totalOverdue > 0 ? 'Requiere atención' : 'Sin deuda vencida',
+      detailTone: metrics.totalOverdue > 0 ? 'negative' as const : 'positive' as const,
+      icon: 'warning',
+      iconTone: 'error' as const,
+    },
+    {
+      label: 'Clientes con deuda',
+      value: String(metrics.clientsWithDebt),
+      detail: `${metrics.criticalClients} de riesgo alto`,
+      icon: 'group_remove',
+      iconTone: 'tertiary' as const,
+    },
+    {
+      label: 'Pagos hoy',
+      value: formatCurrency(metrics.paymentsToday),
+      detail: 'Recibidos',
+      icon: 'payments',
+      iconTone: 'success' as const,
+    },
+  ]
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,7 +128,7 @@ export default function HomePage() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {homeStats.map((stat) => (
+        {stats.map((stat) => (
           <StatCard key={stat.label} {...stat} />
         ))}
       </div>
@@ -111,7 +149,7 @@ export default function HomePage() {
           >
             <DataTable
               columns={attentionColumns}
-              data={customersAttention}
+              data={metrics.attention}
               rowKey={(row) => row.id}
               minWidth="min-w-[640px]"
             />
@@ -121,8 +159,8 @@ export default function HomePage() {
         <div className="xl:col-span-1 flex flex-col gap-6">
           <Card title="Estado de los fiados">
             <DonutChart
-              segments={fiadoDonut}
-              centerValue={totalFiado}
+              segments={metrics.fiadoSegments}
+              centerValue={formatCurrency(metrics.totalPending)}
               centerLabel="en fiados"
             />
           </Card>
@@ -131,7 +169,7 @@ export default function HomePage() {
 
       <div className="w-full">
         <Card title="Actividad reciente">
-          <ActivityFeed items={recentActivity} />
+          <ActivityFeed items={metrics.recentActivity} />
         </Card>
       </div>
     </div>
