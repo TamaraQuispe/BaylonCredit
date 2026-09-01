@@ -22,9 +22,10 @@ function daysUntil(date: string) {
 
 export default function DetalleFiadoPage() {
   const { id } = useParams()
-  const { credits } = useCreditState()
+  const { credits, loading } = useCreditState()
   const detail = credits.find((credit) => credit.id === id)
 
+  if (loading) return <div className="py-16 text-center text-on-surface-variant">Cargando fiado...</div>
   if (!detail) return <Navigate to="/fiados" replace />
 
   const daysLeft = daysUntil(detail.dueAt)

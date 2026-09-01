@@ -84,6 +84,9 @@ pytest
 - `GET|POST|PATCH|DELETE /api/v1/products`: catálogo persistente de productos.
 - `POST /api/v1/products/{id}/stock`: entradas y ajustes auditables de inventario.
 - `GET|POST /api/v1/sales`: consulta y registro transaccional de ventas.
+- `POST /api/v1/credits/evaluate`: evaluación de riesgo y límite recomendado.
+- `GET|POST /api/v1/credits`: cartera, detalle, historial y fiados directos.
+- `GET|POST /api/v1/payments`: abonos totales o parciales con asignaciones atómicas.
 
 Roles disponibles: `admin`, `operator` y `viewer`.
 

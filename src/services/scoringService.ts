@@ -1,5 +1,6 @@
 import type { Cliente } from '@/data/clientes'
 import type { RiskLevel } from '@/types'
+import { apiRequest } from './apiClient'
 
 export interface CreditEvaluation {
   score: number
@@ -16,51 +17,35 @@ export interface CreditScoringService {
   evaluate(client: Cliente, requestedAmount: number): Promise<CreditEvaluation>
 }
 
-const riskBase: Record<RiskLevel, number> = {
-  'muy-bajo': 94,
-  bajo: 86,
-  medio: 70,
-  alto: 52,
-  critico: 38,
+interface ApiEvaluation {
+  score: number
+  risk: RiskLevel
+  default_probability: number
+  recommended_limit: string | number
+  approved: boolean
+  recommendation: string
+  calculated_at: string
+  response_time_ms: number
 }
 
-function riskFromScore(score: number): RiskLevel {
-  if (score >= 88) return 'muy-bajo'
-  if (score >= 76) return 'bajo'
-  if (score >= 61) return 'medio'
-  if (score >= 46) return 'alto'
-  return 'critico'
+function mapEvaluation(evaluation: ApiEvaluation): CreditEvaluation {
+  return {
+    score: evaluation.score,
+    risk: evaluation.risk,
+    defaultProbability: evaluation.default_probability,
+    recommendedLimit: Number(evaluation.recommended_limit),
+    approved: evaluation.approved,
+    recommendation: evaluation.recommendation,
+    calculatedAt: evaluation.calculated_at,
+    responseTimeMs: evaluation.response_time_ms,
+  }
 }
 
 export const localScoringService: CreditScoringService = {
   async evaluate(client, requestedAmount) {
-    const startedAt = performance.now()
-    await new Promise((resolve) => window.setTimeout(resolve, 650))
-
-    const debtPenalty = Math.min(client.debt / 250, 22)
-    const amountPenalty = Math.min(requestedAmount / 300, 18)
-    const loyaltyBonus = Math.min(client.purchases / 45, 7)
-    const score = Math.round(
-      Math.max(30, Math.min(98, riskBase[client.risk] - debtPenalty - amountPenalty + loyaltyBonus)),
-    )
-    const risk = riskFromScore(score)
-    const recommendedLimit = Math.max(
-      50,
-      Math.round((client.purchases * 8 + score * 12 - client.debt * 0.2) / 50) * 50,
-    )
-    const approved = requestedAmount <= recommendedLimit && !['alto', 'critico'].includes(risk)
-
-    return {
-      score,
-      risk,
-      defaultProbability: Math.max(2, 100 - score),
-      recommendedLimit,
-      approved,
-      recommendation: approved
-        ? `Se recomienda aprobar el fiado hasta ${recommendedLimit.toLocaleString('es-PE', { style: 'currency', currency: 'PEN' })}.`
-        : `El monto supera el límite recomendado de ${recommendedLimit.toLocaleString('es-PE', { style: 'currency', currency: 'PEN' })}. Requiere decisión manual.`,
-      calculatedAt: new Date().toISOString(),
-      responseTimeMs: Math.round(performance.now() - startedAt),
-    }
+    return mapEvaluation(await apiRequest<ApiEvaluation>('/credits/evaluate', {
+      method: 'POST',
+      body: JSON.stringify({ client_id: client.id, amount: requestedAmount }),
+    }))
   },
 }

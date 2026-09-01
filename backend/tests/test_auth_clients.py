@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator
+from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
@@ -139,3 +140,55 @@ async def test_sale_updates_stock_and_creates_credit_atomically(client: AsyncCli
     assert rejected.status_code == 409
     products_after_rejection = await client.get("/api/v1/products", headers=headers)
     assert products_after_rejection.json()[0]["stock"] == 3
+
+
+async def test_direct_credit_and_partial_payment_are_consistent(client: AsyncClient) -> None:
+    login = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@baylon.com", "password": "secure-password"},
+    )
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    created_client = await client.post(
+        "/api/v1/clients",
+        headers=headers,
+        json={
+            "first_name": "Rosa",
+            "last_name": "Flores",
+            "document": "87654321",
+            "phone": "987654321",
+        },
+    )
+    client_id = created_client.json()["id"]
+
+    credit = await client.post(
+        "/api/v1/credits",
+        headers=headers,
+        json={
+            "client_id": client_id,
+            "amount": "100.00",
+            "credit_date": date.today().isoformat(),
+            "due_date": "2030-01-15",
+        },
+    )
+    assert credit.status_code == 201, credit.text
+    credit_id = credit.json()["id"]
+
+    payment = await client.post(
+        "/api/v1/payments",
+        headers=headers,
+        json={
+            "client_id": client_id,
+            "allocations": [{"credit_id": credit_id, "amount": "40.00"}],
+            "payment_date": date.today().isoformat(),
+            "method": "Transferencia",
+            "reference": "TEST-001",
+        },
+    )
+    assert payment.status_code == 201, payment.text
+    assert payment.json()["amount"] == "40.00"
+    assert payment.json()["remaining_balance"] == "60.00"
+
+    updated = await client.get(f"/api/v1/credits/{credit_id}", headers=headers)
+    assert updated.json()["pending_amount"] == "60.00"
+    assert updated.json()["paid_percent"] == 40.0
+    assert len(updated.json()["payments"]) == 1
