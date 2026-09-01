@@ -5,3 +5,10 @@ dist-ssr
 *.local
 .DS_Store
 *.log
+.env
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+.coverage

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { startSession } from '@/utils/session'
+import { login } from '@/services/apiClient'
 import Icon from '@/components/ui/Icon'
 
 export default function LoginPage() {
@@ -8,14 +9,22 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    void email
-    void password
-    void remember
-    startSession()
-    navigate('/inicio')
+    setLoading(true)
+    setError('')
+    try {
+      const response = await login(email.trim(), password)
+      startSession(response.access_token, response.user, remember)
+      navigate('/inicio')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No se pudo iniciar sesión.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -39,6 +48,11 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {error && (
+              <div className="p-3 rounded-lg bg-error-container text-on-error-container text-sm flex items-center gap-2">
+                <Icon name="error" size="18px" /> {error}
+              </div>
+            )}
             <div className="flex flex-col gap-1.5">
               <label className="font-label-sm text-label-sm text-on-surface" htmlFor="email">
                 Correo electrónico
@@ -51,6 +65,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   required
+                  disabled={loading}
                   placeholder="usuario@baylon.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -71,6 +86,7 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   required
+                  disabled={loading}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -101,10 +117,11 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full mt-2 bg-primary text-on-primary font-body-lg text-body-lg font-semibold py-3 px-4 rounded-lg shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 active:translate-y-0"
+              disabled={loading}
+              className="w-full mt-2 bg-primary text-on-primary font-body-lg text-body-lg font-semibold py-3 px-4 rounded-lg shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Iniciar sesión
-              <Icon name="arrow_forward" size="20px" />
+              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              <Icon name={loading ? 'progress_activity' : 'arrow_forward'} size="20px" className={loading ? 'animate-spin' : ''} />
             </button>
           </form>
 

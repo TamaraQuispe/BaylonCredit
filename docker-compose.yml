@@ -1,0 +1,60 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bayloncredit}
+      POSTGRES_USER: ${POSTGRES_USER:-baylon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-baylon-local-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-baylon} -d ${POSTGRES_DB:-bayloncredit}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: ./backend
+    command: ["alembic", "upgrade", "head"]
+    environment: &api-environment
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-baylon}:${POSTGRES_PASSWORD:-baylon-local-password}@database:5432/${POSTGRES_DB:-bayloncredit}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-development-secret-change-before-deploy}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:8080}
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: ./backend
+    environment: *api-environment
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_API_URL: /api/v1
+    ports:
+      - "8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
