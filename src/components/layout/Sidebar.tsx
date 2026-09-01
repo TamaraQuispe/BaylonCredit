@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom'
-import { endSession } from '@/utils/session'
+import type { AuthUser } from '@/services/apiClient'
+import { endSession, getSession } from '@/utils/session'
+import { logout } from '@/services/apiClient'
 import Icon from '@/components/ui/Icon'
 
 const navItems = [
@@ -20,17 +22,36 @@ const footerItems = [
   { to: '/perfil', label: 'Perfil', icon: 'account_circle' },
 ]
 
+const ADMIN_ROUTES = new Set(['/usuarios', '/configuracion'])
+
+function canView(rol: AuthUser['role'] | undefined, to: string) {
+  if (rol === 'admin') return true
+  if (ADMIN_ROUTES.has(to)) return false
+  if (rol === 'viewer' && to === '/ventas') return false
+  return true
+}
+
 interface SidebarProps {
   open: boolean
   onClose: () => void
 }
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
+  const rol = getSession()?.rol
+  const visibleNav = navItems.filter((item) => canView(rol, item.to))
+
   const baseLink =
     'flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors'
 
   const activeLink =
     'flex items-center gap-3 px-4 py-3 border-l-4 border-primary bg-surface-container-low text-primary font-semibold transition-all'
+
+  const handleLogout = async () => {
+    await logout()
+    endSession()
+    onClose()
+    window.location.assign('/iniciar-sesion')
+  }
 
   return (
     <>
@@ -65,7 +86,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
           <nav className="flex-1 overflow-y-auto w-full">
             <ul className="flex flex-col w-full font-body-md text-body-md">
-              {navItems.map((item) => (
+              {visibleNav.map((item) => (
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
@@ -97,11 +118,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               <li>
                 <button
                   type="button"
-                  onClick={() => {
-                    endSession()
-                    onClose()
-                    window.location.assign('/iniciar-sesion')
-                  }}
+                  onClick={handleLogout}
                   className={`${baseLink} w-full text-left`}
                 >
                   <Icon name="logout" />

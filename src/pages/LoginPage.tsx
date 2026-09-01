@@ -18,7 +18,7 @@ export default function LoginPage() {
     setError('')
     try {
       const response = await login(email.trim(), password)
-      startSession(response.access_token, response.user, remember)
+      startSession(response.access_token, response.refresh_token, response.user, remember)
       navigate('/inicio')
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo iniciar sesión.')

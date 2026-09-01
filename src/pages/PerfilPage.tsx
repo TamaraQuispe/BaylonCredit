@@ -1,14 +1,26 @@
-import { useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
+import { changePassword, getProfile, updateProfile, type AuthUser } from '@/services/apiClient'
+import { endSession, getSession, updateSessionUser } from '@/utils/session'
+
+const roleLabel: Record<AuthUser['role'], string> = {
+  admin: 'Administrador',
+  operator: 'Vendedor',
+  viewer: 'Supervisor',
+}
 
 const initialProfile = {
-  name: 'Juan Pérez',
-  position: 'Director de Riesgos',
-  email: 'juan.perez@bayloncredit.com',
-  phone: '+51 987 654 321',
+  name: '',
+  position: '',
+  email: '',
+  phone: '',
+  createdAt: '',
 }
 
 export default function PerfilPage() {
+  const navigate = useNavigate()
+  const session = getSession()
   const [profile, setProfile] = useState(initialProfile)
   const [savedProfile, setSavedProfile] = useState(initialProfile)
   const [avatar, setAvatar] = useState('')
@@ -18,8 +30,37 @@ export default function PerfilPage() {
   const [language, setLanguage] = useState('es')
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [systemAlerts, setSystemAlerts] = useState(true)
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState<{ text: string; tone: 'success' | 'info' | 'error' } | null>(null)
+  const [saving, setSaving] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    getProfile()
+      .then((user) => {
+        const loaded = {
+          name: user.full_name,
+          position: user.position ?? '',
+          email: user.email,
+          phone: user.phone ?? '',
+          createdAt: user.created_at ?? '',
+        }
+        setProfile(loaded)
+        setSavedProfile(loaded)
+      })
+      .catch(() => {
+        if (session) {
+          const loaded = {
+            name: session.nombre,
+            position: '',
+            email: session.correo,
+            phone: '',
+            createdAt: '',
+          }
+          setProfile(loaded)
+          setSavedProfile(loaded)
+        }
+      })
+  }, [session])
 
   const handleAvatar = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -29,20 +70,55 @@ export default function PerfilPage() {
     reader.readAsDataURL(file)
   }
 
-  const saveChanges = () => {
-    if ((newPassword || confirmPassword) && newPassword !== confirmPassword) {
-      setMessage('Las contraseñas nuevas no coinciden.')
+  const saveChanges = async () => {
+    setSaving(true)
+    setMessage(null)
+    try {
+      const updated = await updateProfile({
+        full_name: profile.name,
+        position: profile.position || null,
+        phone: profile.phone || null,
+      })
+      updateSessionUser(updated)
+      setSavedProfile(profile)
+      setMessage({ text: 'Perfil actualizado correctamente.', tone: 'success' })
+    } catch (caught) {
+      setMessage({
+        text: caught instanceof Error ? caught.message : 'No se pudo actualizar el perfil.',
+        tone: 'error',
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const savePassword = async () => {
+    setMessage(null)
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setMessage({ text: 'Ingresa la contraseña actual, la nueva y su confirmación.', tone: 'error' })
       return
     }
-    if (newPassword && (!currentPassword || newPassword.length < 8)) {
-      setMessage('Ingresa la contraseña actual y una nueva de al menos 8 caracteres.')
+    if (newPassword !== confirmPassword) {
+      setMessage({ text: 'Las contraseñas nuevas no coinciden.', tone: 'error' })
       return
     }
-    setSavedProfile(profile)
-    setCurrentPassword('')
-    setNewPassword('')
-    setConfirmPassword('')
-    setMessage('Perfil actualizado correctamente.')
+    if (newPassword.length < 10) {
+      setMessage({ text: 'La nueva contraseña debe tener al menos 10 caracteres.', tone: 'error' })
+      return
+    }
+    setSaving(true)
+    try {
+      await changePassword(currentPassword, newPassword)
+      endSession()
+      navigate('/iniciar-sesion', { replace: true })
+    } catch (caught) {
+      setMessage({
+        text: caught instanceof Error ? caught.message : 'No se pudo cambiar la contraseña.',
+        tone: 'error',
+      })
+    } finally {
+      setSaving(false)
+    }
   }
 
   const cancelChanges = () => {
@@ -50,15 +126,21 @@ export default function PerfilPage() {
     setCurrentPassword('')
     setNewPassword('')
     setConfirmPassword('')
-    setMessage('Cambios descartados.')
+    setMessage({ text: 'Cambios descartados.', tone: 'info' })
   }
 
   const initials = profile.name
-    .split(' ')
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
+    ? profile.name
+        .split(' ')
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase()
+    : (session?.iniciales ?? 'US')
+
+  const memberSince = profile.createdAt
+    ? new Intl.DateTimeFormat('es-PE', { month: 'short', year: 'numeric' }).format(new Date(profile.createdAt))
+    : null
 
   return (
     <div className="max-w-5xl mx-auto w-full">
@@ -73,15 +155,15 @@ export default function PerfilPage() {
           <button type="button" onClick={cancelChanges} className="px-4 py-2 bg-surface-container-lowest border border-outline-variant text-primary-container rounded-lg font-label-sm text-label-sm hover:bg-surface-container-low">
             Cancelar
           </button>
-          <button type="button" onClick={saveChanges} className="px-4 py-2 bg-primary-container text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-primary shadow-sm">
-            Guardar Cambios
+          <button type="button" onClick={() => void saveChanges()} disabled={saving} className="px-4 py-2 bg-primary-container text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-primary shadow-sm disabled:opacity-60">
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
           </button>
         </div>
       </div>
 
       {message && (
-        <div className={`mb-6 flex items-center gap-2 p-3 rounded-lg border ${message.includes('correctamente') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : message.includes('descartados') ? 'bg-surface-container-low text-primary border-primary-fixed' : 'bg-error-container text-on-error-container border-error/20'}`}>
-          <Icon name={message.includes('correctamente') ? 'check_circle' : 'info'} size="20px" /> {message}
+        <div className={`mb-6 flex items-center gap-2 p-3 rounded-lg border ${message.tone === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : message.tone === 'error' ? 'bg-error-container text-on-error-container border-error/20' : 'bg-surface-container-low text-primary border-primary-fixed'}`}>
+          <Icon name={message.tone === 'success' ? 'check_circle' : 'info'} size="20px" /> {message.text}
         </div>
       )}
 
@@ -102,10 +184,17 @@ export default function PerfilPage() {
               </button>
             </div>
             <h3 className="font-h3-title text-h3-title text-on-surface">{profile.name}</h3>
-            <p className="font-label-sm text-label-sm text-primary font-medium mt-1 bg-surface-container-low px-3 py-1 rounded-full">Administrador</p>
+            <p className="font-label-sm text-label-sm text-primary font-medium mt-1 bg-surface-container-low px-3 py-1 rounded-full">
+              {roleLabel[session?.rol ?? 'operator']}
+            </p>
             <div className="w-full mt-6 pt-6 border-t border-outline-variant/20 flex flex-col gap-3 text-left">
               <div className="flex items-center gap-3 text-on-surface-variant"><Icon name="mail" className="text-outline" /><span className="text-sm truncate">{profile.email}</span></div>
-              <div className="flex items-center gap-3 text-on-surface-variant"><Icon name="calendar_today" className="text-outline" /><span className="text-sm">Miembro desde Ene 2023</span></div>
+              {memberSince && (
+                <div className="flex items-center gap-3 text-on-surface-variant"><Icon name="calendar_today" className="text-outline" /><span className="text-sm">Miembro desde {memberSince}</span></div>
+              )}
+              {profile.position && (
+                <div className="flex items-center gap-3 text-on-surface-variant"><Icon name="badge" className="text-outline" /><span className="text-sm">{profile.position}</span></div>
+              )}
             </div>
           </section>
         </div>
@@ -116,19 +205,27 @@ export default function PerfilPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ProfileField label="Nombre Completo" value={profile.name} onChange={(value) => setProfile({ ...profile, name: value })} />
               <ProfileField label="Cargo" value={profile.position} onChange={(value) => setProfile({ ...profile, position: value })} />
-              <ProfileField label="Correo Electrónico" type="email" value={profile.email} onChange={(value) => setProfile({ ...profile, email: value })} />
+              <ProfileField label="Correo Electrónico" type="email" value={profile.email} onChange={() => undefined} disabled />
               <ProfileField label="Teléfono" type="tel" value={profile.phone} onChange={(value) => setProfile({ ...profile, phone: value })} />
             </div>
           </section>
 
           <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm p-card-padding">
             <SectionTitle icon="lock">Seguridad</SectionTitle>
+            <p className="font-label-sm text-label-sm text-on-surface-variant mb-4 -mt-3">
+              Al cambiar la contraseña, se cerrarán todas tus sesiones activas y deberás iniciar sesión nuevamente.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <PasswordInput label="Contraseña Actual" value={currentPassword} onChange={setCurrentPassword} placeholder="••••••••" />
               </div>
-              <PasswordInput label="Nueva Contraseña" value={newPassword} onChange={setNewPassword} placeholder="Nueva contraseña" />
+              <PasswordInput label="Nueva Contraseña" value={newPassword} onChange={setNewPassword} placeholder="Mínimo 10 caracteres" />
               <PasswordInput label="Confirmar Contraseña" value={confirmPassword} onChange={setConfirmPassword} placeholder="Confirmar contraseña" />
+            </div>
+            <div className="flex justify-end mt-4">
+              <button type="button" onClick={() => void savePassword()} disabled={saving} className="px-4 py-2 bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-primary-container shadow-sm disabled:opacity-60">
+                Cambiar contraseña
+              </button>
             </div>
           </section>
 
@@ -159,8 +256,8 @@ function SectionTitle({ icon, children }: { icon: string; children: React.ReactN
   return <h3 className="font-h3-title text-h3-title text-on-surface mb-6 flex items-center gap-2"><Icon name={icon} className="text-primary" />{children}</h3>
 }
 
-function ProfileField({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
-  return <label className="space-y-1.5"><span className="font-label-sm text-label-sm text-on-surface-variant block">{label}</span><input required type={type} value={value} onChange={(event) => onChange(event.target.value)} className="w-full bg-surface-bright border border-outline-variant rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container" /></label>
+function ProfileField({ label, value, onChange, type = 'text', disabled = false }: { label: string; value: string; onChange: (value: string) => void; type?: string; disabled?: boolean }) {
+  return <label className="space-y-1.5"><span className="font-label-sm text-label-sm text-on-surface-variant block">{label}</span><input required type={type} disabled={disabled} value={value} onChange={(event) => onChange(event.target.value)} className="w-full bg-surface-bright border border-outline-variant rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container disabled:opacity-60 disabled:cursor-not-allowed" /></label>
 }
 
 function PasswordInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
