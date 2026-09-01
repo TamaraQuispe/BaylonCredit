@@ -1,5 +1,6 @@
-import { useSyncExternalStore } from 'react'
-import { clients as seedClients, type Cliente } from '@/data/clientes'
+import { useEffect, useSyncExternalStore } from 'react'
+import type { Cliente } from '@/data/clientes'
+import { apiRequest } from './apiClient'
 
 export interface StoredClient extends Cliente {
   address?: string
@@ -9,6 +10,9 @@ export interface StoredClient extends Cliente {
 
 interface ClientState {
   clients: StoredClient[]
+  loading: boolean
+  loaded: boolean
+  error?: string
 }
 
 export interface CreateClientInput {
@@ -20,41 +24,43 @@ export interface CreateClientInput {
   address?: string
 }
 
-const STORAGE_KEY = 'baylon_client_state_v1'
+interface ApiClient {
+  id: string
+  first_name: string
+  last_name: string
+  business_name?: string
+  document: string
+  phone: string
+  address?: string
+  created_at: string
+}
+
 const listeners = new Set<() => void>()
+let state: ClientState = { clients: [], loading: false, loaded: false }
+let loadingPromise: Promise<StoredClient[]> | null = null
 
-function seedState(): ClientState {
-  return {
-    clients: seedClients.map((client, index) => ({
-      ...client,
-      registeredAt: index === 0 ? '15/03/2021' : '24/10/2023',
-      hasEvaluation: true,
-    })),
-  }
-}
-
-function loadState(): ClientState {
-  if (typeof window === 'undefined') return seedState()
-  const saved = window.localStorage.getItem(STORAGE_KEY)
-  if (!saved) return seedState()
-  try {
-    const parsed = JSON.parse(saved) as Partial<ClientState>
-    return { clients: parsed.clients ?? seedState().clients }
-  } catch {
-    return seedState()
-  }
-}
-
-let state = loadState()
-
-function persist(nextState: ClientState) {
+function emit(nextState: ClientState) {
   state = nextState
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState))
   listeners.forEach((listener) => listener())
 }
 
-function makeInitials(firstName: string, lastName: string) {
-  return `${firstName.trim()[0] ?? ''}${lastName.trim()[0] ?? ''}`.toUpperCase()
+function mapClient(client: ApiClient): StoredClient {
+  const name = `${client.first_name} ${client.last_name}`.trim()
+  return {
+    id: client.id,
+    initials: `${client.first_name[0] ?? ''}${client.last_name[0] ?? ''}`.toUpperCase(),
+    business: client.business_name || name,
+    name,
+    document: client.document,
+    phone: client.phone,
+    address: client.address,
+    registeredAt: new Intl.DateTimeFormat('es-PE').format(new Date(client.created_at)),
+    purchases: 0,
+    debt: 0,
+    status: 'sin-deuda',
+    risk: 'medio',
+    hasEvaluation: false,
+  }
 }
 
 export const clientRepository = {
@@ -65,37 +71,51 @@ export const clientRepository = {
   getSnapshot() {
     return state
   },
-  create(input: CreateClientInput) {
-    const document = input.document.trim()
-    if (state.clients.some((client) => client.document === document)) {
-      throw new Error('Ya existe un cliente con ese DNI o RUC.')
-    }
-
-    const name = `${input.firstName.trim()} ${input.lastName.trim()}`
-    const client: StoredClient = {
-      id: `c-${Date.now()}`,
-      initials: makeInitials(input.firstName, input.lastName),
-      business: input.business?.trim() || name,
-      name,
-      document,
-      phone: input.phone.trim(),
-      address: input.address?.trim() || undefined,
-      registeredAt: new Intl.DateTimeFormat('es-PE').format(new Date()),
-      purchases: 0,
-      debt: 0,
-      status: 'sin-deuda',
-      risk: 'medio',
-      hasEvaluation: false,
-    }
-    persist({ clients: [client, ...state.clients] })
+  async load(force = false) {
+    if (state.loaded && !force) return state.clients
+    if (loadingPromise) return loadingPromise
+    emit({ ...state, loading: true, error: undefined })
+    loadingPromise = apiRequest<ApiClient[]>('/clients')
+      .then((clients) => {
+        const mapped = clients.map(mapClient)
+        emit({ clients: mapped, loading: false, loaded: true })
+        return mapped
+      })
+      .catch((error: unknown) => {
+        emit({ ...state, loading: false, error: error instanceof Error ? error.message : 'No se pudieron cargar los clientes.' })
+        throw error
+      })
+      .finally(() => {
+        loadingPromise = null
+      })
+    return loadingPromise
+  },
+  async create(input: CreateClientInput) {
+    const created = await apiRequest<ApiClient>('/clients', {
+      method: 'POST',
+      body: JSON.stringify({
+        first_name: input.firstName.trim(),
+        last_name: input.lastName.trim(),
+        business_name: input.business?.trim() || null,
+        document: input.document.trim(),
+        phone: input.phone.trim(),
+        address: input.address?.trim() || null,
+      }),
+    })
+    const client = mapClient(created)
+    emit({ ...state, clients: [client, ...state.clients], loaded: true })
     return client
   },
 }
 
 export function useClientState() {
-  return useSyncExternalStore(
+  const snapshot = useSyncExternalStore(
     clientRepository.subscribe,
     clientRepository.getSnapshot,
     clientRepository.getSnapshot,
   )
+  useEffect(() => {
+    void clientRepository.load().catch(() => undefined)
+  }, [])
+  return snapshot
 }

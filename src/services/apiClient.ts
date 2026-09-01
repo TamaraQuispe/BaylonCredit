@@ -3,7 +3,7 @@ import { endSession, getAccessToken } from '@/utils/session'
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1').replace(/\/$/, '')
 
 interface ApiErrorPayload {
-  detail?: string
+  detail?: string | Array<{ msg?: string }>
 }
 
 export class ApiError extends Error {
@@ -27,7 +27,10 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   if (!response.ok) {
     if (response.status === 401 && token) endSession()
     const payload = await response.json().catch(() => ({})) as ApiErrorPayload
-    throw new ApiError(payload.detail || 'No se pudo completar la solicitud.', response.status)
+    const detail = Array.isArray(payload.detail)
+      ? payload.detail.map((item) => item.msg).filter(Boolean).join(' ')
+      : payload.detail
+    throw new ApiError(detail || 'No se pudo completar la solicitud.', response.status)
   }
   if (response.status === 204) return undefined as T
   return response.json() as Promise<T>

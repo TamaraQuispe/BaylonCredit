@@ -81,8 +81,13 @@ pytest
 - `GET|POST /api/v1/users`: administración de usuarios y roles.
 - `PATCH /api/v1/users/{id}/status`: activar o desactivar usuarios.
 - `GET|POST|PATCH|DELETE /api/v1/clients`: gestión de clientes con archivado lógico.
+- `GET|POST|PATCH|DELETE /api/v1/products`: catálogo persistente de productos.
+- `POST /api/v1/products/{id}/stock`: entradas y ajustes auditables de inventario.
+- `GET|POST /api/v1/sales`: consulta y registro transaccional de ventas.
 
 Roles disponibles: `admin`, `operator` y `viewer`.
+
+Al registrar una venta, la API bloquea los productos implicados, valida existencias, recalcula precios e IGV y descuenta stock dentro de una única transacción. Una venta fiada evalúa el riesgo y crea el crédito en esa misma operación; si cualquier validación falla, no se persiste ningún cambio.
 
 ## Migraciones
 

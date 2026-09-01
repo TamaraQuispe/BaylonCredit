@@ -1,4 +1,6 @@
 from collections.abc import AsyncIterator
+from decimal import Decimal
+from uuid import UUID
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -8,7 +10,10 @@ from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+from app.models.commerce import Product
 from app.models.user import User, UserRole
+
+PRODUCT_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 
 @pytest_asyncio.fixture
@@ -24,6 +29,19 @@ async def client() -> AsyncIterator[AsyncClient]:
                 full_name="Admin Baylon",
                 hashed_password=hash_password("secure-password"),
                 role=UserRole.ADMIN,
+            )
+        )
+        db.add(
+            Product(
+                id=PRODUCT_ID,
+                sku="TEST-001",
+                name="Producto de prueba",
+                category="Otros",
+                icon="category",
+                price=Decimal("10.00"),
+                unit_cost=Decimal("7.00"),
+                stock=5,
+                minimum_stock=1,
             )
         )
         await db.commit()
@@ -74,3 +92,50 @@ async def test_rejects_invalid_credentials(client: AsyncClient) -> None:
         data={"username": "admin@baylon.com", "password": "wrong-password"},
     )
     assert response.status_code == 401
+
+
+async def test_sale_updates_stock_and_creates_credit_atomically(client: AsyncClient) -> None:
+    login = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@baylon.com", "password": "secure-password"},
+    )
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    created_client = await client.post(
+        "/api/v1/clients",
+        headers=headers,
+        json={
+            "first_name": "Mario",
+            "last_name": "Rojas",
+            "document": "12345678",
+            "phone": "987654321",
+        },
+    )
+
+    sale = await client.post(
+        "/api/v1/sales",
+        headers=headers,
+        json={
+            "payment_mode": "fiado",
+            "client_id": created_client.json()["id"],
+            "due_date": "2030-01-15",
+            "items": [{"product_id": str(PRODUCT_ID), "quantity": 2}],
+        },
+    )
+    assert sale.status_code == 201, sale.text
+    assert sale.json()["total"] == "23.60"
+    assert sale.json()["credit"]["pending_amount"] == "23.60"
+
+    products = await client.get("/api/v1/products", headers=headers)
+    assert products.json()[0]["stock"] == 3
+
+    rejected = await client.post(
+        "/api/v1/sales",
+        headers=headers,
+        json={
+            "payment_mode": "contado",
+            "items": [{"product_id": str(PRODUCT_ID), "quantity": 4}],
+        },
+    )
+    assert rejected.status_code == 409
+    products_after_rejection = await client.get("/api/v1/products", headers=headers)
+    assert products_after_rejection.json()[0]["stock"] == 3

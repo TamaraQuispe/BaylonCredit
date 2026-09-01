@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react'
 import Icon from '@/components/ui/Icon'
-import { productCategories, products, type Product } from '@/data/products'
+import { productCategories } from '@/data/products'
 import { useClientState } from '@/services/clientRepository'
-import { creditRepository } from '@/services/creditRepository'
-import { localScoringService } from '@/services/scoringService'
-import { getAvailableStock, salesRepository, useSalesState } from '@/services/salesRepository'
+import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
+import { salesRepository } from '@/services/salesRepository'
 import { formatCurrency } from '@/utils/format'
 
 interface CartLine {
-  product: Product
+  product: CommerceProduct
   quantity: number
 }
 
@@ -29,7 +28,7 @@ export default function VentasPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { clients } = useClientState()
-  const { sales } = useSalesState()
+  const { products, loading: loadingProducts } = useProductState()
   const client = clients.find((item) => item.id === clientId)
 
   const filteredProducts = useMemo(() => {
@@ -42,10 +41,10 @@ export default function VentasPage() {
         product.id.toLowerCase().includes(term)
       return matchesCategory && matchesSearch
     })
-  }, [search, category])
+  }, [search, category, products])
 
-  const addToCart = (product: Product) => {
-    const available = getAvailableStock(product, sales)
+  const addToCart = (product: CommerceProduct) => {
+    const available = product.stock
     setCart((prev) => {
       const existing = prev.find((line) => line.product.id === product.id)
       if ((existing?.quantity ?? 0) >= available) {
@@ -74,7 +73,7 @@ export default function VentasPage() {
                 ...line,
                 quantity: Math.min(
                   line.quantity + delta,
-                  getAvailableStock(line.product, sales),
+                  line.product.stock,
                 ),
               }
             : line,
@@ -92,37 +91,17 @@ export default function VentasPage() {
   const registerSale = async () => {
     setError('')
     setSuccess('')
-    const input = {
-      paymentMode,
-      clientId: client?.id,
-      clientName: client?.business,
-      items: cart,
-      subtotal,
-      tax: igv,
-      total,
-    }
-
     try {
-      salesRepository.validate(input)
       setProcessing(true)
-      let creditId: string | undefined
-      if (paymentMode === 'fiado') {
-        if (!client) throw new Error('Selecciona el cliente para la venta fiada.')
-        const evaluation = await localScoringService.evaluate(client, total)
-        if (!evaluation.approved) throw new Error(evaluation.recommendation)
-        const creditDate = new Date()
-        const dueDate = new Date(creditDate)
-        dueDate.setDate(dueDate.getDate() + 15)
-        creditId = creditRepository.create({
-          client,
-          amount: total,
-          creditDate: isoDate(creditDate),
-          dueDate: isoDate(dueDate),
-          evaluation,
-        }).id
-      }
-
-      const sale = salesRepository.create({ ...input, creditId })
+      const dueDate = new Date()
+      dueDate.setDate(dueDate.getDate() + 15)
+      const sale = await salesRepository.create({
+        paymentMode,
+        clientId: client?.id,
+        dueDate: paymentMode === 'fiado' ? isoDate(dueDate) : undefined,
+        items: cart.map((line) => ({ productId: line.product.id, quantity: line.quantity })),
+      })
+      await productRepository.load(true)
       setCart([])
       setClientId('')
       setPaymentMode('contado')
@@ -177,7 +156,7 @@ export default function VentasPage() {
         <div className="flex-1 overflow-y-auto p-4 md:p-5">
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredProducts.map((product) => {
-              const available = getAvailableStock(product, sales)
+              const available = product.stock
               return (
                 <div
                   key={product.id}
@@ -221,7 +200,7 @@ export default function VentasPage() {
             {filteredProducts.length === 0 && (
               <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
                 <Icon name="search_off" size="40px" className="text-outline" />
-                <p className="mt-3 text-on-surface-variant">No se encontraron productos</p>
+                <p className="mt-3 text-on-surface-variant">{loadingProducts ? 'Cargando productos...' : 'No se encontraron productos'}</p>
               </div>
             )}
           </div>
@@ -291,7 +270,7 @@ export default function VentasPage() {
                     <button
                       type="button"
                       onClick={() => changeQuantity(line.product.id, 1)}
-                      disabled={line.quantity >= getAvailableStock(line.product, sales)}
+                      disabled={line.quantity >= line.product.stock}
                       aria-label="Aumentar cantidad"
                       className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >

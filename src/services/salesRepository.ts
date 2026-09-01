@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from 'react'
-import type { Product } from '@/data/products'
+import { useEffect, useSyncExternalStore } from 'react'
+import { apiRequest } from './apiClient'
 
 export type SalePaymentMode = 'contado' | 'fiado'
 export type SalesPeriod = 'hoy' | 'semana' | 'mes'
@@ -29,17 +29,37 @@ export interface StoredSale {
 
 interface SalesState {
   sales: StoredSale[]
+  loading: boolean
+  loaded: boolean
+  error?: string
+}
+
+interface ApiSale {
+  id: string
+  code: string
+  created_at: string
+  payment_mode: SalePaymentMode
+  client_id?: string
+  client_name?: string
+  subtotal: string | number
+  tax: string | number
+  total: string | number
+  items: Array<{
+    product_id: string
+    product_name: string
+    product_category: string
+    unit_price: string | number
+    quantity: number
+    line_subtotal: string | number
+  }>
+  credit?: { id: string }
 }
 
 export interface CreateSaleInput {
   paymentMode: SalePaymentMode
   clientId?: string
-  clientName?: string
-  creditId?: string
-  items: Array<{ product: Product; quantity: number }>
-  subtotal: number
-  tax: number
-  total: number
+  dueDate?: string
+  items: Array<{ productId: string; quantity: number }>
 }
 
 export interface SalesMetrics {
@@ -52,46 +72,36 @@ export interface SalesMetrics {
   topProducts: Array<{ name: string; category: string; quantity: number; revenue: number }>
 }
 
-const STORAGE_KEY = 'baylon_sales_state_v1'
 const listeners = new Set<() => void>()
+let state: SalesState = { sales: [], loading: false, loaded: false }
+let loadingPromise: Promise<StoredSale[]> | null = null
 
-function loadState(): SalesState {
-  if (typeof window === 'undefined') return { sales: [] }
-  const saved = window.localStorage.getItem(STORAGE_KEY)
-  if (!saved) return { sales: [] }
-  try {
-    const parsed = JSON.parse(saved) as Partial<SalesState>
-    return { sales: parsed.sales ?? [] }
-  } catch {
-    return { sales: [] }
-  }
-}
-
-let state = loadState()
-
-function persist(nextState: SalesState) {
+function emit(nextState: SalesState) {
   state = nextState
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState))
   listeners.forEach((listener) => listener())
 }
 
-export function getAvailableStock(product: Product, sales: StoredSale[]) {
-  const sold = sales.reduce(
-    (total, sale) => total + (sale.items.find((item) => item.productId === product.id)?.quantity ?? 0),
-    0,
-  )
-  return Math.max(0, product.stock - sold)
-}
-
-function validateSale(input: CreateSaleInput) {
-  if (input.items.length === 0 || input.total <= 0) throw new Error('Agrega al menos un producto a la venta.')
-  if (input.paymentMode === 'fiado' && !input.clientId) throw new Error('Selecciona el cliente para la venta fiada.')
-  input.items.forEach(({ product, quantity }) => {
-    if (!Number.isInteger(quantity) || quantity <= 0) throw new Error('La cantidad de productos no es válida.')
-    if (quantity > getAvailableStock(product, state.sales)) {
-      throw new Error(`No hay stock suficiente de ${product.name}.`)
-    }
-  })
+function mapSale(sale: ApiSale): StoredSale {
+  return {
+    id: sale.id,
+    code: sale.code,
+    createdAt: sale.created_at,
+    paymentMode: sale.payment_mode,
+    clientId: sale.client_id,
+    clientName: sale.client_name,
+    creditId: sale.credit?.id,
+    subtotal: Number(sale.subtotal),
+    tax: Number(sale.tax),
+    total: Number(sale.total),
+    items: sale.items.map((item) => ({
+      productId: item.product_id,
+      name: item.product_name,
+      category: item.product_category,
+      unitPrice: Number(item.unit_price),
+      quantity: item.quantity,
+      total: Number(item.line_subtotal),
+    })),
+  }
 }
 
 export const salesRepository = {
@@ -102,43 +112,50 @@ export const salesRepository = {
   getSnapshot() {
     return state
   },
-  validate(input: CreateSaleInput) {
-    validateSale(input)
+  async load(force = false) {
+    if (state.loaded && !force) return state.sales
+    if (loadingPromise) return loadingPromise
+    emit({ ...state, loading: true, error: undefined })
+    loadingPromise = apiRequest<ApiSale[]>('/sales')
+      .then((sales) => {
+        const mapped = sales.map(mapSale)
+        emit({ sales: mapped, loading: false, loaded: true })
+        return mapped
+      })
+      .catch((error: unknown) => {
+        emit({ ...state, loading: false, error: error instanceof Error ? error.message : 'No se pudieron cargar las ventas.' })
+        throw error
+      })
+      .finally(() => {
+        loadingPromise = null
+      })
+    return loadingPromise
   },
-  create(input: CreateSaleInput) {
-    validateSale(input)
-    const now = new Date()
-    const sale: StoredSale = {
-      id: `sale-${Date.now()}`,
-      code: `V-${now.getFullYear()}-${String(state.sales.length + 1).padStart(5, '0')}`,
-      createdAt: now.toISOString(),
-      paymentMode: input.paymentMode,
-      clientId: input.clientId,
-      clientName: input.clientName,
-      creditId: input.creditId,
-      subtotal: Number(input.subtotal.toFixed(2)),
-      tax: Number(input.tax.toFixed(2)),
-      total: Number(input.total.toFixed(2)),
-      items: input.items.map(({ product, quantity }) => ({
-        productId: product.id,
-        name: product.name,
-        category: product.category,
-        unitPrice: product.price,
-        quantity,
-        total: Number((product.price * quantity).toFixed(2)),
-      })),
-    }
-    persist({ sales: [sale, ...state.sales] })
+  async create(input: CreateSaleInput) {
+    const sale = mapSale(await apiRequest<ApiSale>('/sales', {
+      method: 'POST',
+      body: JSON.stringify({
+        payment_mode: input.paymentMode,
+        client_id: input.clientId || null,
+        due_date: input.dueDate || null,
+        items: input.items.map((item) => ({ product_id: item.productId, quantity: item.quantity })),
+      }),
+    }))
+    emit({ ...state, sales: [sale, ...state.sales], loaded: true })
     return sale
   },
 }
 
 export function useSalesState() {
-  return useSyncExternalStore(
+  const snapshot = useSyncExternalStore(
     salesRepository.subscribe,
     salesRepository.getSnapshot,
     salesRepository.getSnapshot,
   )
+  useEffect(() => {
+    void salesRepository.load().catch(() => undefined)
+  }, [])
+  return snapshot
 }
 
 function periodStart(period: SalesPeriod, date: Date) {
@@ -161,13 +178,9 @@ function previousPeriodStart(period: SalesPeriod, currentStart: Date) {
   return start
 }
 
-function saleDate(sale: StoredSale) {
-  return new Date(sale.createdAt)
-}
-
 function selectPeriodSales(sales: StoredSale[], start: Date, end: Date) {
   return sales.filter((sale) => {
-    const date = saleDate(sale)
+    const date = new Date(sale.createdAt)
     return date >= start && date < end
   })
 }
@@ -179,9 +192,8 @@ function buildBars(sales: StoredSale[], period: SalesPeriod) {
       ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
       : ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5']
   const values = labels.map((label) => ({ label, cash: 0, credit: 0 }))
-
   sales.forEach((sale) => {
-    const date = saleDate(sale)
+    const date = new Date(sale.createdAt)
     const index = period === 'hoy'
       ? Math.floor(date.getHours() / 4)
       : period === 'semana'
@@ -190,7 +202,6 @@ function buildBars(sales: StoredSale[], period: SalesPeriod) {
     if (sale.paymentMode === 'contado') values[index].cash += sale.total
     else values[index].credit += sale.total
   })
-
   const maximum = Math.max(0, ...values.flatMap((value) => [value.cash, value.credit]))
   if (maximum === 0) return values
   return values.map((value) => ({
@@ -200,14 +211,9 @@ function buildBars(sales: StoredSale[], period: SalesPeriod) {
   }))
 }
 
-export function selectSalesMetrics(
-  sales: StoredSale[],
-  period: SalesPeriod,
-  now = new Date(),
-): SalesMetrics {
+export function selectSalesMetrics(sales: StoredSale[], period: SalesPeriod, now = new Date()): SalesMetrics {
   const currentStart = periodStart(period, now)
-  const currentEnd = new Date(now)
-  currentEnd.setMilliseconds(currentEnd.getMilliseconds() + 1)
+  const currentEnd = new Date(now.getTime() + 1)
   const previousStart = previousPeriodStart(period, currentStart)
   const current = selectPeriodSales(sales, currentStart, currentEnd)
   const previous = selectPeriodSales(sales, previousStart, currentStart)
@@ -218,12 +224,11 @@ export function selectSalesMetrics(
     const existing = products.get(item.productId)
     products.set(item.productId, {
       name: item.name,
-      category: item.category,
+      category: item.category || 'Sin categoría',
       quantity: (existing?.quantity ?? 0) + item.quantity,
       revenue: Number(((existing?.revenue ?? 0) + item.total).toFixed(2)),
     })
   }))
-
   return {
     total,
     cash: current.filter((sale) => sale.paymentMode === 'contado').reduce((sum, sale) => sum + sale.total, 0),

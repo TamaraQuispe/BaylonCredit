@@ -2,12 +2,13 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import Modal from '@/components/ui/Modal'
-import { inventoryItems, type InventoryItem } from '@/data/inventory'
+import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
+import { formatCurrency } from '@/utils/format'
 
 type StockFilter = 'todos' | 'optimo' | 'bajo' | 'agotado'
 type StockAction = 'entrada' | 'ajuste'
 
-function getStatus(item: InventoryItem): Exclude<StockFilter, 'todos'> {
+function getStatus(item: CommerceProduct): Exclude<StockFilter, 'todos'> {
   if (item.stock === 0) return 'agotado'
   if (item.stock <= item.minimumStock) return 'bajo'
   return 'optimo'
@@ -34,80 +35,60 @@ const statusConfig = {
   },
 }
 
-const kpis = [
-  {
-    label: 'Productos registrados',
-    value: '1,248',
-    detail: '+12 este mes',
-    icon: 'inventory_2',
-    iconClass: 'text-primary bg-surface-container',
-    detailClass: 'text-emerald-600',
-    detailIcon: 'trending_up',
-    decor: 'bg-primary-fixed',
-  },
-  {
-    label: 'Productos con stock bajo',
-    value: '45',
-    detail: 'Requiere atención',
-    icon: 'warning',
-    iconClass: 'text-secondary bg-secondary-fixed',
-    detailClass: 'text-secondary',
-    detailIcon: 'priority_high',
-    decor: 'bg-secondary-fixed',
-  },
-  {
-    label: 'Productos agotados',
-    value: '12',
-    detail: 'Impacto en ventas',
-    icon: 'block',
-    iconClass: 'text-error bg-error-container',
-    detailClass: 'text-error',
-    detailIcon: 'shopping_cart_off',
-    decor: 'bg-error-container',
-  },
-]
-
 export default function InventarioPage() {
-  const [items, setItems] = useState(inventoryItems)
+  const { products: items, loading, error: loadError } = useProductState()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<StockFilter>('todos')
   const [showFilters, setShowFilters] = useState(false)
-  const [selected, setSelected] = useState<InventoryItem | null>(null)
+  const [selected, setSelected] = useState<CommerceProduct | null>(null)
   const [action, setAction] = useState<StockAction>('entrada')
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const lowStock = items.filter((item) => item.stock > 0 && item.stock <= item.minimumStock).length
+  const outOfStock = items.filter((item) => item.stock === 0).length
+  const inventoryValue = items.reduce((sum, item) => sum + item.stock * item.unitCost, 0)
+  const kpis = [
+    { label: 'Productos registrados', value: String(items.length), detail: 'Catálogo activo', icon: 'inventory_2', iconClass: 'text-primary bg-surface-container', detailClass: 'text-emerald-600', detailIcon: 'check_circle', decor: 'bg-primary-fixed' },
+    { label: 'Productos con stock bajo', value: String(lowStock), detail: 'Requiere atención', icon: 'warning', iconClass: 'text-secondary bg-secondary-fixed', detailClass: 'text-secondary', detailIcon: 'priority_high', decor: 'bg-secondary-fixed' },
+    { label: 'Productos agotados', value: String(outOfStock), detail: 'Impacto en ventas', icon: 'block', iconClass: 'text-error bg-error-container', detailClass: 'text-error', detailIcon: 'shopping_cart_off', decor: 'bg-error-container' },
+  ]
 
   const filteredItems = useMemo(() => {
     const term = search.trim().toLowerCase()
     return items.filter((item) => {
       const matchesSearch =
-        !term || item.name.toLowerCase().includes(term) || item.code.toLowerCase().includes(term)
+        !term || item.name.toLowerCase().includes(term) || item.sku.toLowerCase().includes(term)
       const matchesFilter = filter === 'todos' || getStatus(item) === filter
       return matchesSearch && matchesFilter
     })
   }, [filter, items, search])
 
-  const openStockAction = (item: InventoryItem, nextAction: StockAction) => {
+  const openStockAction = (item: CommerceProduct, nextAction: StockAction) => {
     setSelected(item)
     setAction(nextAction)
   }
 
-  const updateStock = (event: FormEvent<HTMLFormElement>) => {
+  const updateStock = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!selected) return
     const value = Number(new FormData(event.currentTarget).get('quantity'))
-    setItems((current) =>
-      current.map((item) =>
-        item.id === selected.id
-          ? { ...item, stock: action === 'entrada' ? item.stock + value : value }
-          : item,
-      ),
-    )
-    setSelected(null)
+    setSaving(true)
+    setError('')
+    try {
+      await productRepository.changeStock(selected.id, action, value)
+      setSelected(null)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No se pudo actualizar el inventario.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const exportInventory = () => {
     const rows = [
       ['Código', 'Producto', 'Categoría', 'Stock actual', 'Stock mínimo'],
-      ...items.map((item) => [item.code, item.name, item.category, item.stock, item.minimumStock]),
+      ...items.map((item) => [item.sku, item.name, item.category, item.stock, item.minimumStock]),
     ]
     const csv = rows.map((row) => row.join(',')).join('\n')
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
@@ -135,6 +116,8 @@ export default function InventarioPage() {
           <Icon name="download" size="18px" /> Exportar
         </button>
       </div>
+
+      {(error || loadError) && <div className="mb-6 p-4 rounded-lg bg-error-container text-on-error-container">{error || loadError}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {kpis.map((kpi) => (
@@ -174,7 +157,7 @@ export default function InventarioPage() {
           <div className="z-10">
             <div className="flex items-baseline gap-1">
               <span className="font-h3-title text-h3-title text-primary-fixed-dim">S/</span>
-              <h3 className="font-h2-headline text-h2-headline">142,500.00</h3>
+               <h3 className="font-h2-headline text-h2-headline">{formatCurrency(inventoryValue).replace('S/', '').trim()}</h3>
             </div>
             <span className="font-label-sm text-label-sm text-primary-fixed">Actualizado hoy</span>
           </div>
@@ -255,7 +238,7 @@ export default function InventarioPage() {
                         </div>
                         <div>
                           <p className="font-body-md text-body-md font-medium text-on-surface">{item.name}</p>
-                          <p className="font-label-sm text-label-sm text-on-surface-variant">Cod: {item.code}</p>
+                           <p className="font-label-sm text-label-sm text-on-surface-variant">Cod: {item.sku}</p>
                         </div>
                       </div>
                     </td>
@@ -285,7 +268,7 @@ export default function InventarioPage() {
         </div>
 
         <div className="p-4 border-t border-outline-variant flex items-center justify-between text-sm text-on-surface-variant bg-surface-bright">
-          <span>Mostrando {filteredItems.length} de 1,248 productos</span>
+           <span>{loading ? 'Cargando inventario...' : `Mostrando ${filteredItems.length} de ${items.length} productos`}</span>
           <div className="flex gap-1">
             <button type="button" disabled className="w-8 h-8 flex items-center justify-center rounded disabled:opacity-50"><Icon name="chevron_left" size="20px" /></button>
             <button type="button" className="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary-container font-medium">1</button>
@@ -322,7 +305,7 @@ export default function InventarioPage() {
           </label>
           <div className="flex justify-end gap-3">
             <button type="button" onClick={() => setSelected(null)} className="h-10 px-5 rounded-lg border border-outline-variant text-primary hover:bg-surface-container-low">Cancelar</button>
-            <button type="submit" className="h-10 px-5 rounded-lg bg-primary text-on-primary hover:bg-primary-container">Guardar</button>
+             <button type="submit" disabled={saving} className="h-10 px-5 rounded-lg bg-primary text-on-primary hover:bg-primary-container disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar'}</button>
           </div>
         </form>
       </Modal>
