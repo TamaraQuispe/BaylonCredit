@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -36,3 +38,14 @@ def decode_access_token(token: str) -> UUID:
     if not subject:
         raise jwt.InvalidTokenError("Token subject is missing")
     return UUID(subject)
+
+
+def create_refresh_token() -> tuple[str, str, datetime]:
+    settings = get_settings()
+    token = secrets.token_urlsafe(48)
+    expires_at = datetime.now(UTC) + timedelta(days=settings.refresh_token_expire_days)
+    return token, hash_token(token), expires_at
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()

@@ -72,14 +72,20 @@ ruff check .
 pytest
 ```
 
-## Endpoints Iniciales
+## Endpoints
 
 - `GET /health/live`: proceso activo.
 - `GET /health/ready`: API y PostgreSQL disponibles.
-- `POST /api/v1/auth/login`: autenticación OAuth2 con email y contraseña.
+- `POST /api/v1/auth/login`: autenticación OAuth2; emite access y refresh token.
+- `POST /api/v1/auth/refresh`: renueva la sesión; rota el refresh token (un solo uso).
+- `POST /api/v1/auth/logout`: revoca el refresh token de la sesión.
 - `GET /api/v1/auth/me`: usuario autenticado.
+- `PATCH /api/v1/auth/me`: actualiza perfil (nombre, cargo y teléfono).
+- `POST /api/v1/auth/change-password`: cambia la contraseña y revoca todas las sesiones.
 - `GET|POST /api/v1/users`: administración de usuarios y roles.
+- `PATCH /api/v1/users/{id}`: edita nombre, cargo, teléfono y rol.
 - `PATCH /api/v1/users/{id}/status`: activar o desactivar usuarios.
+- `GET /api/v1/users/audit`: registros de actividad (requiere `admin`).
 - `GET|POST|PATCH|DELETE /api/v1/clients`: gestión de clientes con archivado lógico.
 - `GET|POST|PATCH|DELETE /api/v1/products`: catálogo persistente de productos.
 - `POST /api/v1/products/{id}/stock`: entradas y ajustes auditables de inventario.
@@ -89,6 +95,8 @@ pytest
 - `GET|POST /api/v1/payments`: abonos totales o parciales con asignaciones atómicas.
 
 Roles disponibles: `admin`, `operator` y `viewer`.
+
+Las sesiones usan access tokens de corta duración y refresh tokens con rotación. El login aplica bloqueo anti fuerza bruta tras varios intentos fallidos; los cambios de contraseña invalidan todas las sesiones.
 
 Al registrar una venta, la API bloquea los productos implicados, valida existencias, recalcula precios e IGV y descuenta stock dentro de una única transacción. Una venta fiada evalúa el riesgo y crea el crédito en esa misma operación; si cualquier validación falla, no se persiste ningún cambio.
 
@@ -106,6 +114,19 @@ Para generar una migración después de cambiar los modelos:
 ```bash
 alembic revision --autogenerate -m "descripcion"
 ```
+
+## Entorno De Staging
+
+La configuración reproducible de staging usa `docker-compose.staging.yml` como override. Copia `.env.staging.example` a `.env.staging`, completa `DATABASE_URL`, `JWT_SECRET_KEY`, `CORS_ORIGINS` y las credenciales del primer administrador, y levanta:
+
+```bash
+cp .env.staging.example .env.staging
+docker compose --env-file .env.staging \
+  -f docker-compose.yml -f docker-compose.staging.yml \
+  up --build -d
+```
+
+El override añade una tarea `bootstrap` que crea el primer `admin` tras aplicar las migraciones, aplica límites de memoria a la API y exige valores explícitos para staging en las variables críticas. El despliegue sobre un proveedor (AWS, Google Cloud, Render, Railway, una VPS...) solo requiere exportar las mismas variables y conservar los health checks, la task de release de migraciones y los headers `X-Forwarded-*` en el balanceador.
 
 ## Despliegue En La Nube
 

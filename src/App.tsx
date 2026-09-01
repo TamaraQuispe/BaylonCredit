@@ -41,8 +41,10 @@ export default function App() {
           <Route path="/pagos/nuevo" element={<NuevoPagoPage />} />
           <Route path="/evaluacion-crediticia" element={<EvaluacionCrediticiaPage />} />
           <Route path="/reportes" element={<ReportesPage />} />
-          <Route path="/usuarios" element={<UsuariosPage />} />
-          <Route path="/configuracion" element={<ConfiguracionPage />} />
+          <Route element={<ProtectedRoute adminOnly />}>
+            <Route path="/usuarios" element={<UsuariosPage />} />
+            <Route path="/configuracion" element={<ConfiguracionPage />} />
+          </Route>
           <Route path="/perfil" element={<PerfilPage />} />
         </Route>
       </Route>

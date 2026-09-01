@@ -8,7 +8,7 @@ from app.models.commerce import (
     Sale,
     SaleItem,
 )
-from app.models.user import User, UserRole
+from app.models.user import AuditLog, RefreshToken, User, UserRole
 
 __all__ = [
     "Client",
@@ -19,6 +19,8 @@ __all__ = [
     "Product",
     "Sale",
     "SaleItem",
+    "AuditLog",
+    "RefreshToken",
     "User",
     "UserRole",
 ]

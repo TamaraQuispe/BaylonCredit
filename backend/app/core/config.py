@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     jwt_secret_key: str = DEVELOPMENT_JWT_SECRET
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 14
+    login_attempt_limit: int = 5
+    login_attempt_window_minutes: int = 15
     cors_origins: str = "http://localhost:5173,http://localhost:8080"
 
     model_config = SettingsConfigDict(
@@ -38,6 +41,8 @@ class Settings(BaseSettings):
             raise ValueError("JWT_SECRET_KEY must be configured outside development")
         if self.access_token_expire_minutes <= 0:
             raise ValueError("ACCESS_TOKEN_EXPIRE_MINUTES must be greater than zero")
+        if self.refresh_token_expire_days <= 0:
+            raise ValueError("REFRESH_TOKEN_EXPIRE_DAYS must be greater than zero")
         return self
 
 

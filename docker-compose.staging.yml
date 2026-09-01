@@ -1,0 +1,48 @@
+services:
+  database:
+    restart: always
+
+  migrate:
+    environment: &staging-environment
+      ENVIRONMENT: staging
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}
+    restart: "no"
+
+  api:
+    environment: *staging-environment
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  bootstrap:
+    build:
+      context: ./backend
+    command: ["python", "-m", "app.scripts.create_admin"]
+    environment:
+      <<: *staging-environment
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?ADMIN_EMAIL is required}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+      ADMIN_FULL_NAME: ${ADMIN_FULL_NAME:-Administrador Baylon}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_API_URL: /api/v1
+    restart: always
+
+volumes:
+  postgres_data:
