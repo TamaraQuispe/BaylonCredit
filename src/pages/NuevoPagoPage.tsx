@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import { formatCurrency } from '@/utils/format'
@@ -51,6 +51,7 @@ export default function NuevoPagoPage() {
   const [reference, setReference] = useState('')
   const [completedPayment, setCompletedPayment] = useState<StoredPayment | null>(null)
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   const client = clients.find((item) => item.id === clientId)
   const clientCredits = payableCredits.filter((credit) => credit.clientId === clientId)
@@ -68,6 +69,24 @@ export default function NuevoPagoPage() {
     setAmount(nextCredits.reduce((sum, credit) => sum + credit.pendingAmount, 0))
     setError('')
   }
+
+  useEffect(() => {
+    if (clientId || !clients.some((item) => item.id === requestedClient)) return
+    const nextCredits = credits.filter(
+      (credit) => credit.clientId === requestedClient && credit.pendingAmount > 0,
+    )
+    if (nextCredits.length === 0) return
+    const nextSelection = nextCredits.some((credit) => credit.id === requestedCredit)
+      ? [requestedCredit]
+      : nextCredits.map((credit) => credit.id)
+    setClientId(requestedClient)
+    setSelectedCredits(nextSelection)
+    setAmount(
+      nextCredits
+        .filter((credit) => nextSelection.includes(credit.id))
+        .reduce((sum, credit) => sum + credit.pendingAmount, 0),
+    )
+  }, [clientId, clients, credits, requestedClient, requestedCredit])
 
   const toggleCredit = (creditId: string) => {
     const next = selectedCredits.includes(creditId)
@@ -87,7 +106,7 @@ export default function NuevoPagoPage() {
     setAmount(totalDebt)
   }
 
-  const applyPayment = () => {
+  const applyPayment = async () => {
     if (!client || amount <= 0 || selectedCredits.length === 0) {
       setError('Selecciona al menos un fiado e ingresa un monto válido.')
       return
@@ -116,7 +135,8 @@ export default function NuevoPagoPage() {
       .filter((allocation) => allocation.amount > 0)
 
     try {
-      const payment = creditRepository.applyPayment({
+      setSaving(true)
+      const payment = await creditRepository.applyPayment({
         client,
         allocations,
         paymentDate,
@@ -127,6 +147,8 @@ export default function NuevoPagoPage() {
       setError('')
     } catch (paymentError) {
       setError(paymentError instanceof Error ? paymentError.message : 'No se pudo registrar el pago.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -306,8 +328,8 @@ export default function NuevoPagoPage() {
                   <span className="font-h3-title text-h3-title font-bold text-primary">{formatCurrency(newBalance)}</span>
                 </div>
               </div>
-              <button type="button" disabled={!client || selectedCredits.length === 0 || amount <= 0} onClick={applyPayment} className="w-full mt-8 bg-primary-container text-on-primary font-body-lg font-semibold py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed">
-                <Icon name="check_circle" size="20px" /> Confirmar Pago
+              <button type="button" disabled={saving || !client || selectedCredits.length === 0 || amount <= 0} onClick={applyPayment} className="w-full mt-8 bg-primary-container text-on-primary font-body-lg font-semibold py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed">
+                <Icon name={saving ? 'progress_activity' : 'check_circle'} size="20px" className={saving ? 'animate-spin' : ''} /> {saving ? 'Registrando...' : 'Confirmar Pago'}
               </button>
             </section>
           </div>

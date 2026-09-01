@@ -17,10 +17,11 @@ const tabs: { key: HistoryTab; label: string }[] = [
 export default function DetalleClientePage() {
   const [activeTab, setActiveTab] = useState<HistoryTab>('compras')
   const { id } = useParams()
-  const { clients } = useClientState()
-  const { credits } = useCreditState()
+  const { clients, loading: loadingClients } = useClientState()
+  const { credits, loading: loadingCredits } = useCreditState()
   const client = clients.find((item) => item.id === id)
 
+  if (loadingClients || loadingCredits) return <div className="py-16 text-center text-on-surface-variant">Cargando cliente...</div>
   if (!client) return <Navigate to="/clientes" replace />
 
   const clientCredits = credits.filter((credit) => credit.clientId === client.id)

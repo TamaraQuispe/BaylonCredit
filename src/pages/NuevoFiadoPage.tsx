@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import RiskBadge from '@/components/ui/RiskBadge'
@@ -37,6 +37,12 @@ export default function NuevoFiadoPage() {
   const client = clients.find((item) => item.id === clientId)
   const numericAmount = Number(amount)
 
+  useEffect(() => {
+    if (!clientId && clients.some((item) => item.id === requestedClient)) {
+      setClientId(requestedClient)
+    }
+  }, [clientId, clients, requestedClient])
+
   const invalidateEvaluation = () => {
     setEvaluation(null)
     setError('')
@@ -65,16 +71,24 @@ export default function NuevoFiadoPage() {
     }
   }
 
-  const confirmCredit = () => {
+  const confirmCredit = async () => {
     if (!client || !evaluation) return
-    const credit = creditRepository.create({
-      client,
-      amount: numericAmount,
-      creditDate,
-      dueDate,
-      evaluation,
-    })
-    navigate(`/fiados/${credit.id}`, { replace: true })
+    setLoading(true)
+    setError('')
+    try {
+      const credit = await creditRepository.create({
+        client,
+        amount: numericAmount,
+        creditDate,
+        dueDate,
+        evaluation,
+      })
+      navigate(`/fiados/${credit.id}`, { replace: true })
+    } catch (creditError) {
+      setError(creditError instanceof Error ? creditError.message : 'No se pudo registrar el fiado.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -275,6 +289,7 @@ export default function NuevoFiadoPage() {
               <button
                 type="button"
                 onClick={confirmCredit}
+                disabled={loading}
                 className="mt-auto w-full h-12 bg-primary text-on-primary rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-primary-container"
               >
                 <Icon name="check_circle" /> Confirmar y registrar fiado

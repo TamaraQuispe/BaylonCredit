@@ -1,7 +1,9 @@
-import { useSyncExternalStore } from 'react'
-import { fiados as seedFiados, type Fiado } from '@/data/fiados'
+import { useEffect, useSyncExternalStore } from 'react'
+import type { Fiado } from '@/data/fiados'
 import type { Cliente } from '@/data/clientes'
-import { paymentRecords, type PaymentRecord } from '@/data/pagos'
+import type { PaymentRecord } from '@/data/pagos'
+import type { RiskLevel } from '@/types'
+import { apiRequest } from './apiClient'
 import type { CreditEvaluation } from './scoringService'
 
 export interface CreditTimelineEntry {
@@ -31,6 +33,9 @@ export interface StoredPayment extends PaymentRecord {
 interface CreditState {
   credits: StoredCredit[]
   payments: StoredPayment[]
+  loading: boolean
+  loaded: boolean
+  error?: string
 }
 
 export interface CreateCreditInput {
@@ -49,83 +54,157 @@ export interface ApplyPaymentInput {
   reference?: string
 }
 
-const STORAGE_KEY = 'baylon_credit_state_v1'
+interface ApiCreditPayment {
+  id: string
+  payment_id: string
+  amount: string | number
+  payment_date: string
+  method: string
+  reference?: string
+  created_at: string
+}
+
+interface ApiCredit {
+  id: string
+  code: string
+  client_id: string
+  client_name: string
+  client_business: string
+  client_phone: string
+  original_amount: string | number
+  pending_amount: string | number
+  paid_amount: string | number
+  paid_percent: number
+  credit_date: string
+  due_date: string
+  status: Fiado['status']
+  risk: RiskLevel
+  score: number
+  recommended_limit: string | number
+  created_at: string
+  payments: ApiCreditPayment[]
+}
+
+interface ApiPayment {
+  id: string
+  client_id: string
+  client_name: string
+  amount: string | number
+  credit_ids: string[]
+  credit_codes: string[]
+  credit_dates: string[]
+  payment_date: string
+  method: string
+  reference?: string
+  remaining_balance: string | number
+  registered_by: string
+  created_at: string
+}
+
 const listeners = new Set<() => void>()
+let state: CreditState = { credits: [], payments: [], loading: false, loaded: false }
+let loadingPromise: Promise<CreditState> | null = null
 
-function seedState(): CreditState {
-  return {
-    credits: seedFiados.map((credit) => ({
-      ...credit,
-      timeline: [
-        {
-          id: `${credit.id}-registered`,
-          title: 'Fiado registrado',
-          description: 'Crédito inicial aprobado.',
-          amount: credit.originalAmount,
-          date: credit.createdAt,
-          type: 'registered',
-        },
-        ...(credit.paidAmount > 0
-          ? [
-              {
-                id: `${credit.id}-payment`,
-                title: credit.status === 'pagado' ? 'Pago completado' : 'Pago parcial',
-                description: 'Pago registrado en el historial.',
-                amount: -credit.paidAmount,
-                date: credit.dueAt,
-                type: 'payment' as const,
-              },
-            ]
-          : []),
-        ...(credit.pendingAmount > 0
-          ? [
-              {
-                id: `${credit.id}-pending`,
-                title: 'Saldo pendiente',
-                description: 'Pendiente de cancelación.',
-                amount: credit.pendingAmount,
-                date: 'Restante',
-                type: 'pending' as const,
-              },
-            ]
-          : []),
-      ],
-    })),
-    payments: paymentRecords.map((payment) => ({
-      ...payment,
-      creditIds: [],
-      paymentDate: payment.paidAt,
-      method: 'No especificado',
-    })),
-  }
-}
-
-function loadState(): CreditState {
-  if (typeof window === 'undefined') return seedState()
-  const saved = window.localStorage.getItem(STORAGE_KEY)
-  if (!saved) return seedState()
-  try {
-    const parsed = JSON.parse(saved) as Partial<CreditState>
-    const seed = seedState()
-    return {
-      credits: parsed.credits ?? seed.credits,
-      payments: parsed.payments ?? seed.payments,
-    }
-  } catch {
-    return seedState()
-  }
-}
-
-let state = loadState()
-
-function persist(nextState: CreditState) {
+function emit(nextState: CreditState) {
   state = nextState
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState))
   listeners.forEach((listener) => listener())
 }
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('es-PE').format(new Date(`${value}T12:00:00`))
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat('es-PE', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date(value))
+}
+
+function mapCredit(credit: ApiCredit): StoredCredit {
+  const originalAmount = Number(credit.original_amount)
+  const pendingAmount = Number(credit.pending_amount)
+  const paymentTimeline: CreditTimelineEntry[] = credit.payments.map((payment) => ({
+    id: payment.id,
+    title: pendingAmount === 0 ? 'Pago completado' : 'Pago parcial',
+    description: `${payment.method}${payment.reference ? ` · Ref. ${payment.reference}` : ''}`,
+    amount: -Number(payment.amount),
+    date: formatDateTime(payment.created_at),
+    type: 'payment',
+  }))
+  return {
+    id: credit.id,
+    code: credit.code,
+    clientId: credit.client_id,
+    client: {
+      initials: credit.client_name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase(),
+      name: credit.client_name,
+      business: credit.client_business,
+    },
+    phone: credit.client_phone,
+    originalAmount,
+    pendingAmount,
+    paidAmount: Number(credit.paid_amount),
+    paidPercent: credit.paid_percent,
+    createdAt: formatDate(credit.credit_date),
+    dueAt: formatDate(credit.due_date),
+    status: credit.status,
+    risk: credit.risk,
+    evaluation: {
+      score: credit.score,
+      risk: credit.risk,
+      defaultProbability: Math.max(2, 100 - credit.score),
+      recommendedLimit: Number(credit.recommended_limit),
+      approved: originalAmount <= Number(credit.recommended_limit),
+      recommendation: `Límite recomendado: ${Number(credit.recommended_limit).toLocaleString('es-PE', { style: 'currency', currency: 'PEN' })}.`,
+      calculatedAt: credit.created_at,
+      responseTimeMs: 0,
+    },
+    timeline: [
+      {
+        id: `${credit.id}-registered`,
+        title: 'Fiado registrado',
+        description: `Crédito aprobado con score ${credit.score}.`,
+        amount: originalAmount,
+        date: formatDateTime(credit.created_at),
+        type: 'registered',
+      },
+      ...paymentTimeline,
+      ...(pendingAmount > 0
+        ? [{
+            id: `${credit.id}-pending`,
+            title: 'Saldo pendiente',
+            description: 'Pendiente de cancelación.',
+            amount: pendingAmount,
+            date: 'Restante',
+            type: 'pending' as const,
+          }]
+        : []),
+    ],
+  }
+}
+
+function initials(name: string) {
+  return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
+}
+
+function mapPayment(payment: ApiPayment): StoredPayment {
+  return {
+    id: payment.id,
+    clientId: payment.client_id,
+    client: payment.client_name,
+    amount: Number(payment.amount),
+    creditIds: payment.credit_ids,
+    creditCode: payment.credit_codes.join(', '),
+    creditDate: payment.credit_dates.map(formatDate).join(', '),
+    paidAt: formatDateTime(payment.created_at),
+    paymentDate: payment.payment_date,
+    remainingBalance: Number(payment.remaining_balance),
+    registeredBy: payment.registered_by,
+    initials: initials(payment.registered_by),
+    method: payment.method,
+    reference: payment.reference,
+  }
 }
 
 export const creditRepository = {
@@ -136,149 +215,72 @@ export const creditRepository = {
   getSnapshot() {
     return state
   },
-  create(input: CreateCreditInput) {
-    const id = `f-${Date.now()}`
-    const now = new Date()
-    const due = new Date(`${input.dueDate}T12:00:00`)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const daysToDue = Math.ceil((due.getTime() - today.getTime()) / 86_400_000)
-    const status = daysToDue < 0 ? 'vencido' : daysToDue <= 5 ? 'proximo-a-vencer' : 'al-dia'
-    const credit: StoredCredit = {
-      id,
-      code: `F-${now.getFullYear()}-${String(state.credits.length + 1).padStart(4, '0')}`,
-      clientId: input.client.id,
-      client: {
-        initials: input.client.initials,
-        name: input.client.name,
-        business: input.client.business,
-      },
-      phone: input.client.phone,
-      originalAmount: input.amount,
-      pendingAmount: input.amount,
-      paidAmount: 0,
-      paidPercent: 0,
-      createdAt: formatDate(input.creditDate),
-      dueAt: formatDate(input.dueDate),
-      status,
-      risk: input.evaluation.risk,
-      evaluation: input.evaluation,
-      timeline: [
-        {
-          id: `${id}-registered`,
-          title: 'Fiado registrado',
-          description: `Crédito aprobado con score ${input.evaluation.score}.`,
-          amount: input.amount,
-          date: `${formatDate(input.creditDate)}, ${now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`,
-          type: 'registered',
-        },
-        {
-          id: `${id}-pending`,
-          title: 'Pago completado',
-          description: 'Pendiente de cancelación total.',
-          amount: input.amount,
-          date: 'Restante',
-          type: 'pending',
-        },
-      ],
-    }
-    persist({ ...state, credits: [credit, ...state.credits] })
+  async load(force = false) {
+    if (state.loaded && !force) return state
+    if (loadingPromise) return loadingPromise
+    emit({ ...state, loading: true, error: undefined })
+    loadingPromise = Promise.all([
+      apiRequest<ApiCredit[]>('/credits'),
+      apiRequest<ApiPayment[]>('/payments'),
+    ]).then(([credits, payments]) => {
+      const next = {
+        credits: credits.map(mapCredit),
+        payments: payments.map(mapPayment),
+        loading: false,
+        loaded: true,
+      }
+      emit(next)
+      return next
+    }).catch((error: unknown) => {
+      const next = { ...state, loading: false, error: error instanceof Error ? error.message : 'No se pudo cargar la cartera.' }
+      emit(next)
+      throw error
+    }).finally(() => {
+      loadingPromise = null
+    })
+    return loadingPromise
+  },
+  async create(input: CreateCreditInput) {
+    const credit = mapCredit(await apiRequest<ApiCredit>('/credits', {
+      method: 'POST',
+      body: JSON.stringify({
+        client_id: input.client.id,
+        amount: input.amount,
+        credit_date: input.creditDate,
+        due_date: input.dueDate,
+        manual_override: !input.evaluation.approved,
+      }),
+    }))
+    emit({ ...state, credits: [credit, ...state.credits], loaded: true })
     return credit
   },
-  applyPayment(input: ApplyPaymentInput) {
-    const allocations = input.allocations.filter((allocation) => allocation.amount > 0)
-    if (allocations.length === 0) throw new Error('El pago no tiene asignaciones válidas.')
-    if (input.paymentDate > new Date().toISOString().slice(0, 10)) {
-      throw new Error('La fecha del pago no puede estar en el futuro.')
-    }
-
-    const paymentId = `pay-${Date.now()}`
-    const now = new Date()
-    const allocationMap = new Map(allocations.map((allocation) => [allocation.creditId, allocation.amount]))
-
-    for (const allocation of allocations) {
-      const credit = state.credits.find((item) => item.id === allocation.creditId)
-      if (!credit || credit.clientId !== input.client.id) {
-        throw new Error('Uno de los fiados seleccionados no pertenece al cliente.')
-      }
-      if (allocation.amount > credit.pendingAmount + 0.001) {
-        throw new Error(`El pago supera el saldo de ${credit.code}.`)
-      }
-    }
-
-    const updatedCredits = state.credits.map((credit) => {
-      const appliedAmount = allocationMap.get(credit.id)
-      if (!appliedAmount) return credit
-
-      const pendingAmount = Math.max(0, Number((credit.pendingAmount - appliedAmount).toFixed(2)))
-      const paidAmount = Number((credit.paidAmount + appliedAmount).toFixed(2))
-      const paidPercent = Math.min(100, Number(((paidAmount / credit.originalAmount) * 100).toFixed(1)))
-      const paymentEntry: CreditTimelineEntry = {
-        id: `${paymentId}-${credit.id}`,
-        title: pendingAmount === 0 ? 'Pago completado' : 'Pago parcial',
-        description: `${input.method}${input.reference ? ` · Ref. ${input.reference}` : ''}`,
-        amount: -appliedAmount,
-        date: `${formatDate(input.paymentDate)}, ${now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`,
-        type: 'payment',
-      }
-      const timelineWithoutPending = credit.timeline.filter((entry) => entry.type !== 'pending')
-
-      return {
-        ...credit,
-        pendingAmount,
-        paidAmount,
-        paidPercent,
-        status: pendingAmount === 0 ? 'pagado' as const : credit.status,
-        timeline: [
-          ...timelineWithoutPending,
-          paymentEntry,
-          ...(pendingAmount > 0
-            ? [
-                {
-                  id: `${credit.id}-pending-${paymentId}`,
-                  title: 'Pago completado',
-                  description: 'Pendiente de cancelación total.',
-                  amount: pendingAmount,
-                  date: 'Restante',
-                  type: 'pending' as const,
-                },
-              ]
-            : []),
-        ],
-      }
-    })
-
-    const appliedCredits = updatedCredits.filter((credit) => allocationMap.has(credit.id))
-    const amount = Number(allocations.reduce((sum, allocation) => sum + allocation.amount, 0).toFixed(2))
-    const remainingBalance = updatedCredits
-      .filter((credit) => credit.clientId === input.client.id)
-      .reduce((sum, credit) => sum + credit.pendingAmount, 0)
-    const payment: StoredPayment = {
-      id: paymentId,
-      clientId: input.client.id,
-      client: input.client.business,
-      amount,
-      creditIds: allocations.map((allocation) => allocation.creditId),
-      creditCode: appliedCredits.map((credit) => credit.code).join(', '),
-      creditDate: appliedCredits.map((credit) => credit.createdAt).join(', '),
-      paidAt: `${formatDate(input.paymentDate)}, ${now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`,
-      paymentDate: input.paymentDate,
-      remainingBalance,
-      registeredBy: 'Administrador',
-      initials: 'AD',
-      method: input.method,
-      reference: input.reference,
-    }
-
-    persist({ credits: updatedCredits, payments: [payment, ...state.payments] })
+  async applyPayment(input: ApplyPaymentInput) {
+    const payment = mapPayment(await apiRequest<ApiPayment>('/payments', {
+      method: 'POST',
+      body: JSON.stringify({
+        client_id: input.client.id,
+        allocations: input.allocations.map((allocation) => ({
+          credit_id: allocation.creditId,
+          amount: allocation.amount,
+        })),
+        payment_date: input.paymentDate,
+        method: input.method,
+        reference: input.reference || null,
+      }),
+    }))
+    await this.load(true)
     return payment
   },
 }
 
 export function useCreditState() {
-  return useSyncExternalStore(
+  const snapshot = useSyncExternalStore(
     creditRepository.subscribe,
     creditRepository.getSnapshot,
     creditRepository.getSnapshot,
   )
+  useEffect(() => {
+    void creditRepository.load().catch(() => undefined)
+  }, [])
+  return snapshot
 }
