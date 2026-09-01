@@ -8,12 +8,15 @@ const baseInput =
 export default function NuevoClientePage() {
   const navigate = useNavigate()
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
+    setSaving(true)
+    setError('')
     try {
-      const client = clientRepository.create({
+      const client = await clientRepository.create({
         firstName: String(data.get('nombres')),
         lastName: String(data.get('apellidos')),
         business: String(data.get('negocio') ?? ''),
@@ -24,6 +27,8 @@ export default function NuevoClientePage() {
       navigate(`/clientes/${client.id}`, { replace: true })
     } catch (clientError) {
       setError(clientError instanceof Error ? clientError.message : 'No se pudo registrar el cliente.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -184,10 +189,11 @@ export default function NuevoClientePage() {
             </Link>
             <button
               type="submit"
-              className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm shadow-sm hover:bg-primary hover:shadow-md transition-all flex items-center justify-center gap-2"
+              disabled={saving}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm shadow-sm hover:bg-primary hover:shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[18px]">save</span>
-              Guardar cliente
+              {saving ? 'Guardando...' : 'Guardar cliente'}
             </button>
           </div>
         </form>

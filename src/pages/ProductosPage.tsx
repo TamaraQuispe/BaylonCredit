@@ -2,7 +2,8 @@ import { useMemo, useState, type FormEvent } from 'react'
 import Icon from '@/components/ui/Icon'
 import Modal from '@/components/ui/Modal'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
-import { productCategories, products as initialProducts, type Product } from '@/data/products'
+import { productCategories } from '@/data/products'
+import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
 import { formatCurrency } from '@/utils/format'
 
 const categoryIcons: Record<string, string> = {
@@ -39,12 +40,14 @@ function stockState(stock: number) {
 }
 
 export default function ProductosPage() {
-  const [catalog, setCatalog] = useState(initialProducts)
+  const { products: catalog, loading, error: loadError } = useProductState()
   const [category, setCategory] = useState('Cervezas')
   const [search, setSearch] = useState('')
-  const [editing, setEditing] = useState<Product | null>(null)
+  const [editing, setEditing] = useState<CommerceProduct | null>(null)
   const [formOpen, setFormOpen] = useState(false)
-  const [deleting, setDeleting] = useState<Product | null>(null)
+  const [deleting, setDeleting] = useState<CommerceProduct | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -62,32 +65,35 @@ export default function ProductosPage() {
     setFormOpen(true)
   }
 
-  const openEdit = (product: Product) => {
+  const openEdit = (product: CommerceProduct) => {
     setEditing(product)
     setFormOpen(true)
   }
 
-  const saveProduct = (event: FormEvent<HTMLFormElement>) => {
+  const saveProduct = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const selectedCategory = String(data.get('category'))
-    const product: Product = {
-      id: editing?.id ?? `p${Date.now()}`,
+    const product = {
       name: String(data.get('name')),
       category: selectedCategory,
       price: Number(data.get('price')),
       stock: Number(data.get('stock')),
       icon: categoryIcons[selectedCategory] ?? 'category',
     }
-
-    setCatalog((current) =>
-      editing
-        ? current.map((item) => (item.id === editing.id ? product : item))
-        : [product, ...current],
-    )
-    setCategory(selectedCategory)
-    setFormOpen(false)
-    setEditing(null)
+    setSaving(true)
+    setError('')
+    try {
+      if (editing) await productRepository.update(editing.id, product)
+      else await productRepository.create(product)
+      setCategory(selectedCategory)
+      setFormOpen(false)
+      setEditing(null)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No se pudo guardar el producto.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -131,6 +137,12 @@ export default function ProductosPage() {
           )
         })}
       </div>
+
+      {(error || loadError) && (
+        <div className="mb-6 p-4 rounded-lg bg-error-container text-on-error-container">
+          {error || loadError}
+        </div>
+      )}
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b border-outline-variant bg-surface-bright flex justify-end">
@@ -199,7 +211,7 @@ export default function ProductosPage() {
               {filteredProducts.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-14 px-6 text-center text-on-surface-variant">
-                    No hay productos para esta búsqueda.
+                     {loading ? 'Cargando productos...' : 'No hay productos para esta búsqueda.'}
                   </td>
                 </tr>
               )}
@@ -245,7 +257,7 @@ export default function ProductosPage() {
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setFormOpen(false)} className="h-10 px-5 rounded-lg border border-outline-variant text-primary hover:bg-surface-container-low">Cancelar</button>
-            <button type="submit" className="h-10 px-5 rounded-lg bg-primary-container text-on-primary hover:bg-primary">Guardar producto</button>
+            <button type="submit" disabled={saving} className="h-10 px-5 rounded-lg bg-primary-container text-on-primary hover:bg-primary disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar producto'}</button>
           </div>
         </form>
       </Modal>
@@ -257,10 +269,17 @@ export default function ProductosPage() {
         confirmLabel="Eliminar"
         tone="danger"
         onCancel={() => setDeleting(null)}
-        onConfirm={() => {
-          if (deleting) setCatalog((current) => current.filter((item) => item.id !== deleting.id))
-          setDeleting(null)
-        }}
+         onConfirm={() => {
+           if (!deleting) return
+           setSaving(true)
+           setError('')
+           void productRepository.archive(deleting.id)
+             .catch((caught: unknown) => setError(caught instanceof Error ? caught.message : 'No se pudo eliminar el producto.'))
+             .finally(() => {
+               setSaving(false)
+               setDeleting(null)
+             })
+         }}
       />
     </div>
   )
