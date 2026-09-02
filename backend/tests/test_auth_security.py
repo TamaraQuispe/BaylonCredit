@@ -183,6 +183,7 @@ async def test_users_crud_and_audit_require_admin(client: AsyncClient) -> None:
     )
     assert created.status_code == 201, created.text
     user_id = created.json()["id"]
+    assert created.json()["must_change_password"] is True
 
     patched = await client.patch(
         f"/api/v1/users/{user_id}",
@@ -315,3 +316,64 @@ async def test_credit_defaults_from_settings_and_caps_recommended_limit(
     assert credit.status_code == 201, credit.text
     assert credit.json()["due_date"] == (credit_date + timedelta(days=30)).isoformat()
     assert credit.json()["recommended_limit"] == "120.00"
+
+
+async def test_invited_user_must_change_password_on_first_login(client: AsyncClient) -> None:
+    admin_session = await login(client)
+    admin_headers = {"Authorization": f"Bearer {admin_session['access_token']}"}
+
+    created = await client.post(
+        "/api/v1/users",
+        headers=admin_headers,
+        json={
+            "email": "invitado@baylon.com",
+            "full_name": "Usuario Invitado",
+            "password": "temporal-123456",
+            "role": "operator",
+        },
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["must_change_password"] is True
+
+    invited = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "invitado@baylon.com", "password": "temporal-123456"},
+    )
+    assert invited.status_code == 200, invited.text
+    invited_session = invited.json()
+    assert invited_session["user"]["must_change_password"] is True
+    invited_headers = {"Authorization": f"Bearer {invited_session['access_token']}"}
+
+    too_short = await client.post(
+        "/api/v1/auth/complete-registration",
+        headers=invited_headers,
+        json={"new_password": "corta"},
+    )
+    assert too_short.status_code == 422
+
+    completed = await client.post(
+        "/api/v1/auth/complete-registration",
+        headers=invited_headers,
+        json={"new_password": "nueva-clave-segura"},
+    )
+    assert completed.status_code == 204, completed.text
+
+    relogin = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "invitado@baylon.com", "password": "nueva-clave-segura"},
+    )
+    assert relogin.status_code == 200
+    assert relogin.json()["user"]["must_change_password"] is False
+
+    old_password_fails = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "invitado@baylon.com", "password": "temporal-123456"},
+    )
+    assert old_password_fails.status_code == 401
+
+    repeated = await client.post(
+        "/api/v1/auth/complete-registration",
+        headers={"Authorization": f"Bearer {relogin.json()['access_token']}"},
+        json={"new_password": "otra-clave-segura-2"},
+    )
+    assert repeated.status_code == 409

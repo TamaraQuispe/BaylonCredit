@@ -19,11 +19,16 @@ import ReportesPage from '@/pages/ReportesPage'
 import UsuariosPage from '@/pages/UsuariosPage'
 import ConfiguracionPage from '@/pages/ConfiguracionPage'
 import PerfilPage from '@/pages/PerfilPage'
+import CambiarContrasenaInicialPage from '@/pages/CambiarContrasenaInicialPage'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/iniciar-sesion" element={<LoginPage />} />
+
+      <Route path="/cambiar-contrasena" element={<ProtectedRoute />}>
+        <Route index element={<CambiarContrasenaInicialPage />} />
+      </Route>
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>

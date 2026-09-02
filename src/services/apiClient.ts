@@ -25,6 +25,7 @@ export interface AuthUser {
   is_active: boolean
   created_at?: string
   last_login_at?: string | null
+  must_change_password: boolean
 }
 
 export interface TokenResponse {
@@ -147,5 +148,12 @@ export function changePassword(currentPassword: string, newPassword: string) {
       current_password: currentPassword,
       new_password: newPassword,
     }),
+  })
+}
+
+export function completeRegistration(newPassword: string) {
+  return apiRequest<void>('/auth/complete-registration', {
+    method: 'POST',
+    body: JSON.stringify({ new_password: newPassword }),
   })
 }

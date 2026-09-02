@@ -33,6 +33,10 @@ class PasswordChange(BaseModel):
     new_password: str = Field(min_length=10, max_length=128)
 
 
+class CompleteRegistration(BaseModel):
+    new_password: str = Field(min_length=10, max_length=128)
+
+
 class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -45,6 +49,7 @@ class UserRead(BaseModel):
     is_active: bool
     created_at: datetime
     last_login_at: datetime | None
+    must_change_password: bool
 
 
 class TokenResponse(BaseModel):

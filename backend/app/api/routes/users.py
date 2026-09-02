@@ -41,6 +41,7 @@ async def create_user(
         role=payload.role,
         position=payload.position,
         phone=payload.phone,
+        must_change_password=True,
     )
     db.add(user)
     try:
@@ -52,7 +53,7 @@ async def create_user(
             actor=current_user,
             entity_id=user.id,
             ip_address=request.client.host if request.client else None,
-            details={"role": user.role.value},
+            details={"role": user.role.value, "must_change_password": True},
         )
         await db.commit()
     except IntegrityError:

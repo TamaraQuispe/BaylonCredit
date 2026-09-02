@@ -8,6 +8,7 @@ export interface SessionUser {
   correo: string
   iniciales: string
   rol: AuthUser['role']
+  mustChangePassword: boolean
 }
 
 interface StoredSession {
@@ -69,6 +70,7 @@ export function mapUser(user: AuthUser): SessionUser {
     correo: user.email,
     iniciales: initials || 'US',
     rol: user.role,
+    mustChangePassword: user.must_change_password,
   }
 }
 

@@ -85,6 +85,7 @@ pytest
 - `GET|POST /api/v1/users`: administración de usuarios y roles.
 - `PATCH /api/v1/users/{id}`: edita nombre, cargo, teléfono y rol.
 - `PATCH /api/v1/users/{id}/status`: activar o desactivar usuarios.
+- `POST /api/v1/auth/complete-registration`: primer ingreso, define una contraseña propia y desbloquea la cuenta.
 - `GET /api/v1/users/audit`: registros de actividad (requiere `admin`).
 - `GET|PATCH /api/v1/settings`: lectura para autenticados; actualización solo `admin`.
 - `GET|POST|PATCH|DELETE /api/v1/clients`: gestión de clientes con archivado lógico.
@@ -98,6 +99,8 @@ pytest
 Roles disponibles: `admin`, `operator` y `viewer`.
 
 Las sesiones usan access tokens de corta duración y refresh tokens con rotación. El login aplica bloqueo anti fuerza bruta tras varios intentos fallidos; los cambios de contraseña invalidan todas las sesiones.
+
+Al crear un usuario (admin), se genera una cuenta con una contraseña temporal y la marca de cambio pendiente: en su primer ingreso el sistema obliga a definir una contraseña personal antes de acceder al resto de la aplicación.
 
 Al registrar una venta, la API bloquea los productos implicados, valida existencias, recalcula precios e IGV y descuenta stock dentro de una única transacción. Una venta fiada evalúa el riesgo y crea el crédito en esa misma operación; si cualquier validación falla, no se persiste ningún cambio.
 
