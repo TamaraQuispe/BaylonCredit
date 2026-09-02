@@ -86,7 +86,7 @@ pytest
 - `PATCH /api/v1/users/{id}`: edita nombre, cargo, teléfono y rol.
 - `PATCH /api/v1/users/{id}/status`: activar o desactivar usuarios.
 - `GET /api/v1/users/audit`: registros de actividad (requiere `admin`).
-- `GET|PATCH /api/v1/settings`: datos del negocio y parámetros de fiados (requiere `admin`).
+- `GET|PATCH /api/v1/settings`: lectura para autenticados; actualización solo `admin`.
 - `GET|POST|PATCH|DELETE /api/v1/clients`: gestión de clientes con archivado lógico.
 - `GET|POST|PATCH|DELETE /api/v1/products`: catálogo persistente de productos.
 - `POST /api/v1/products/{id}/stock`: entradas y ajustes auditables de inventario.
@@ -100,6 +100,8 @@ Roles disponibles: `admin`, `operator` y `viewer`.
 Las sesiones usan access tokens de corta duración y refresh tokens con rotación. El login aplica bloqueo anti fuerza bruta tras varios intentos fallidos; los cambios de contraseña invalidan todas las sesiones.
 
 Al registrar una venta, la API bloquea los productos implicados, valida existencias, recalcula precios e IGV y descuenta stock dentro de una única transacción. Una venta fiada evalúa el riesgo y crea el crédito en esa misma operación; si cualquier validación falla, no se persiste ningún cambio.
+
+Los parámetros de la sección Configuración se aplican al flujo de fiados: si una venta fiada o un fiado directo omite la fecha de vencimiento, se usa `default_credit_term_days` a partir de la fecha del crédito, y el límite recomendado se recorta al `max_credit_amount` del negocio. Los operadores leen estos parámetros para prellenar los formularios; solo el administrador puede modificarlos.
 
 ## Migraciones
 

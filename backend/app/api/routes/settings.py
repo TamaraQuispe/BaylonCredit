@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import require_roles
+from app.api.dependencies import get_current_user, require_roles
 from app.db.session import get_db
 from app.models.settings import SETTINGS_ID, BusinessSettings
 from app.models.user import User, UserRole
@@ -37,7 +37,7 @@ async def get_settings_record(db: AsyncSession, actor: User | None = None) -> Bu
 
 @router.get("", response_model=SettingsRead)
 async def read_settings(
-    _: User = Depends(admin_only),
+    _: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> BusinessSettings:
     return await get_settings_record(db)

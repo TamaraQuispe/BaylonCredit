@@ -1,10 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import RiskBadge from '@/components/ui/RiskBadge'
 import { formatCurrency } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import { creditRepository } from '@/services/creditRepository'
+import { useSettingsState } from '@/services/settingsRepository'
 import {
   localScoringService,
   type CreditEvaluation,
@@ -16,21 +17,21 @@ function isoDate(date: Date) {
 }
 
 const today = new Date()
-const defaultDueDate = new Date(today)
-defaultDueDate.setDate(defaultDueDate.getDate() + 15)
 
 export default function NuevoFiadoPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { clients } = useClientState()
+  const { settings } = useSettingsState()
   const requestedClient = searchParams.get('cliente') ?? ''
   const [clientId, setClientId] = useState(
     clients.some((client) => client.id === requestedClient) ? requestedClient : '',
   )
   const [amount, setAmount] = useState('')
   const [creditDate, setCreditDate] = useState(isoDate(today))
-  const [dueDate, setDueDate] = useState(isoDate(defaultDueDate))
+  const [dueDate, setDueDate] = useState('')
   const [evaluation, setEvaluation] = useState<CreditEvaluation | null>(null)
+  const dueDateEdited = useRef(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -42,6 +43,13 @@ export default function NuevoFiadoPage() {
       setClientId(requestedClient)
     }
   }, [clientId, clients, requestedClient])
+
+  useEffect(() => {
+    if (dueDateEdited.current) return
+    const next = new Date()
+    next.setDate(next.getDate() + (settings?.defaultCreditTermDays ?? 15))
+    setDueDate(isoDate(next))
+  }, [settings])
 
   const invalidateEvaluation = () => {
     setEvaluation(null)
@@ -213,6 +221,7 @@ export default function NuevoFiadoPage() {
                   min={creditDate}
                   value={dueDate}
                   onChange={(event) => {
+                    dueDateEdited.current = true
                     setDueDate(event.target.value)
                     invalidateEvaluation()
                   }}

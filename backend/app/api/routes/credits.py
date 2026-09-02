@@ -1,4 +1,4 @@
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from time import perf_counter
 from uuid import UUID, uuid4
@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, require_roles
+from app.api.routes.settings import get_settings_record
 from app.db.session import get_db
 from app.models.client import Client
 from app.models.commerce import Credit, CreditStatus, Payment, PaymentAllocation
@@ -152,6 +153,11 @@ async def create_credit(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=evaluation.recommendation,
         )
+    if payload.due_date is None:
+        settings = await get_settings_record(db)
+        due_date = payload.credit_date + timedelta(days=settings.default_credit_term_days)
+    else:
+        due_date = payload.due_date
     credit = Credit(
         code=f"F-{date.today().year}-{uuid4().hex[:8].upper()}",
         client_id=payload.client_id,
@@ -160,7 +166,7 @@ async def create_credit(
         original_amount=payload.amount,
         pending_amount=payload.amount,
         credit_date=payload.credit_date,
-        due_date=payload.due_date,
+        due_date=due_date,
         status=CreditStatus.CURRENT,
         risk=evaluation.risk,
         score=evaluation.score,
