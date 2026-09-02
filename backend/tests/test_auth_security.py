@@ -223,3 +223,51 @@ async def test_admin_cannot_disable_own_account(client: AsyncClient) -> None:
         headers=admin_headers,
     )
     assert response.status_code == 400
+
+
+async def test_business_settings_get_update_and_audit(client: AsyncClient) -> None:
+    admin_session = await login(client)
+    admin_headers = {"Authorization": f"Bearer {admin_session['access_token']}"}
+
+    initial = await client.get("/api/v1/settings", headers=admin_headers)
+    assert initial.status_code == 200
+    assert initial.json()["business_name"] == "Cervecería Baylón"
+    assert initial.json()["default_credit_term_days"] == 15
+
+    updated = await client.patch(
+        "/api/v1/settings",
+        headers=admin_headers,
+        json={
+            "business_name": "Cervecería Baylón SAC",
+            "default_credit_term_days": 30,
+            "max_credit_amount": "350.00",
+            "due_alerts_enabled": False,
+        },
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["business_name"] == "Cervecería Baylón SAC"
+    assert updated.json()["default_credit_term_days"] == 30
+    assert updated.json()["max_credit_amount"] == "350.00"
+    assert updated.json()["due_alerts_enabled"] is False
+
+    persisted = await client.get("/api/v1/settings", headers=admin_headers)
+    assert persisted.json()["business_name"] == "Cervecería Baylón SAC"
+
+    audit = await client.get("/api/v1/users/audit", headers=admin_headers)
+    actions = [entry["action"] for entry in audit.json()]
+    assert "settings_updated" in actions
+
+
+async def test_operator_cannot_read_or_write_settings(client: AsyncClient) -> None:
+    operator_session = await login(client, "vendedor@baylon.com")
+    operator_headers = {"Authorization": f"Bearer {operator_session['access_token']}"}
+
+    denied_read = await client.get("/api/v1/settings", headers=operator_headers)
+    assert denied_read.status_code == 403
+
+    denied_write = await client.patch(
+        "/api/v1/settings",
+        headers=operator_headers,
+        json={"business_name": "Cervecería X"},
+    )
+    assert denied_write.status_code == 403
