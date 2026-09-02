@@ -148,3 +148,44 @@ El override añade una tarea `bootstrap` que crea el primer `admin` tras aplicar
 - Publica el frontend en CDN o usa su imagen Nginx.
 
 No deben incluirse archivos `.env`, secretos ni datos de producción en Git.
+
+## Despliegue Gratuito Permanente: Oracle Cloud Free Tier
+
+Oracle Cloud da una VM ARM **permanente y gratis** (hasta 4 OCPU / 24 GB RAM). Es la
+única oferta de cloud con VM sin fecha de expiración. Este repositorio ya incluye los
+artefactos de producción para levantar todo con dos comandos:
+
+- `docker-compose.prod.yml` — override de producción (DB con credenciales propias,
+  healthchecks, límites de memoria, tarea de migración y bootstrap de admin).
+- `.env.prod.example` — plantilla de variables para producción.
+- `deploy/install-docker.sh` — instala Docker + Compose v2 en Ubuntu VPS.
+- `deploy/nginx-https.conf` — reverse proxy para terminar HTTPS/HTTP de borde.
+
+### Pasos en la VPS
+
+1. Crea la cuenta y una VM (Compute → Ampere/ARM, Ubuntu 24.04, boot 100 GB) en el
+   **free tier**. Abre en la security list los puertos de entrada `80`, `443` y `22`.
+2. Entra por SSH y prepara las variables:
+   ```bash
+   git clone https://github.com/TamaraQuispe/BaylonCredit.git && cd BaylonCredit
+   cp .env.prod.example .env.prod && nano .env.prod
+   ```
+   Rellena `DATABASE_URL`, `POSTGRES_PASSWORD`, `JWT_SECRET_KEY` (genera uno con
+   `openssl rand -hex 32`), `CORS_ORIGINS`, `ADMIN_EMAIL` y `ADMIN_PASSWORD`.
+3. Instala Docker y despliega:
+   ```bash
+   chmod +x deploy/install-docker.sh && ./deploy/install-docker.sh
+   # vuelve a entrar por SSH para refrescar el grupo docker
+   docker compose --env-file .env.prod -f docker-compose.yml \
+     -f docker-compose.prod.yml up --build -d
+   ```
+4. Verifica:
+   ```bash
+   docker compose --env-file .env.prod -f docker-compose.yml \
+     -f docker-compose.prod.yml ps
+   curl -s http://localhost:8000/health/ready
+   ```
+5. Entra desde el navegador a `http://IP_PUBLICA` (puerto 80) con el admin creado.
+
+El compose ejecuta en orden: migraciones → creación del admin → API → frontend. La
+API escucha en `8000` (interna) y el frontend se publica en el puerto `80`.
