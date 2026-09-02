@@ -305,8 +305,19 @@ async def test_credit_defaults_from_settings_and_caps_recommended_limit(
         json={"client_id": client_id, "amount": "150.00"},
     )
     assert evaluation.status_code == 200, evaluation.text
-    assert evaluation.json()["recommended_limit"] == "120.00"
-    assert evaluation.json()["approved"] is False
+    body = evaluation.json()
+    assert body["recommended_limit"] == "120.00"
+    assert body["approved"] is False
+    assert {factor["key"] for factor in body["factors"]} == {
+        "volume",
+        "punctuality",
+        "debt",
+        "amount",
+        "tenure",
+    }
+    assert 0 <= body["confidence"] <= 100
+    factor_sum = sum(factor["contribution"] for factor in body["factors"])
+    assert body["score"] == 50 + factor_sum
 
     credit = await client.post(
         "/api/v1/credits",

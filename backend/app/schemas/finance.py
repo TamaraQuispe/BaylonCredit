@@ -7,6 +7,14 @@ from pydantic import BaseModel, Field, model_validator
 from app.models.commerce import RiskLevel
 
 
+class ScoreFactorRead(BaseModel):
+    key: str
+    label: str
+    weight: int
+    contribution: int
+    description: str
+
+
 class CreditEvaluationRequest(BaseModel):
     client_id: UUID
     amount: Decimal = Field(gt=0, max_digits=12, decimal_places=2)
@@ -19,6 +27,8 @@ class CreditEvaluationRead(BaseModel):
     recommended_limit: Decimal
     approved: bool
     recommendation: str
+    confidence: int
+    factors: list[ScoreFactorRead]
     calculated_at: datetime
     response_time_ms: int
 

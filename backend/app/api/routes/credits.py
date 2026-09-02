@@ -19,6 +19,7 @@ from app.schemas.finance import (
     CreditPaymentEntry,
     DirectCreditCreate,
     FinanceCreditRead,
+    ScoreFactorRead,
 )
 from app.services.credit_scoring import evaluate_credit
 
@@ -88,7 +89,9 @@ async def evaluate(db: AsyncSession, client_id: UUID, amount: Decimal) -> Credit
     client = await db.get(Client, client_id)
     if not client or not client.is_active:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-    score, risk, recommended_limit, approved = await evaluate_credit(db, client_id, amount)
+    score, risk, recommended_limit, approved, factors = await evaluate_credit(db, client_id, amount)
+    max_weight = sum(factor.weight for factor in factors) or 1
+    confidence = min(100, 50 + (len(factors) * 10) + (score * 40) // (5 * max_weight))
     return CreditEvaluationRead(
         score=score,
         risk=risk,
@@ -100,6 +103,10 @@ async def evaluate(db: AsyncSession, client_id: UUID, amount: Decimal) -> Credit
             if approved
             else f"Amount exceeds the recommended limit of S/ {recommended_limit}."
         ),
+        confidence=confidence,
+        factors=[
+            ScoreFactorRead.model_validate(factor, from_attributes=True) for factor in factors
+        ],
         calculated_at=datetime.now(UTC),
         response_time_ms=round((perf_counter() - started_at) * 1000),
     )

@@ -274,8 +274,44 @@ export default function NuevoFiadoPage() {
                 <SummaryRow label="Monto solicitado" value={formatCurrency(numericAmount)} />
                 <SummaryRow label="Límite recomendado" value={formatCurrency(evaluation.recommendedLimit)} strong />
                 <SummaryRow label="Probabilidad de impago" value={`${evaluation.defaultProbability}%`} />
+                <SummaryRow label="Confianza del modelo" value={evaluation.confidence !== undefined ? `${evaluation.confidence}%` : '—'} />
                 <SummaryRow label="Tiempo de respuesta" value={`${evaluation.responseTimeMs} ms`} />
               </div>
+
+              {evaluation.factors && evaluation.factors.length > 0 && (
+                <div className="mb-5 p-4 bg-surface-bright border border-outline-variant rounded-lg">
+                  <h4 className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-3 flex items-center gap-2">
+                    <Icon name="insights" size="18px" className="text-primary" /> Desglose del score
+                  </h4>
+                  <div className="space-y-3">
+                    {evaluation.factors.map((factor) => {
+                      const pct = factor.weight > 0 ? Math.round((factor.contribution / factor.weight) * 100) : 0
+                      const tone =
+                        factor.contribution >= factor.weight * 0.8
+                          ? 'bg-green-500'
+                          : factor.contribution >= factor.weight * 0.5
+                            ? 'bg-yellow-400'
+                            : 'bg-error-container'
+                      return (
+                        <div key={factor.key}>
+                          <div className="flex justify-between font-label-sm text-label-sm mb-1">
+                            <span className="text-on-surface">{factor.label}</span>
+                            <span className="text-on-surface-variant">
+                              +{factor.contribution} de {factor.weight}
+                            </span>
+                          </div>
+                          <div className="w-full bg-surface-variant rounded-full h-2">
+                            <div className={`h-2 rounded-full ${tone}`} style={{ width: `${pct}%` }} />
+                          </div>
+                          <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
+                            {factor.description}
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div
                 className={`p-4 rounded-lg border mb-5 ${
