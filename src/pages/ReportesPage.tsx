@@ -4,6 +4,7 @@ import Icon from '@/components/ui/Icon'
 import { reportsByPeriod } from '@/data/reportes'
 import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
+import { useReportsState } from '@/services/reportsRepository'
 import { selectDashboardMetrics } from '@/services/dashboardSelectors'
 import { selectSalesMetrics, useSalesState, type SalesPeriod } from '@/services/salesRepository'
 import { formatCurrency } from '@/utils/format'
@@ -13,13 +14,11 @@ export default function ReportesPage() {
   const { clients } = useClientState()
   const { credits, payments } = useCreditState()
   const { sales } = useSalesState()
+  const { report: portfolio } = useReportsState()
   const report = reportsByPeriod[period]
   const metrics = selectDashboardMetrics(credits, payments, clients, sales)
   const salesMetrics = selectSalesMetrics(sales, period)
   const riskGradient = `conic-gradient(#10b981 0% ${metrics.risk.low}%, #fe932c ${metrics.risk.low}% ${metrics.risk.low + metrics.risk.medium}%, #ef4444 ${metrics.risk.low + metrics.risk.medium}% 100%)`
-  const linePoints = report.delinquency
-    .map((value, index) => `${(index / (report.delinquency.length - 1)) * 100},${100 - value * 7}`)
-    .join(' ')
 
   const exportReport = () => {
     const rows = [
@@ -30,6 +29,17 @@ export default function ReportesPage() {
       ['Monto vencido actual', metrics.totalOverdue],
       ['Tasa de morosidad actual', `${metrics.delinquencyRate}%`],
       [],
+      ...(portfolio ? [
+        ['Cartera por cliente', 'Deuda', 'Vencido', 'Fiados', 'Vencidos'],
+        ...portfolio.clients.map((client) => [
+          client.clientName,
+          client.totalPending,
+          client.totalOverdue,
+          client.activeCredits,
+          client.overdueCredits,
+        ]),
+        [],
+      ] : []),
       ['Producto', 'Cantidad', 'Ingresos'],
       ...salesMetrics.topProducts.map((product) => [product.name, product.quantity, product.revenue]),
     ]
@@ -123,14 +133,26 @@ export default function ReportesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <section className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high flex flex-col">
-          <h3 className="font-h3-title text-h3-title text-on-background mb-1">Evolución referencial de la morosidad</h3>
-          <p className="font-label-sm text-label-sm text-on-surface-variant mb-6">Datos demo hasta contar con historial mensual persistido.</p>
-          <div className="relative min-h-[250px]">
-            <div className="absolute inset-0 pb-8 pt-2 flex flex-col justify-between">{[1, 2, 3, 4].map((line) => <div key={line} className="border-b border-outline-variant border-dashed opacity-30" />)}</div>
-            <svg className="absolute inset-0 w-full h-[calc(100%-2rem)] z-10" preserveAspectRatio="none" viewBox="0 0 100 100">
-              <polyline points={linePoints} fill="none" stroke="#ef4444" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-            </svg>
-            <div className="absolute bottom-0 w-full flex justify-between px-2">{['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'].map((month) => <span key={month} className="font-label-sm text-label-sm text-on-surface-variant">{month}</span>)}</div>
+          <h3 className="font-h3-title text-h3-title text-on-background mb-1">Cartera de fiados por cliente</h3>
+          <p className="font-label-sm text-label-sm text-on-surface-variant mb-6">
+            {portfolio?.summary?.activeCredits ?? 0} fiados activos · {portfolio?.summary?.overdueCredits ?? 0} vencidos · {portfolio?.summary?.dueSoonCredits ?? 0} por vencer (≤5 días)
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[560px]">
+              <thead><tr className="border-b border-surface-container-high"><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2">CLIENTE</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">DEUDA</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">VENCIDO</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">FIADOS</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">MORA</th></tr></thead>
+              <tbody>
+                {portfolio?.clients.map((client) => (
+                  <tr key={client.clientId} className="border-b border-surface-container-high last:border-0 hover:bg-surface-container-low h-[56px]">
+                    <td className="py-3 px-2"><p className="font-medium text-on-background">{client.clientName}</p>{client.businessName && <p className="font-label-sm text-on-surface-variant">{client.businessName}</p>}</td>
+                    <td className="py-3 px-2 text-right font-semibold text-primary">{formatCurrency(client.totalPending)}</td>
+                    <td className={`py-3 px-2 text-right ${client.totalOverdue > 0 ? 'text-error font-medium' : 'text-on-surface-variant'}`}>{client.totalOverdue > 0 ? formatCurrency(client.totalOverdue) : '—'}</td>
+                    <td className="py-3 px-2 text-center">{client.activeCredits}</td>
+                    <td className="py-3 px-2 text-center">{client.overdueCredits > 0 ? <span className="px-2 py-1 rounded text-xs font-semibold bg-error-container text-on-error-container">{client.overdueCredits} vencido{client.overdueCredits > 1 ? 's' : ''}</span> : <span className="px-2 py-1 rounded text-xs font-semibold bg-green-50 text-green-700">Al día</span>}</td>
+                  </tr>
+                ))}
+                {(!portfolio || portfolio.clients.length === 0) && <tr><td colSpan={5} className="py-12 text-center text-on-surface-variant">No hay fiados registrados en la cartera.</td></tr>}
+              </tbody>
+            </table>
           </div>
         </section>
 
