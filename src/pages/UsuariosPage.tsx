@@ -30,6 +30,7 @@ const auditActionLabels: Record<string, string> = {
   user_deactivated: 'Usuario desactivado',
   profile_updated: 'Perfil actualizado',
   password_changed: 'Contraseña cambiada',
+  registration_completed: 'Registro completado (cambio de contraseña inicial)',
 }
 
 function initials(name: string) {
@@ -222,7 +223,16 @@ export default function UsuariosPage() {
                         <span className="font-medium text-on-background">{user.fullName}</span>
                       </div>
                     </td>
-                    <td className={`py-3 px-6 text-on-surface-variant ${user.isActive ? '' : 'opacity-60'}`}>{user.email}</td>
+                    <td className={`py-3 px-6 text-on-surface-variant ${user.isActive ? '' : 'opacity-60'}`}>
+                      <div className="flex flex-col gap-1">
+                        <span>{user.email}</span>
+                        {user.mustChangePassword && (
+                          <span className="inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-secondary-fixed text-on-secondary-fixed-variant border-secondary-fixed-dim">
+                            <Icon name="key" size="12px" /> Cambio de contraseña pendiente
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className={`py-3 px-6 ${user.isActive ? '' : 'opacity-60'}`}>
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border ${role.className}`}>{role.label}</span>
                     </td>
@@ -305,7 +315,15 @@ export default function UsuariosPage() {
           </label>
           <FormField label="Cargo" name="position" defaultValue={editing?.position ?? undefined} />
           <FormField label="Teléfono" name="phone" type="tel" defaultValue={editing?.phone ?? undefined} />
-          {!editing && <FormField label="Contraseña temporal" name="password" type="password" minLength={10} />}
+          {!editing && (
+            <>
+              <FormField label="Contraseña temporal" name="password" type="password" minLength={10} />
+              <p className="flex items-start gap-2 rounded-lg bg-surface-container-low border border-outline-variant p-3 text-sm text-on-surface-variant">
+                <Icon name="info" size="18px" className="text-primary mt-0.5" />
+                El usuario deberá cambiar esta contraseña en su primer ingreso.
+              </p>
+            </>
+          )}
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setFormOpen(false)} className="h-10 px-5 rounded-lg border border-outline-variant text-primary hover:bg-surface-container-low">Cancelar</button>
             <button type="submit" disabled={saving} className="h-10 px-5 rounded-lg bg-primary-container text-on-primary hover:bg-primary disabled:opacity-60">

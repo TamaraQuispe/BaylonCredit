@@ -13,6 +13,7 @@ export interface UserRecord {
   lastLoginAt?: string | null
   position?: string | null
   phone?: string | null
+  mustChangePassword: boolean
 }
 
 export interface AuditRecord {
@@ -52,6 +53,7 @@ interface ApiUser {
   is_active: boolean
   created_at: string
   last_login_at?: string | null
+  must_change_password: boolean
 }
 
 interface ApiAuditLog {
@@ -108,6 +110,7 @@ function mapUser(user: ApiUser): UserRecord {
     lastLoginAt: user.last_login_at,
     position: user.position,
     phone: user.phone,
+    mustChangePassword: user.must_change_password,
   }
 }
 

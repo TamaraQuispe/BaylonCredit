@@ -17,6 +17,7 @@ from app.core.security import (
 from app.db.session import get_db
 from app.models.user import AuditLog, RefreshToken, User
 from app.schemas.user import (
+    CompleteRegistration,
     LogoutRequest,
     PasswordChange,
     ProfileUpdate,
@@ -164,10 +165,39 @@ async def change_password(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect"
         )
     current_user.hashed_password = hash_password(payload.new_password)
+    current_user.must_change_password = False
     await db.execute(
         update(RefreshToken)
         .where(RefreshToken.user_id == current_user.id, RefreshToken.revoked_at.is_(None))
         .values(revoked_at=datetime.now(UTC))
     )
     add_audit_log(db, "password_changed", "user", actor=current_user, entity_id=current_user.id)
+    await db.commit()
+
+
+@router.post("/complete-registration", status_code=status.HTTP_204_NO_CONTENT)
+async def complete_registration(
+    payload: CompleteRegistration,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    if not current_user.must_change_password:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Registration already completed",
+        )
+    current_user.hashed_password = hash_password(payload.new_password)
+    current_user.must_change_password = False
+    await db.execute(
+        update(RefreshToken)
+        .where(RefreshToken.user_id == current_user.id, RefreshToken.revoked_at.is_(None))
+        .values(revoked_at=datetime.now(UTC))
+    )
+    add_audit_log(
+        db,
+        "registration_completed",
+        "user",
+        actor=current_user,
+        entity_id=current_user.id,
+    )
     await db.commit()
