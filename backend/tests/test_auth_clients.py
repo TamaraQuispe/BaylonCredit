@@ -228,3 +228,63 @@ async def test_direct_credit_and_partial_payment_are_consistent(client: AsyncCli
     assert updated.json()["pending_amount"] == "60.00"
     assert updated.json()["paid_percent"] == 40.0
     assert len(updated.json()["payments"]) == 1
+
+
+async def test_portfolio_report_reflects_active_and_overdue_fiados(client: AsyncClient) -> None:
+    login = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@baylon.com", "password": "secure-password"},
+    )
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    created_client = await client.post(
+        "/api/v1/clients",
+        headers=headers,
+        json={
+            "first_name": "Pedro",
+            "last_name": "Ramírez",
+            "document": "55667788",
+            "phone": "987654321",
+        },
+    )
+    client_id = created_client.json()["id"]
+
+    active = await client.post(
+        "/api/v1/credits",
+        headers=headers,
+        json={
+            "client_id": client_id,
+            "amount": "120.00",
+            "credit_date": date.today().isoformat(),
+            "due_date": (date.today() + timedelta(days=10)).isoformat(),
+        },
+    )
+    assert active.status_code == 201, active.text
+
+    overdue = await client.post(
+        "/api/v1/credits",
+        headers=headers,
+        json={
+            "client_id": client_id,
+            "amount": "80.00",
+            "credit_date": "2026-01-01",
+            "due_date": "2026-01-10",
+            "manual_override": True,
+        },
+    )
+    assert overdue.status_code == 201, overdue.text
+
+    report = await client.get("/api/v1/reports/portfolio", headers=headers)
+    assert report.status_code == 200, report.text
+    body = report.json()
+    assert body["summary"]["active_credits"] == 2
+    assert body["summary"]["total_pending"] == "200.00"
+    assert body["summary"]["overdue_credits"] == 1
+    assert len(body["clients"]) == 1
+    client_entry = body["clients"][0]
+    assert client_entry["client_id"] == client_id
+    assert client_entry["total_pending"] == "200.00"
+    assert client_entry["total_overdue"] == "80.00"
+    assert client_entry["overdue_credits"] == 1
+
+    no_auth = await client.get("/api/v1/reports/portfolio")
+    assert no_auth.status_code == 401
