@@ -106,7 +106,7 @@ async def create_sale(
     total = subtotal + tax
 
     client: Client | None = None
-    credit_evaluation: tuple[int, RiskLevel, Decimal, bool] | None = None
+    credit_evaluation: tuple[int, RiskLevel, Decimal, bool, list] | None = None
     if payload.payment_mode == PaymentMode.CREDIT:
         client = await db.get(Client, payload.client_id)
         if not client or not client.is_active:
@@ -173,7 +173,7 @@ async def create_sale(
 
     credit: Credit | None = None
     if client and credit_evaluation:
-        score, risk, recommended_limit, _ = credit_evaluation
+        score, risk, recommended_limit, _approved, _factors = credit_evaluation
         credit = Credit(
             code=f"F-{date.today().year}-{uuid4().hex[:8].upper()}",
             client_id=client.id,

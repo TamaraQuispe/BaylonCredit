@@ -2,6 +2,14 @@ import type { Cliente } from '@/data/clientes'
 import type { RiskLevel } from '@/types'
 import { apiRequest } from './apiClient'
 
+export interface ScoreFactor {
+  key: string
+  label: string
+  weight: number
+  contribution: number
+  description: string
+}
+
 export interface CreditEvaluation {
   score: number
   risk: RiskLevel
@@ -9,6 +17,8 @@ export interface CreditEvaluation {
   recommendedLimit: number
   approved: boolean
   recommendation: string
+  confidence?: number
+  factors?: ScoreFactor[]
   calculatedAt: string
   responseTimeMs: number
 }
@@ -24,6 +34,8 @@ interface ApiEvaluation {
   recommended_limit: string | number
   approved: boolean
   recommendation: string
+  confidence?: number
+  factors?: ScoreFactor[]
   calculated_at: string
   response_time_ms: number
 }
@@ -36,6 +48,8 @@ function mapEvaluation(evaluation: ApiEvaluation): CreditEvaluation {
     recommendedLimit: Number(evaluation.recommended_limit),
     approved: evaluation.approved,
     recommendation: evaluation.recommendation,
+    confidence: evaluation.confidence,
+    factors: evaluation.factors,
     calculatedAt: evaluation.calculated_at,
     responseTimeMs: evaluation.response_time_ms,
   }

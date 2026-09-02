@@ -106,6 +106,8 @@ Al registrar una venta, la API bloquea los productos implicados, valida existenc
 
 Los parámetros de la sección Configuración se aplican al flujo de fiados: si una venta fiada o un fiado directo omite la fecha de vencimiento, se usa `default_credit_term_days` a partir de la fecha del crédito, y el límite recomendado se recorta al `max_credit_amount` del negocio. Los operadores leen estos parámetros para prellenar los formularios; solo el administrador puede modificarlos.
 
+Las evaluaciones (`POST /credits/evaluate`) devuelven un score determinista y explicable compuesto por cinco factores ponderados que se incluyen en la respuesta (`factors` con contribución y descripción) junto a una confianza estimada: historial de ventas, puntualidad de pagos, nivel de endeudamiento, monto solicitado y antigüedad del cliente.
+
 ## Migraciones
 
 No se crean tablas automáticamente al arrancar la API. En cada despliegue debe ejecutarse una sola tarea de release antes de iniciar las réplicas:
