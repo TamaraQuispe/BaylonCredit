@@ -1,5 +1,5 @@
 from collections.abc import AsyncIterator
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from uuid import UUID
 
@@ -140,6 +140,42 @@ async def test_sale_updates_stock_and_creates_credit_atomically(client: AsyncCli
     assert rejected.status_code == 409
     products_after_rejection = await client.get("/api/v1/products", headers=headers)
     assert products_after_rejection.json()[0]["stock"] == 3
+
+
+async def test_fiado_sale_uses_default_term_from_settings(client: AsyncClient) -> None:
+    login = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@baylon.com", "password": "secure-password"},
+    )
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    await client.patch(
+        "/api/v1/settings",
+        headers=headers,
+        json={"default_credit_term_days": 30},
+    )
+    created_client = await client.post(
+        "/api/v1/clients",
+        headers=headers,
+        json={
+            "first_name": "Lucia",
+            "last_name": "Torres",
+            "document": "88776655",
+            "phone": "987654321",
+        },
+    )
+
+    sale = await client.post(
+        "/api/v1/sales",
+        headers=headers,
+        json={
+            "payment_mode": "fiado",
+            "client_id": created_client.json()["id"],
+            "items": [{"product_id": str(PRODUCT_ID), "quantity": 1}],
+        },
+    )
+    assert sale.status_code == 201, sale.text
+    expected_due = (date.today() + timedelta(days=30)).isoformat()
+    assert sale.json()["credit"]["due_date"] == expected_due
 
 
 async def test_direct_credit_and_partial_payment_are_consistent(client: AsyncClient) -> None:

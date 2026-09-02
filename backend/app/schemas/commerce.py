@@ -67,8 +67,8 @@ class SaleCreate(BaseModel):
         product_ids = [item.product_id for item in self.items]
         if len(product_ids) != len(set(product_ids)):
             raise ValueError("Products cannot be repeated")
-        if self.payment_mode == PaymentMode.CREDIT and (not self.client_id or not self.due_date):
-            raise ValueError("Credit sales require client_id and due_date")
+        if self.payment_mode == PaymentMode.CREDIT and not self.client_id:
+            raise ValueError("Credit sales require a client")
         if self.payment_mode == PaymentMode.CASH and (self.client_id or self.due_date):
             raise ValueError("Cash sales cannot include credit data")
         return self

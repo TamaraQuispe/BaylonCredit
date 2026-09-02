@@ -27,15 +27,15 @@ class DirectCreditCreate(BaseModel):
     client_id: UUID
     amount: Decimal = Field(gt=0, max_digits=12, decimal_places=2)
     credit_date: date
-    due_date: date
+    due_date: date | None = None
     manual_override: bool = False
 
     @model_validator(mode="after")
     def validate_dates(self) -> "DirectCreditCreate":
-        if self.due_date <= self.credit_date:
-            raise ValueError("Due date must be after credit date")
         if self.credit_date > date.today():
             raise ValueError("Credit date cannot be in the future")
+        if self.due_date is not None and self.due_date <= self.credit_date:
+            raise ValueError("Due date must be after credit date")
         return self
 
 

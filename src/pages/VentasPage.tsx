@@ -4,6 +4,7 @@ import { productCategories } from '@/data/products'
 import { useClientState } from '@/services/clientRepository'
 import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
 import { salesRepository } from '@/services/salesRepository'
+import { useSettingsState } from '@/services/settingsRepository'
 import { formatCurrency } from '@/utils/format'
 
 interface CartLine {
@@ -29,6 +30,7 @@ export default function VentasPage() {
   const [success, setSuccess] = useState('')
   const { clients } = useClientState()
   const { products, loading: loadingProducts } = useProductState()
+  const { settings } = useSettingsState()
   const client = clients.find((item) => item.id === clientId)
 
   const filteredProducts = useMemo(() => {
@@ -94,7 +96,7 @@ export default function VentasPage() {
     try {
       setProcessing(true)
       const dueDate = new Date()
-      dueDate.setDate(dueDate.getDate() + 15)
+      dueDate.setDate(dueDate.getDate() + (settings?.defaultCreditTermDays ?? 15))
       const sale = await salesRepository.create({
         paymentMode,
         clientId: client?.id,

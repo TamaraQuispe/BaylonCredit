@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator
+from datetime import date, timedelta
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -258,12 +259,13 @@ async def test_business_settings_get_update_and_audit(client: AsyncClient) -> No
     assert "settings_updated" in actions
 
 
-async def test_operator_cannot_read_or_write_settings(client: AsyncClient) -> None:
+async def test_operator_can_read_but_not_write_settings(client: AsyncClient) -> None:
     operator_session = await login(client, "vendedor@baylon.com")
     operator_headers = {"Authorization": f"Bearer {operator_session['access_token']}"}
 
-    denied_read = await client.get("/api/v1/settings", headers=operator_headers)
-    assert denied_read.status_code == 403
+    allowed_read = await client.get("/api/v1/settings", headers=operator_headers)
+    assert allowed_read.status_code == 200
+    assert "default_credit_term_days" in allowed_read.json()
 
     denied_write = await client.patch(
         "/api/v1/settings",
@@ -271,3 +273,45 @@ async def test_operator_cannot_read_or_write_settings(client: AsyncClient) -> No
         json={"business_name": "Cervecería X"},
     )
     assert denied_write.status_code == 403
+
+
+async def test_credit_defaults_from_settings_and_caps_recommended_limit(
+    client: AsyncClient,
+) -> None:
+    admin_session = await login(client)
+    admin_headers = {"Authorization": f"Bearer {admin_session['access_token']}"}
+    await client.patch(
+        "/api/v1/settings",
+        headers=admin_headers,
+        json={"default_credit_term_days": 30, "max_credit_amount": "120.00"},
+    )
+    created = await client.post(
+        "/api/v1/clients",
+        headers=admin_headers,
+        json={
+            "first_name": "Carlos",
+            "last_name": "Mendoza",
+            "document": "11223344",
+            "phone": "987654321",
+        },
+    )
+    client_id = created.json()["id"]
+    credit_date = date.today()
+
+    evaluation = await client.post(
+        "/api/v1/credits/evaluate",
+        headers=admin_headers,
+        json={"client_id": client_id, "amount": "150.00"},
+    )
+    assert evaluation.status_code == 200, evaluation.text
+    assert evaluation.json()["recommended_limit"] == "120.00"
+    assert evaluation.json()["approved"] is False
+
+    credit = await client.post(
+        "/api/v1/credits",
+        headers=admin_headers,
+        json={"client_id": client_id, "amount": "100.00", "credit_date": credit_date.isoformat()},
+    )
+    assert credit.status_code == 201, credit.text
+    assert credit.json()["due_date"] == (credit_date + timedelta(days=30)).isoformat()
+    assert credit.json()["recommended_limit"] == "120.00"

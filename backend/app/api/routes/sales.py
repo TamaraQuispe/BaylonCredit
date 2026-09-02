@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from uuid import uuid4
 
@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, require_roles
+from app.api.routes.settings import get_settings_record
 from app.db.session import get_db
 from app.models.client import Client
 from app.models.commerce import (
@@ -110,7 +111,12 @@ async def create_sale(
         client = await db.get(Client, payload.client_id)
         if not client or not client.is_active:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-        if not payload.due_date or payload.due_date <= date.today():
+        if payload.due_date is None:
+            settings = await get_settings_record(db)
+            due_date = date.today() + timedelta(days=settings.default_credit_term_days)
+        else:
+            due_date = payload.due_date
+        if due_date <= date.today():
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Due date must be after today",
@@ -166,7 +172,7 @@ async def create_sale(
         )
 
     credit: Credit | None = None
-    if client and credit_evaluation and payload.due_date:
+    if client and credit_evaluation:
         score, risk, recommended_limit, _ = credit_evaluation
         credit = Credit(
             code=f"F-{date.today().year}-{uuid4().hex[:8].upper()}",
@@ -176,7 +182,7 @@ async def create_sale(
             original_amount=total,
             pending_amount=total,
             credit_date=date.today(),
-            due_date=payload.due_date,
+            due_date=due_date,
             status=CreditStatus.CURRENT,
             risk=risk,
             score=score,
