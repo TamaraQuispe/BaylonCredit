@@ -86,6 +86,7 @@ pytest
 - `PATCH /api/v1/users/{id}`: edita nombre, cargo, teléfono y rol.
 - `PATCH /api/v1/users/{id}/status`: activar o desactivar usuarios.
 - `GET /api/v1/users/audit`: registros de actividad (requiere `admin`).
+- `GET|PATCH /api/v1/settings`: datos del negocio y parámetros de fiados (requiere `admin`).
 - `GET|POST|PATCH|DELETE /api/v1/clients`: gestión de clientes con archivado lógico.
 - `GET|POST|PATCH|DELETE /api/v1/products`: catálogo persistente de productos.
 - `POST /api/v1/products/{id}/stock`: entradas y ajustes auditables de inventario.

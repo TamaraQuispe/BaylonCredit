@@ -1,31 +1,111 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import Modal from '@/components/ui/Modal'
+import LoadingState from '@/components/ui/LoadingState'
+import ErrorState from '@/components/ui/ErrorState'
+import { changePassword } from '@/services/apiClient'
+import { settingsRepository, useSettingsState } from '@/services/settingsRepository'
+import { endSession } from '@/utils/session'
 
 export default function ConfiguracionPage() {
+  const navigate = useNavigate()
+  const { settings, loading, error } = useSettingsState()
   const [business, setBusiness] = useState({
-    name: 'Cervecería Baylón',
-    phone: '+51 987 654 321',
-    address: 'Av. Principal 123, Lima, Perú',
+    name: '',
+    phone: '',
+    address: '',
   })
   const [editingBusiness, setEditingBusiness] = useState(false)
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [privacyOpen, setPrivacyOpen] = useState(false)
-  const [twoFactor, setTwoFactor] = useState(false)
+  const [savingBusiness, setSavingBusiness] = useState(false)
+  const [savingParams, setSavingParams] = useState(false)
+  const [savingPassword, setSavingPassword] = useState(false)
   const [term, setTerm] = useState('15')
   const [maxAmount, setMaxAmount] = useState('200.00')
   const [alerts, setAlerts] = useState(true)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState<{ text: string; tone: 'success' | 'error' } | null>(null)
 
-  const showNotice = (message: string) => {
-    setNotice(message)
-    window.setTimeout(() => setNotice(''), 2500)
+  useEffect(() => {
+    if (!settings) return
+    setBusiness({
+      name: settings.businessName,
+      phone: settings.businessPhone,
+      address: settings.businessAddress,
+    })
+    setTerm(String(settings.defaultCreditTermDays))
+    setMaxAmount(settings.maxCreditAmount)
+    setAlerts(settings.dueAlertsEnabled)
+  }, [settings])
+
+  const showNotice = (text: string, tone: 'success' | 'error' = 'success') => {
+    setNotice({ text, tone })
+    window.setTimeout(() => setNotice(null), 3000)
   }
 
-  const updatePassword = (event: FormEvent<HTMLFormElement>) => {
+  const saveBusiness = async () => {
+    setSavingBusiness(true)
+    try {
+      await settingsRepository.update({
+        businessName: business.name,
+        businessPhone: business.phone,
+        businessAddress: business.address,
+      })
+      setEditingBusiness(false)
+      showNotice('Datos del negocio guardados.')
+    } catch (caught) {
+      showNotice(caught instanceof Error ? caught.message : 'No se pudieron guardar los datos.', 'error')
+    } finally {
+      setSavingBusiness(false)
+    }
+  }
+
+  const saveParams = async () => {
+    setSavingParams(true)
+    try {
+      await settingsRepository.update({
+        defaultCreditTermDays: Number(term),
+        maxCreditAmount: maxAmount || '0',
+        dueAlertsEnabled: alerts,
+      })
+      showNotice('Parámetros de fiados guardados.')
+    } catch (caught) {
+      showNotice(caught instanceof Error ? caught.message : 'No se pudieron guardar los parámetros.', 'error')
+    } finally {
+      setSavingParams(false)
+    }
+  }
+
+  const updatePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setPasswordOpen(false)
-    showNotice('Contraseña actualizada correctamente.')
+    const data = new FormData(event.currentTarget)
+    const currentPassword = String(data.get('current-password'))
+    const newPassword = String(data.get('new-password'))
+    const confirmPassword = String(data.get('confirm-password'))
+    if (newPassword !== confirmPassword) {
+      showNotice('Las contraseñas nuevas no coinciden.', 'error')
+      return
+    }
+    if (newPassword.length < 10) {
+      showNotice('La nueva contraseña debe tener al menos 10 caracteres.', 'error')
+      return
+    }
+    setSavingPassword(true)
+    try {
+      await changePassword(currentPassword, newPassword)
+      endSession()
+      navigate('/iniciar-sesion', { replace: true })
+    } catch (caught) {
+      showNotice(caught instanceof Error ? caught.message : 'No se pudo cambiar la contraseña.', 'error')
+    } finally {
+      setSavingPassword(false)
+    }
+  }
+
+  if (loading && !settings) return <LoadingState label="Cargando configuración..." />
+  if (error && !settings) {
+    return <ErrorState title="No se pudo cargar la configuración" description={error} />
   }
 
   return (
@@ -38,8 +118,8 @@ export default function ConfiguracionPage() {
       </div>
 
       {notice && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
-          <Icon name="check_circle" size="20px" /> {notice}
+        <div className={`flex items-center gap-2 p-3 rounded-lg border ${notice.tone === 'error' ? 'bg-error-container text-on-error-container border-error/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+          <Icon name={notice.tone === 'error' ? 'error' : 'check_circle'} size="20px" /> {notice.text}
         </div>
       )}
 
@@ -52,13 +132,17 @@ export default function ConfiguracionPage() {
             <button
               type="button"
               onClick={() => {
-                if (editingBusiness) showNotice('Datos del negocio guardados.')
-                setEditingBusiness((editing) => !editing)
+                if (editingBusiness) {
+                  void saveBusiness()
+                } else {
+                  setEditingBusiness(true)
+                }
               }}
-              className="text-primary hover:bg-surface-container-low px-3 py-1.5 rounded-lg font-label-sm text-label-sm flex items-center gap-1"
+              disabled={savingBusiness}
+              className="text-primary hover:bg-surface-container-low px-3 py-1.5 rounded-lg font-label-sm text-label-sm flex items-center gap-1 disabled:opacity-60"
             >
               <Icon name={editingBusiness ? 'save' : 'edit'} size="16px" />
-              {editingBusiness ? 'Guardar' : 'Editar'}
+              {editingBusiness ? (savingBusiness ? 'Guardando...' : 'Guardar') : 'Editar'}
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -82,14 +166,10 @@ export default function ConfiguracionPage() {
             <div className="p-4 bg-surface-bright rounded-lg border border-outline-variant">
               <div className="flex justify-between items-start mb-2">
                 <span className="font-label-sm text-label-sm font-semibold text-on-surface">Doble factor (2FA)</span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${twoFactor ? 'bg-emerald-100 text-emerald-700' : 'bg-surface-container-high text-on-surface-variant'}`}>
-                  {twoFactor ? 'ACTIVO' : 'INACTIVO'}
-                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-surface-container-high text-on-surface-variant">PRÓXIMAMENTE</span>
               </div>
               <p className="text-xs text-on-surface-variant mb-3">Mayor seguridad para las aprobaciones de crédito.</p>
-              <button type="button" onClick={() => { setTwoFactor((active) => !active); showNotice(`Doble factor ${twoFactor ? 'desactivado' : 'activado'}.`) }} className="text-primary font-label-sm text-label-sm hover:underline">
-                {twoFactor ? 'Desactivar' : 'Configurar ahora'}
-              </button>
+              <span className="text-xs text-on-surface-variant font-medium">Disponible en una próxima versión.</span>
             </div>
           </div>
         </section>
@@ -115,8 +195,8 @@ export default function ConfiguracionPage() {
             <SettingRow title="Alertas de vencimiento" description="Notificar 2 días antes">
               <Toggle checked={alerts} onChange={setAlerts} label="Alertas de vencimiento" />
             </SettingRow>
-            <button type="button" onClick={() => showNotice('Parámetros de fiados guardados.')} className="w-full py-2.5 bg-primary-container text-on-primary rounded-lg hover:bg-primary font-medium">
-              Guardar parámetros
+            <button type="button" onClick={() => void saveParams()} disabled={savingParams} className="w-full py-2.5 bg-primary-container text-on-primary rounded-lg hover:bg-primary font-medium disabled:opacity-60">
+              {savingParams ? 'Guardando...' : 'Guardar parámetros'}
             </button>
           </div>
         </section>
@@ -142,10 +222,16 @@ export default function ConfiguracionPage() {
 
       <Modal open={passwordOpen} onClose={() => setPasswordOpen(false)} title="Cambiar contraseña" icon="lock" iconClassName="text-primary">
         <form onSubmit={updatePassword} className="space-y-4">
+          <p className="font-label-sm text-label-sm text-on-surface-variant">
+            Al cambiar la contraseña se cerrarán todas tus sesiones activas.
+          </p>
           <PasswordField label="Contraseña actual" name="current-password" />
-          <PasswordField label="Nueva contraseña" name="new-password" />
-          <PasswordField label="Confirmar contraseña" name="confirm-password" />
-          <div className="flex justify-end gap-3"><button type="button" onClick={() => setPasswordOpen(false)} className="h-10 px-5 border border-outline-variant rounded-lg text-primary">Cancelar</button><button type="submit" className="h-10 px-5 bg-primary-container text-on-primary rounded-lg">Actualizar</button></div>
+          <PasswordField label="Nueva contraseña" name="new-password" minLength={10} />
+          <PasswordField label="Confirmar contraseña" name="confirm-password" minLength={10} />
+          <div className="flex justify-end gap-3">
+            <button type="button" onClick={() => setPasswordOpen(false)} className="h-10 px-5 border border-outline-variant rounded-lg text-primary">Cancelar</button>
+            <button type="submit" disabled={savingPassword} className="h-10 px-5 bg-primary-container text-on-primary rounded-lg disabled:opacity-60">{savingPassword ? 'Actualizando...' : 'Actualizar'}</button>
+          </div>
         </form>
       </Modal>
 
@@ -154,7 +240,10 @@ export default function ConfiguracionPage() {
           <ConsentOption title="Evaluación crediticia con IA" description="Permite analizar el historial transaccional para calcular el riesgo." defaultChecked />
           <ConsentOption title="Notificaciones de cobranza" description="Autoriza recordatorios de vencimiento por teléfono o mensajería." defaultChecked />
           <ConsentOption title="Uso estadístico anonimizado" description="Utiliza datos sin identificación para mejorar los reportes." />
-          <div className="flex justify-end gap-3 pt-2"><button type="button" onClick={() => setPrivacyOpen(false)} className="h-10 px-5 border border-outline-variant rounded-lg text-primary">Cancelar</button><button type="button" onClick={() => { setPrivacyOpen(false); showNotice('Preferencias de privacidad guardadas.') }} className="h-10 px-5 bg-primary-container text-on-primary rounded-lg">Guardar</button></div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={() => setPrivacyOpen(false)} className="h-10 px-5 border border-outline-variant rounded-lg text-primary">Cancelar</button>
+            <button type="button" onClick={() => { setPrivacyOpen(false); showNotice('Preferencias de privacidad guardadas.') }} className="h-10 px-5 bg-primary-container text-on-primary rounded-lg">Guardar</button>
+          </div>
         </div>
       </Modal>
     </div>
@@ -173,8 +262,8 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (val
   return <button type="button" role="switch" aria-checked={checked} aria-label={label} onClick={() => onChange(!checked)} className={`relative w-11 h-6 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-outline-variant'}`}><span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white border transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`} /></button>
 }
 
-function PasswordField({ label, name }: { label: string; name: string }) {
-  return <label className="flex flex-col gap-1.5 font-label-sm text-label-sm text-on-surface">{label}<input required minLength={8} name={name} type="password" className="h-11 px-4 rounded-lg bg-surface border border-outline-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" /></label>
+function PasswordField({ label, name, minLength = 8 }: { label: string; name: string; minLength?: number }) {
+  return <label className="flex flex-col gap-1.5 font-label-sm text-label-sm text-on-surface">{label}<input required minLength={minLength} name={name} type="password" className="h-11 px-4 rounded-lg bg-surface border border-outline-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" /></label>
 }
 
 function ConsentOption({ title, description, defaultChecked = false }: { title: string; description: string; defaultChecked?: boolean }) {
