@@ -189,3 +189,33 @@ artefactos de producción para levantar todo con dos comandos:
 
 El compose ejecuta en orden: migraciones → creación del admin → API → frontend. La
 API escucha en `8000` (interna) y el frontend se publica en el puerto `80`.
+
+## HTTPS Con Dominio Y Certificado Gratis (opcional pero recomendado)
+
+Para acceder por `https://` en vez de una IP basta añadir **Caddy** como frente TLS
+(Let's Encrypt automático) y un dominio. El proyecto ya incluye `deploy/Caddyfile`
+y `docker-compose.caddy.yml`.
+
+1. Crea un subdominio DDNS en https://www.duckdns.org (p. ej. `tunegocio.duckdns.org`)
+   y apúntalo a la IP de la VM. Guarda el `token` de DuckDNS.
+2. En el `.env.prod` define:
+   ```
+   DOMAIN=tunegocio.duckdns.org
+   CORS_ORIGINS=https://tunegocio.duckdns.org
+   ```
+3. Mantén la IP actualizada en DuckDNS añadiendo a `/etc/crontab` o el crontab del
+   usuario un job que llame:
+   ```bash
+   curl -s "https://www.duckdns.org/update?domains=tunegocio&token=TU_TOKEN&ip="
+   ```
+   (periodicidad recomendada: cada 5 minutos).
+4. Levanta Caddy junto al stack:
+   ```bash
+   docker compose --env-file .env.prod -f docker-compose.yml \
+     -f docker-compose.prod.yml -f docker-compose.caddy.yml up -d --remove-orphans
+   ```
+5. Abre `http://tunegocio.duckdns.org` → Caddy redirige a `https://` y emite el
+   certificado automáticamente (renovación libre de intervención).
+
+> Nota: al usar Caddy, el servicio `frontend` ya no publica el puerto `80` (lo
+> omite el `docker-compose.prod.yml`); el tráfico entra por Caddy (`80`/`443`).

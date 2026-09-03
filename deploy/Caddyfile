@@ -1,0 +1,16 @@
+# Caddyfile — frente HTTPS (Let's Encrypt automatico) para BaylonCredit.
+# Caddy activa TLS/Https automaticamente para el dominio (emite y renueva el certificado).
+# Redirige HTTP->HTTPS y reenvia al frontend (nginx) que sirve la SPA y proxy /api.
+
+{$DOMAIN} {
+    # Headers de seguridad
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "no-referrer"
+    }
+
+    # SPA: servicios internos del proyecto
+    reverse_proxy http://frontend:8080
+}
