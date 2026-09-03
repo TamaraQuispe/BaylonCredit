@@ -25,6 +25,7 @@ from app.services.credit_scoring import evaluate_credit
 
 router = APIRouter(prefix="/credits", tags=["credits"])
 can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
+can_evaluate_risk = require_roles(UserRole.ADMIN, UserRole.VIEWER)
 
 
 def current_status(credit: Credit) -> str:
@@ -115,7 +116,7 @@ async def evaluate(db: AsyncSession, client_id: UUID, amount: Decimal) -> Credit
 @router.post("/evaluate", response_model=CreditEvaluationRead)
 async def evaluate_requested_credit(
     payload: CreditEvaluationRequest,
-    _: User = Depends(can_write),
+    _: User = Depends(can_evaluate_risk),
     db: AsyncSession = Depends(get_db),
 ) -> CreditEvaluationRead:
     return await evaluate(db, payload.client_id, payload.amount)

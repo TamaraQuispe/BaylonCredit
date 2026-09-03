@@ -9,7 +9,7 @@ from app.models.commerce import (
     SaleItem,
 )
 from app.models.settings import BusinessSettings
-from app.models.user import AuditLog, RefreshToken, User, UserRole
+from app.models.user import AuditLog, RefreshToken, User, UserRole, WebauthnCredential
 
 __all__ = [
     "Client",
@@ -24,5 +24,6 @@ __all__ = [
     "RefreshToken",
     "User",
     "UserRole",
+    "WebauthnCredential",
     "BusinessSettings",
 ]

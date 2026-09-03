@@ -24,9 +24,12 @@ const footerItems = [
 
 const ADMIN_ROUTES = new Set(['/usuarios', '/configuracion'])
 
+export const MANAGEMENT_ROUTES = new Set(['/evaluacion-crediticia', '/reportes'])
+
 function canView(rol: AuthUser['role'] | undefined, to: string) {
   if (rol === 'admin') return true
   if (ADMIN_ROUTES.has(to)) return false
+  if (rol === 'operator' && MANAGEMENT_ROUTES.has(to)) return false
   if (rol === 'viewer' && to === '/ventas') return false
   return true
 }

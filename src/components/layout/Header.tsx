@@ -1,11 +1,19 @@
 import Icon from '@/components/ui/Icon'
+import GlobalSearch from '@/components/ui/GlobalSearch'
+import { useNavigate } from 'react-router-dom'
 import { getSession } from '@/utils/session'
+import type { StoredCredit } from '@/services/creditRepository'
+import type { StoredClient } from '@/services/clientRepository'
+import type { CommerceProduct } from '@/services/productRepository'
 
 interface HeaderProps {
   onToggleSidebar: () => void
   notificationsOpen?: boolean
   onToggleNotifications?: () => void
   notificationCount?: number
+  credits?: StoredCredit[]
+  clients?: StoredClient[]
+  products?: CommerceProduct[]
 }
 
 export default function Header({
@@ -13,8 +21,12 @@ export default function Header({
   notificationsOpen = false,
   onToggleNotifications,
   notificationCount = 0,
+  credits = [],
+  clients = [],
+  products = [],
 }: HeaderProps) {
   const user = getSession()
+  const navigate = useNavigate()
 
   return (
     <header className="fixed top-0 right-0 z-20 h-16 bg-surface-bright border-b border-outline-variant flex justify-between items-center px-gutter w-full md:w-[calc(100%-260px)]">
@@ -28,16 +40,7 @@ export default function Header({
           <Icon name="menu" />
         </button>
         <div className="hidden sm:block w-full max-w-md">
-          <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-on-surface-variant">
-              <Icon name="search" size="18px" />
-            </span>
-            <input
-              type="text"
-              placeholder="Búsqueda rápida..."
-              className="w-full h-10 pl-10 pr-4 bg-surface-container-low border border-outline-variant rounded-full font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-            />
-          </div>
+          <GlobalSearch credits={credits} clients={clients} products={products} />
         </div>
       </div>
 
@@ -58,6 +61,7 @@ export default function Header({
         </button>
         <button
           type="button"
+          onClick={() => navigate('/configuracion')}
           className="text-on-surface-variant hover:text-primary transition-colors p-1 cursor-pointer"
           aria-label="Configuración"
         >

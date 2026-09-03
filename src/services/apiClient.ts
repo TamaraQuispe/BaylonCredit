@@ -157,3 +157,76 @@ export function completeRegistration(newPassword: string) {
     body: JSON.stringify({ new_password: newPassword }),
   })
 }
+
+// ------------------------------------------------------------------ WebAuthn (FIDO2)
+
+export interface WebauthnOptionsResponse {
+  session_id: string
+  options: Record<string, unknown>
+}
+
+export interface WebauthnCredentialRecord {
+  id: string
+  credential_id: string
+  name?: string | null
+  device_type: string
+  created_at: string
+}
+
+export function webauthnRegistrationBegin(name?: string) {
+  return apiRequest<WebauthnOptionsResponse>('/auth/webauthn/registration/begin', {
+    method: 'POST',
+    body: JSON.stringify({ name: name || null }),
+  })
+}
+
+export function webauthnRegistrationFinish(
+  sessionId: string,
+  challenge: string,
+  credential: unknown,
+  name?: string,
+) {
+  return apiRequest<WebauthnCredentialRecord>('/auth/webauthn/registration/finish', {
+    method: 'POST',
+    body: JSON.stringify({
+      session_id: sessionId,
+      challenge,
+      credential,
+      name: name || null,
+    }),
+  })
+}
+
+export function getWebauthnCredentials() {
+  return apiRequest<WebauthnCredentialRecord[]>('/auth/webauthn/credentials')
+}
+
+export function deleteWebauthnCredential(credentialId: string) {
+  return apiRequest<void>(`/auth/webauthn/credentials/${encodeURIComponent(credentialId)}`, {
+    method: 'DELETE',
+  })
+}
+
+export function webauthnAuthenticationBegin(userHandle?: string) {
+  return apiRequest<WebauthnOptionsResponse>('/auth/webauthn/authentication/begin', {
+    method: 'POST',
+    body: JSON.stringify({ user_handle: userHandle || null }),
+  })
+}
+
+export function webauthnAuthenticationFinish(
+  sessionId: string,
+  challenge: string,
+  userHandle: string,
+  credential: unknown,
+) {
+  return apiRequest<TokenResponse>('/auth/webauthn/authentication/finish', {
+    method: 'POST',
+    body: JSON.stringify({
+      session_id: sessionId,
+      challenge,
+      user_handle: userHandle,
+      credential,
+    }),
+  })
+}

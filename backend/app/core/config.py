@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     login_attempt_limit: int = 5
     login_attempt_window_minutes: int = 15
     cors_origins: str = "http://localhost:5173,http://localhost:8080"
+    webauthn_rp_id: str = "localhost"
+    webauthn_origin: str = "http://localhost:5173"
+    webauthn_rp_name: str = "BaylonCredit IA"
 
     model_config = SettingsConfigDict(
         env_file=".env",

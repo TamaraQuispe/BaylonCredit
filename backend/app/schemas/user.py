@@ -80,3 +80,45 @@ class AuditLogRead(BaseModel):
     details: dict | None
     description: str | None
     created_at: datetime
+
+
+class WebauthnRegistrationBegin(BaseModel):
+    name: str | None = Field(default=None, max_length=120)
+
+
+class WebauthnRegistrationBeginResponse(BaseModel):
+    session_id: str
+    options: dict
+
+
+class WebauthnRegistrationFinish(BaseModel):
+    session_id: str
+    challenge: str
+    credential: dict
+    name: str | None = Field(default=None, max_length=120)
+
+
+class WebauthnAuthenticationBegin(BaseModel):
+    user_handle: str | None = None
+
+
+class WebauthnAuthenticationBeginResponse(BaseModel):
+    session_id: str
+    options: dict
+
+
+class WebauthnAuthenticationFinish(BaseModel):
+    session_id: str
+    challenge: str
+    user_handle: str
+    credential: dict
+
+
+class WebauthnCredentialRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    credential_id: str
+    name: str | None
+    device_type: str
+    created_at: datetime

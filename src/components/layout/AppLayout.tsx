@@ -4,12 +4,16 @@ import Sidebar from './Sidebar'
 import Header from './Header'
 import NotificationsPanel from '@/components/ui/NotificationsPanel'
 import { useCreditState } from '@/services/creditRepository'
+import { useClientState } from '@/services/clientRepository'
+import { useProductState } from '@/services/productRepository'
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const navigate = useNavigate()
   const { credits } = useCreditState()
+  const { clients } = useClientState()
+  const { products } = useProductState()
 
   const notificationCount = credits.filter((credit) => {
     if (credit.pendingAmount <= 0) return false
@@ -29,6 +33,9 @@ export default function AppLayout() {
         notificationsOpen={notificationsOpen}
         onToggleNotifications={() => setNotificationsOpen((open) => !open)}
         notificationCount={notificationCount}
+        credits={credits}
+        clients={clients}
+        products={products}
       />
       <NotificationsPanel
         credits={credits}

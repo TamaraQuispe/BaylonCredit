@@ -1,8 +1,19 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { changePassword, getProfile, updateProfile, type AuthUser } from '@/services/apiClient'
+import {
+  changePassword,
+  deleteWebauthnCredential,
+  getProfile,
+  getWebauthnCredentials,
+  updateProfile,
+  webauthnRegistrationBegin,
+  webauthnRegistrationFinish,
+  type AuthUser,
+  type WebauthnCredentialRecord,
+} from '@/services/apiClient'
 import { endSession, getSession, updateSessionUser } from '@/utils/session'
+import { base64UrlToBuffer, bufferToBase64Url } from '@/utils/base64url'
 
 const roleLabel: Record<AuthUser['role'], string> = {
   admin: 'Administrador',
@@ -32,6 +43,9 @@ export default function PerfilPage() {
   const [systemAlerts, setSystemAlerts] = useState(true)
   const [message, setMessage] = useState<{ text: string; tone: 'success' | 'info' | 'error' } | null>(null)
   const [saving, setSaving] = useState(false)
+  const [webauthnKeys, setWebauthnKeys] = useState<WebauthnCredentialRecord[]>([])
+  const [webauthnLoading, setWebauthnLoading] = useState(false)
+  const [newKeyName, setNewKeyName] = useState('')
   const fileInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -61,6 +75,10 @@ export default function PerfilPage() {
         }
       })
   }, [session])
+
+  useEffect(() => {
+    getWebauthnCredentials().then(setWebauthnKeys).catch(() => undefined)
+  }, [])
 
   const handleAvatar = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -127,6 +145,89 @@ export default function PerfilPage() {
     setNewPassword('')
     setConfirmPassword('')
     setMessage({ text: 'Cambios descartados.', tone: 'info' })
+  }
+
+  const registerWebauthnKey = async () => {
+    const mediator = (navigator as { credentials?: WebauthnNavigatorCredentials }).credentials
+    if (!mediator || typeof mediator.create === 'undefined') {
+      setMessage({ text: 'Tu navegador no soporta llaves FIDO2 / WebAuthn.', tone: 'error' })
+      return
+    }
+    setWebauthnLoading(true)
+    setMessage(null)
+    try {
+      const { session_id, options } = await webauthnRegistrationBegin(newKeyName || 'Llave FIDO2')
+      const challengeB64 = String((options as { challenge: string }).challenge)
+      const createOptions: Record<string, unknown> = {
+        challenge: base64UrlToBuffer(challengeB64),
+        rp: options.rp,
+        user: options.user,
+        pubKeyCredParams: options.pubKeyCredParams,
+        timeout: Number(options.timeout || 120000),
+        attestation: String(options.attestation || 'none'),
+        authenticatorSelection: options.authenticatorSelection || {},
+        excludeCredentials: Array.isArray(options.excludeCredentials)
+          ? (options.excludeCredentials as { id: string }[]).map((entry) => ({
+              ...entry,
+              id: base64UrlToBuffer(entry.id),
+            }))
+          : [],
+        riskPreference: options.riskPreference,
+        extensions: options.extensions || {},
+      }
+      const credential = await mediator.create(createOptions)
+      if (!credential) {
+        setMessage({ text: 'No se registró ninguna llave.', tone: 'info' })
+        return
+      }
+
+      const rawId = credential.rawId ?? credential.id
+      const attestationObject = credential.response.attestationObject as ArrayBuffer
+      const clientDataJSON = credential.response.clientDataJSON
+      const transports: string[] = []
+
+      const serialized: Record<string, unknown> = {
+        id: bufferToBase64Url(rawId),
+        rawId: bufferToBase64Url(rawId),
+        type: credential.type,
+        authenticatorAttachment: credential.authenticatorAttachment,
+        clientExtensionResults: {},
+        response: {
+          attestationObject: bufferToBase64Url(attestationObject),
+          clientDataJSON: bufferToBase64Url(clientDataJSON),
+          transports,
+        },
+      }
+
+      await webauthnRegistrationFinish(
+        session_id,
+        challengeB64,
+        serialized,
+        newKeyName || 'Llave FIDO2',
+      )
+      setWebauthnKeys(await getWebauthnCredentials())
+      setNewKeyName('')
+      setMessage({ text: 'Llave FIDO2 registrada correctamente.', tone: 'success' })
+    } catch (caught) {
+      const msg = caught instanceof Error ? caught.message : 'No se pudo registrar la llave.'
+      setMessage({ text: /canceled|cancelled|abort/i.test(msg) ? 'Registro cancelado.' : msg, tone: 'error' })
+    } finally {
+      setWebauthnLoading(false)
+    }
+  }
+
+  const removeWebauthnKey = async (credentialId: string) => {
+    setMessage(null)
+    try {
+      await deleteWebauthnCredential(credentialId)
+      setWebauthnKeys(await getWebauthnCredentials())
+      setMessage({ text: 'Llave eliminada.', tone: 'success' })
+    } catch (caught) {
+      setMessage({
+        text: caught instanceof Error ? caught.message : 'No se pudo eliminar la llave.',
+        tone: 'error',
+      })
+    }
   }
 
   const initials = profile.name
@@ -225,6 +326,65 @@ export default function PerfilPage() {
             <div className="flex justify-end mt-4">
               <button type="button" onClick={() => void savePassword()} disabled={saving} className="px-4 py-2 bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-primary-container shadow-sm disabled:opacity-60">
                 Cambiar contraseña
+              </button>
+            </div>
+          </section>
+
+          <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm p-card-padding">
+            <SectionTitle icon="key">Llaves de seguridad (FIDO2)</SectionTitle>
+            <p className="font-label-sm text-label-sm text-on-surface-variant mb-4 -mt-3">
+              Registra una llave física o biométrica para iniciar sesión sin contraseña.
+            </p>
+
+            <div className="space-y-3">
+              {webauthnKeys.length === 0 && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low text-on-surface-variant text-sm">
+                  <Icon name="info" className="text-outline" />
+                  <span>No tienes llaves registradas. Añade una para acceder con FIDO2.</span>
+                </div>
+              )}
+
+              {webauthnKeys.map((key) => (
+                <div key={key.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-outline-variant/30 bg-surface-bright">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Icon name="key" size="18px" className="text-amber-600 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-on-surface truncate">
+                        {key.name || 'Llave FIDO2'}
+                      </p>
+                      <p className="font-label-sm text-label-sm text-on-surface-variant">
+                        {key.device_type || 'Dispositivo de seguridad'} · Registrada{' '}
+                        {new Intl.DateTimeFormat('es-PE', { dateStyle: 'short' }).format(new Date(key.created_at))}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void removeWebauthnKey(key.credential_id)}
+                    className="text-on-surface-variant hover:text-error transition-colors p-1.5"
+                    aria-label={`Eliminar llave ${key.name || ''}`}
+                  >
+                    <Icon name="delete" size="18px" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 mt-4">
+              <input
+                type="text"
+                value={newKeyName}
+                onChange={(event) => setNewKeyName(event.target.value)}
+                placeholder="Nombre de la llave (opcional)"
+                className="flex-1 bg-surface-bright border border-outline-variant rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container"
+              />
+              <button
+                type="button"
+                onClick={() => void registerWebauthnKey()}
+                disabled={webauthnLoading}
+                className="px-4 py-2 bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-primary-container shadow-sm disabled:opacity-60 whitespace-nowrap"
+              >
+                {webauthnLoading ? 'Esperando llave...' : 'Registrar llave'}
               </button>
             </div>
           </section>

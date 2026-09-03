@@ -10,10 +10,12 @@ from app.api.routes import (
     sales,
     settings,
     users,
+    webauthn,
 )
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
+api_router.include_router(webauthn.router)
 api_router.include_router(users.router)
 api_router.include_router(clients.router)
 api_router.include_router(products.router)
