@@ -3,9 +3,17 @@ import { getSession } from '@/utils/session'
 
 interface HeaderProps {
   onToggleSidebar: () => void
+  notificationsOpen?: boolean
+  onToggleNotifications?: () => void
+  notificationCount?: number
 }
 
-export default function Header({ onToggleSidebar }: HeaderProps) {
+export default function Header({
+  onToggleSidebar,
+  notificationsOpen = false,
+  onToggleNotifications,
+  notificationCount = 0,
+}: HeaderProps) {
   const user = getSession()
 
   return (
@@ -36,11 +44,17 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
       <div className="flex items-center gap-4">
         <button
           type="button"
-          className="text-on-surface-variant hover:text-primary transition-colors p-1 relative cursor-pointer"
+          onClick={onToggleNotifications}
+          aria-pressed={notificationsOpen}
+          className={`text-on-surface-variant hover:text-primary transition-colors p-1 relative cursor-pointer ${notificationsOpen ? 'text-primary' : ''}`}
           aria-label="Notificaciones"
         >
           <Icon name="notifications" />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-error rounded-full border border-surface-bright" />
+          {notificationCount > 0 && (
+            <span className="absolute top-0.5 right-0.5 min-w-4 h-4 rounded-full bg-error text-on-error text-[10px] flex items-center justify-center px-1">
+              {notificationCount > 9 ? '9+' : notificationCount}
+            </span>
+          )}
         </button>
         <button
           type="button"
