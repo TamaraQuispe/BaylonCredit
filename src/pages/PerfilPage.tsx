@@ -159,10 +159,11 @@ export default function PerfilPage() {
     try {
       const { session_id, options } = await webauthnRegistrationBegin(newKeyName || 'Llave FIDO2')
       const challengeB64 = String((options as { challenge: string }).challenge)
+      const user = options.user as { id: string; name: string; displayName: string }
       const createOptions: Record<string, unknown> = {
         challenge: base64UrlToBuffer(challengeB64),
         rp: options.rp,
-        user: options.user,
+        user: { ...user, id: base64UrlToBuffer(user.id) },
         pubKeyCredParams: options.pubKeyCredParams,
         timeout: Number(options.timeout || 120000),
         attestation: String(options.attestation || 'none'),
