@@ -148,7 +148,8 @@ export default function PerfilPage() {
   }
 
   const registerWebauthnKey = async () => {
-    const mediator = (navigator as { credentials?: WebauthnNavigatorCredentials }).credentials
+    const mediator = (navigator as unknown as { credentials?: WebauthnNavigatorCredentials })
+      .credentials
     if (!mediator || typeof mediator.create === 'undefined') {
       setMessage({ text: 'Tu navegador no soporta llaves FIDO2 / WebAuthn.', tone: 'error' })
       return
@@ -175,7 +176,7 @@ export default function PerfilPage() {
         riskPreference: options.riskPreference,
         extensions: options.extensions || {},
       }
-      const credential = await mediator.create(createOptions)
+      const credential = await mediator.create({ publicKey: createOptions })
       if (!credential) {
         setMessage({ text: 'No se registró ninguna llave.', tone: 'info' })
         return

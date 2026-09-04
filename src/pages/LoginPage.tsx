@@ -39,7 +39,8 @@ export default function LoginPage() {
   }
 
   async function handleWebauthn() {
-    const mediator = (navigator as { credentials?: WebauthnNavigatorCredentials }).credentials
+    const mediator = (navigator as unknown as { credentials?: WebauthnNavigatorCredentials })
+      .credentials
     if (!mediator || typeof mediator.get === 'undefined') {
       setError('Tu navegador no soporta llaves FIDO2 / WebAuthn.')
       return
@@ -60,7 +61,7 @@ export default function LoginPage() {
           (entry) => ({ id: base64UrlToBuffer(entry.id), type: 'public-key' }),
         )
       }
-      const credential = await mediator.get(requestOptions)
+      const credential = await mediator.get({ publicKey: requestOptions })
       if (!credential) {
         setError('No se detectó ninguna llave. Inténtalo de nuevo.')
         return

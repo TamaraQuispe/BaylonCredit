@@ -39,18 +39,16 @@ interface WebauthnUserCredential extends WebauthnCredential {
 
 interface WebauthnCredentialMediator {
   get(
-    options: WebauthnRequestOptions,
+    options: { publicKey: WebauthnRequestOptions },
   ): Promise<WebauthnCredential | WebauthnUserCredential | null>
   create(
-    options: Record<string, unknown>,
-    mediation?: Record<string, unknown>,
+    options: { publicKey: Record<string, unknown> },
   ): Promise<WebauthnCredential | WebauthnUserCredential | null>
 }
 
 interface WebauthnNavigatorCredentials {
-  get?: (options: WebauthnRequestOptions) => Promise<WebauthnCredential | null>
+  get?: (options: { publicKey: WebauthnRequestOptions }) => Promise<WebauthnCredential | null>
   create?: (
-    options: Record<string, unknown>,
-    mediation?: Record<string, unknown>,
+    options: { publicKey: Record<string, unknown> },
   ) => Promise<WebauthnCredential | null>
 }
