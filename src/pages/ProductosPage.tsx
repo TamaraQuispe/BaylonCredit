@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import Icon from '@/components/ui/Icon'
 import Modal from '@/components/ui/Modal'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import ProductThumbnail from '@/components/ui/ProductThumbnail'
 import { productCategories } from '@/data/products'
 import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
 import { formatCurrency } from '@/utils/format'
@@ -80,6 +81,7 @@ export default function ProductosPage() {
       price: Number(data.get('price')),
       stock: Number(data.get('stock')),
       icon: categoryIcons[selectedCategory] ?? 'category',
+      imageUrl: String(data.get('imageUrl')).trim() || null,
     }
     setSaving(true)
     setError('')
@@ -178,9 +180,12 @@ export default function ProductosPage() {
                   <tr key={product.id} className={`hover:bg-surface-container-low transition-colors group h-[64px] ${state.row}`}>
                     <td className="py-3 px-6">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded border border-outline-variant bg-surface-bright flex items-center justify-center shrink-0 ${product.stock === 0 ? 'opacity-50 grayscale' : ''}`}>
-                          <Icon name={product.icon} size="22px" className="text-primary" />
-                        </div>
+                        <ProductThumbnail
+                          name={product.name}
+                          icon={product.icon}
+                          imageUrl={product.imageUrl}
+                          className={`w-10 h-10 rounded border border-outline-variant bg-surface-bright shrink-0 ${product.stock === 0 ? 'opacity-50 grayscale' : ''}`}
+                        />
                         <span className={`font-medium group-hover:text-primary transition-colors ${product.stock === 0 ? 'text-on-surface-variant line-through' : 'text-on-background'}`}>
                           {product.name}
                         </span>
@@ -255,6 +260,14 @@ export default function ProductosPage() {
             <ProductField label="Precio" name="price" type="number" step="0.01" min="0" defaultValue={editing?.price} />
             <ProductField label="Stock" name="stock" type="number" min="0" defaultValue={editing?.stock} />
           </div>
+          <ProductField
+            label="URL de imagen (opcional)"
+            name="imageUrl"
+            type="url"
+            required={false}
+            placeholder="https://ejemplo.com/producto.jpg"
+            defaultValue={editing?.imageUrl ?? ''}
+          />
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setFormOpen(false)} className="h-10 px-5 rounded-lg border border-outline-variant text-primary hover:bg-surface-container-low">Cancelar</button>
             <button type="submit" disabled={saving} className="h-10 px-5 rounded-lg bg-primary-container text-on-primary hover:bg-primary disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar producto'}</button>
@@ -291,15 +304,17 @@ interface ProductFieldProps {
   type?: string
   step?: string
   min?: string
+  placeholder?: string
+  required?: boolean
   defaultValue?: string | number
 }
 
-function ProductField({ label, name, type = 'text', ...props }: ProductFieldProps) {
+function ProductField({ label, name, type = 'text', required = true, ...props }: ProductFieldProps) {
   return (
     <label className="flex flex-col gap-1.5 font-label-sm text-label-sm text-on-surface">
       {label}
       <input
-        required
+        required={required}
         name={name}
         type={type}
         className="h-11 px-4 rounded-lg bg-surface border border-outline-variant text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"

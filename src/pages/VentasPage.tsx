@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import Icon from '@/components/ui/Icon'
+import ProductThumbnail from '@/components/ui/ProductThumbnail'
 import { productCategories } from '@/data/products'
 import { useClientState } from '@/services/clientRepository'
 import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
@@ -164,13 +165,15 @@ export default function VentasPage() {
                   key={product.id}
                   className={`group bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden transition-all duration-200 flex flex-col ${available > 0 ? 'hover:shadow-sm' : 'opacity-60'}`}
                 >
-                <div className="aspect-square bg-surface-container-low relative overflow-hidden p-4 flex items-center justify-center">
-                  <Icon
-                    name={product.icon}
-                    size="52px"
-                    className="text-primary group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
+                <ProductThumbnail
+                  name={product.name}
+                  icon={product.icon}
+                  imageUrl={product.imageUrl}
+                  iconSize="52px"
+                  iconClassName="text-primary group-hover:scale-105 transition-transform duration-300"
+                  imageClassName="group-hover:scale-105 transition-transform duration-300"
+                  className="aspect-square bg-surface-container-low relative"
+                />
                 <div className="p-4 flex-1 flex flex-col justify-between border-t border-outline-variant">
                   <div>
                     <h3 className="font-body-md text-body-md font-medium text-on-surface line-clamp-2">
@@ -241,9 +244,12 @@ export default function VentasPage() {
               key={line.product.id}
               className="flex items-start gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors"
             >
-              <div className="w-12 h-12 bg-surface-container rounded flex-shrink-0 flex items-center justify-center">
-                <Icon name={line.product.icon} size="22px" className="text-primary" />
-              </div>
+              <ProductThumbnail
+                name={line.product.name}
+                icon={line.product.icon}
+                imageUrl={line.product.imageUrl}
+                className="w-12 h-12 bg-surface-container rounded flex-shrink-0"
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start">
                   <h4 className="font-body-md text-body-md font-medium text-on-surface truncate pr-2">

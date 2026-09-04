@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
+import ProductThumbnail from '@/components/ui/ProductThumbnail'
 import type { StoredCredit } from '@/services/creditRepository'
 import type { StoredClient } from '@/services/clientRepository'
 import type { CommerceProduct } from '@/services/productRepository'
@@ -178,7 +179,14 @@ export default function GlobalSearch({ credits, clients, products }: GlobalSearc
                   }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-container-high transition-colors"
                 >
-                  <Icon name={product.icon || 'inventory_2'} size="18px" className="text-on-surface-variant" />
+                  <ProductThumbnail
+                    name={product.name}
+                    icon={product.icon}
+                    imageUrl={product.imageUrl}
+                    iconSize="18px"
+                    iconClassName="text-on-surface-variant"
+                    className="w-8 h-8 rounded bg-surface-container shrink-0"
+                  />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium text-on-surface truncate">{product.name}</span>
                     <span className="block text-[11px] text-on-surface-variant truncate">

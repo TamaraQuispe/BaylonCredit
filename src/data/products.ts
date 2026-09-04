@@ -4,6 +4,7 @@ export interface Product {
   category: string
   price: number
   icon: string
+  imageUrl?: string | null
   stock: number
 }
 

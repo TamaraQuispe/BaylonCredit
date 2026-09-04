@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import Modal from '@/components/ui/Modal'
+import ProductThumbnail from '@/components/ui/ProductThumbnail'
 import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
 import { formatCurrency } from '@/utils/format'
 
@@ -233,9 +234,13 @@ export default function InventarioPage() {
                   <tr key={item.id} className={`hover:bg-surface transition-colors h-[56px] group ${config.row}`}>
                     <td className="py-3 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-primary shrink-0">
-                          <Icon name={item.icon} size="20px" />
-                        </div>
+                        <ProductThumbnail
+                          name={item.name}
+                          icon={item.icon}
+                          imageUrl={item.imageUrl}
+                          iconSize="20px"
+                          className="w-10 h-10 rounded-lg bg-surface-variant shrink-0"
+                        />
                         <div>
                           <p className="font-body-md text-body-md font-medium text-on-surface">{item.name}</p>
                            <p className="font-label-sm text-label-sm text-on-surface-variant">Cod: {item.sku}</p>

@@ -41,6 +41,7 @@ class Product(UUIDMixin, TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(180), nullable=False)
     category: Mapped[str] = mapped_column(String(80), index=True, nullable=False)
     icon: Mapped[str] = mapped_column(String(60), default="category", nullable=False)
+    image_url: Mapped[str | None] = mapped_column(String(2048))
     price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     unit_cost: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0, nullable=False)
     stock: Mapped[int] = mapped_column(Integer, default=0, nullable=False)

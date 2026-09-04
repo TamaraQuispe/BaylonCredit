@@ -15,6 +15,7 @@ interface ApiProduct {
   name: string
   category: string
   icon: string
+  image_url: string | null
   price: string | number
   unit_cost: string | number
   stock: number
@@ -34,6 +35,7 @@ export interface SaveProductInput {
   name: string
   category: string
   icon: string
+  imageUrl?: string | null
   price: number
   unitCost?: number
   stock: number
@@ -56,6 +58,7 @@ function mapProduct(product: ApiProduct): CommerceProduct {
     name: product.name,
     category: product.category,
     icon: product.icon,
+    imageUrl: product.image_url,
     price: Number(product.price),
     unitCost: Number(product.unit_cost),
     stock: product.stock,
@@ -99,6 +102,7 @@ export const productRepository = {
         name: input.name,
         category: input.category,
         icon: input.icon,
+        image_url: input.imageUrl || null,
         price: input.price,
         unit_cost: input.unitCost ?? 0,
         stock: input.stock,
@@ -116,6 +120,7 @@ export const productRepository = {
         name: input.name,
         category: input.category,
         icon: input.icon,
+        image_url: input.imageUrl || null,
         price: input.price,
         unit_cost: input.unitCost ?? current?.unitCost ?? 0,
         minimum_stock: input.minimumStock ?? current?.minimumStock ?? 10,

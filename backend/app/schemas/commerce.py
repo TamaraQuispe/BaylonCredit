@@ -1,10 +1,21 @@
 from datetime import date, datetime
 from decimal import Decimal
+from urllib.parse import urlsplit
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.commerce import InventoryMovementType, PaymentMode, RiskLevel
+
+
+def normalize_image_url(value: str | None) -> str | None:
+    if value is None or not value.strip():
+        return None
+    value = value.strip()
+    parsed = urlsplit(value)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError("Image URL must be a valid HTTP or HTTPS URL")
+    return value
 
 
 class ProductCreate(BaseModel):
@@ -12,20 +23,32 @@ class ProductCreate(BaseModel):
     name: str = Field(min_length=2, max_length=180)
     category: str = Field(min_length=2, max_length=80)
     icon: str = Field(default="category", max_length=60)
+    image_url: str | None = Field(default=None, max_length=2048)
     price: Decimal = Field(gt=0, max_digits=12, decimal_places=2)
     unit_cost: Decimal = Field(default=0, ge=0, max_digits=12, decimal_places=2)
     stock: int = Field(default=0, ge=0)
     minimum_stock: int = Field(default=0, ge=0)
+
+    @field_validator("image_url")
+    @classmethod
+    def validate_image_url(cls, value: str | None) -> str | None:
+        return normalize_image_url(value)
 
 
 class ProductUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=2, max_length=180)
     category: str | None = Field(default=None, min_length=2, max_length=80)
     icon: str | None = Field(default=None, max_length=60)
+    image_url: str | None = Field(default=None, max_length=2048)
     price: Decimal | None = Field(default=None, gt=0, max_digits=12, decimal_places=2)
     unit_cost: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=2)
     minimum_stock: int | None = Field(default=None, ge=0)
     is_active: bool | None = None
+
+    @field_validator("image_url")
+    @classmethod
+    def validate_image_url(cls, value: str | None) -> str | None:
+        return normalize_image_url(value)
 
 
 class ProductRead(ProductCreate):

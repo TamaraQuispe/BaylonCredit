@@ -95,6 +95,43 @@ async def test_rejects_invalid_credentials(client: AsyncClient) -> None:
     assert response.status_code == 401
 
 
+async def test_product_image_url_can_be_created_and_removed(client: AsyncClient) -> None:
+    login = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@baylon.com", "password": "secure-password"},
+    )
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    created = await client.post(
+        "/api/v1/products",
+        headers=headers,
+        json={
+            "sku": "IMG-001",
+            "name": "Producto con imagen",
+            "category": "Otros",
+            "icon": "category",
+            "image_url": "https://example.com/producto.jpg",
+            "price": "12.50",
+            "stock": 3,
+        },
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["image_url"] == "https://example.com/producto.jpg"
+
+    product_id = created.json()["id"]
+    updated = await client.patch(
+        f"/api/v1/products/{product_id}", headers=headers, json={"image_url": None}
+    )
+    assert updated.status_code == 200
+    assert updated.json()["image_url"] is None
+
+    invalid = await client.patch(
+        f"/api/v1/products/{product_id}",
+        headers=headers,
+        json={"image_url": "file:///tmp/producto.jpg"},
+    )
+    assert invalid.status_code == 422
+
+
 async def test_sale_updates_stock_and_creates_credit_atomically(client: AsyncClient) -> None:
     login = await client.post(
         "/api/v1/auth/login",
