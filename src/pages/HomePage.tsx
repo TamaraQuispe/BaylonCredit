@@ -14,6 +14,7 @@ import { useCreditState } from '@/services/creditRepository'
 import { selectDashboardMetrics } from '@/services/dashboardSelectors'
 import { selectSalesMetrics, useSalesState } from '@/services/salesRepository'
 import { formatCurrency } from '@/utils/format'
+import { getSession } from '@/utils/session'
 
 const attentionColumns: Column<CustomerAttention>[] = [
   {
@@ -76,6 +77,8 @@ function Card({ title, action, children }: { title: string; action?: React.React
 }
 
 export default function HomePage() {
+  const role = getSession()?.rol
+  const roleLabel = role === 'operator' ? 'Operador' : role === 'viewer' ? 'Supervisor' : 'Administrador'
   const { clients } = useClientState()
   const { credits, payments } = useCreditState()
   const { sales } = useSalesState()
@@ -124,7 +127,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Buenos días, Administrador"
+        title={`Buenos días, ${roleLabel}`}
         subtitle="Aquí tienes un resumen de la actividad de hoy."
         actions={
           <Link to="/fiados/nuevo">
