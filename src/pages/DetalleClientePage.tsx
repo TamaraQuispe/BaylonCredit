@@ -91,7 +91,7 @@ export default function DetalleClientePage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
-            to="/evaluacion-crediticia"
+            to={`/evaluacion-crediticia?cliente=${client.id}`}
             className="bg-white border border-outline-variant text-primary-container hover:bg-surface-container-low transition-colors px-4 py-2 rounded font-label-sm text-label-sm font-semibold flex items-center gap-2"
           >
             <Icon name="psychology_alt" size="18px" /> Evaluar nuevamente

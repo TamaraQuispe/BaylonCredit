@@ -1,16 +1,26 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import date
 from decimal import Decimal
+from time import perf_counter
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.client import Client
-from app.models.commerce import Credit, CreditStatus, RiskLevel, Sale
+from app.models.commerce import (
+    Credit,
+    CreditEvaluation,
+    Payment,
+    PaymentAllocation,
+    RiskLevel,
+    Sale,
+)
 from app.models.settings import SETTINGS_ID, BusinessSettings
 
 DEFAULT_MAX_CREDIT_AMOUNT = Decimal("200")
+CreditEvaluationSource = Literal["manual", "direct_credit", "credit_sale"]
 
 MAX_SCORE = 100
 INITIAL_CREDIT_SCORE = 50
@@ -76,29 +86,50 @@ async def evaluate_credit(
     outstanding = await db.scalar(
         select(func.coalesce(func.sum(Credit.pending_amount), 0)).where(
             Credit.client_id == client_id,
-            Credit.status != CreditStatus.PAID,
+            Credit.pending_amount > 0,
         )
     )
     completed_sales = await db.scalar(
         select(func.count(Sale.id)).where(Sale.client_id == client_id)
     )
-    paid_credits = await db.scalar(
-        select(func.count(Credit.id)).where(
-            Credit.client_id == client_id,
-            Credit.status == CreditStatus.PAID,
+    paid_credits = int(
+        await db.scalar(
+            select(func.count(Credit.id)).where(
+                Credit.client_id == client_id,
+                Credit.pending_amount == 0,
+            )
         )
+        or 0
     )
-    overdue_credits = await db.scalar(
-        select(func.count(Credit.id)).where(
-            Credit.client_id == client_id,
-            Credit.status == CreditStatus.OVERDUE,
+    pending_overdue = int(
+        await db.scalar(
+            select(func.count(Credit.id)).where(
+                Credit.client_id == client_id,
+                Credit.pending_amount > 0,
+                Credit.due_date < date.today(),
+            )
         )
+        or 0
+    )
+    paid_late = int(
+        await db.scalar(
+            select(func.count(func.distinct(Credit.id)))
+            .join(PaymentAllocation, PaymentAllocation.credit_id == Credit.id)
+            .join(Payment, Payment.id == PaymentAllocation.payment_id)
+            .where(
+                Credit.client_id == client_id,
+                Credit.pending_amount == 0,
+                Payment.payment_date > Credit.due_date,
+            )
+        )
+        or 0
     )
     max_credit_amount = await _max_credit_amount(db)
 
     debt = Decimal(outstanding or 0)
     volume = _volume_contribution(int(completed_sales or 0))
-    punctuality = _punctuality_contribution(int(paid_credits or 0), int(overdue_credits or 0))
+    paid_on_time = paid_credits - paid_late
+    punctuality = _punctuality_contribution(paid_on_time, pending_overdue + paid_late)
     debt_factor = _debt_contribution(debt)
     amount_factor = _amount_contribution(amount, max_credit_amount)
     tenure = _tenure_contribution(client.created_at if client else None)
@@ -127,8 +158,8 @@ async def evaluate_credit(
             weight=20,
             contribution=punctuality,
             description=(
-                f"{int(paid_credits or 0)} fiados pagados, "
-                f"{int(overdue_credits or 0)} vencidos."
+                f"{paid_on_time} pagados puntualmente, {paid_late} pagados con atraso, "
+                f"{pending_overdue} pendientes vencidos."
             ),
         ),
         ScoreFactor(
@@ -155,3 +186,40 @@ async def evaluate_credit(
     ]
 
     return score, risk, recommended_limit, approved, factors
+
+
+async def evaluate_and_record(
+    db: AsyncSession,
+    client_id: UUID,
+    amount: Decimal,
+    created_by_id: UUID | None,
+    source: CreditEvaluationSource,
+) -> CreditEvaluation:
+    started_at = perf_counter()
+    score, risk, recommended_limit, approved, factors = await evaluate_credit(
+        db, client_id, amount
+    )
+    max_weight = sum(factor.weight for factor in factors) or 1
+    confidence = min(100, 50 + len(factors) * 10 + (score * 40) // (5 * max_weight))
+    recommendation = (
+        f"Credit approved up to S/ {recommended_limit}."
+        if approved
+        else f"Amount exceeds the recommended limit of S/ {recommended_limit}."
+    )
+    evaluation = CreditEvaluation(
+        client_id=client_id,
+        created_by_id=created_by_id,
+        requested_amount=amount,
+        score=score,
+        risk=risk,
+        default_probability=max(2, 100 - score),
+        recommended_limit=recommended_limit,
+        approved=approved,
+        recommendation=recommendation,
+        confidence=confidence,
+        factors=[asdict(factor) for factor in factors],
+        source=source,
+        response_time_ms=round((perf_counter() - started_at) * 1000),
+    )
+    db.add(evaluation)
+    return evaluation

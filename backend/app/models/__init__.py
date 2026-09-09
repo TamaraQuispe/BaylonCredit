@@ -1,6 +1,7 @@
 from app.models.client import Client
 from app.models.commerce import (
     Credit,
+    CreditEvaluation,
     InventoryMovement,
     Payment,
     PaymentAllocation,
@@ -14,6 +15,7 @@ from app.models.user import AuditLog, RefreshToken, User, UserRole, WebauthnCred
 __all__ = [
     "Client",
     "Credit",
+    "CreditEvaluation",
     "InventoryMovement",
     "Payment",
     "PaymentAllocation",

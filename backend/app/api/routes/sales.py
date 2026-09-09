@@ -17,13 +17,12 @@ from app.models.commerce import (
     InventoryMovementType,
     PaymentMode,
     Product,
-    RiskLevel,
     Sale,
     SaleItem,
 )
 from app.models.user import User, UserRole
 from app.schemas.commerce import CreditRead, SaleCreate, SaleItemRead, SaleRead
-from app.services.credit_scoring import evaluate_credit
+from app.services.credit_scoring import evaluate_and_record
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 can_sell = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
@@ -106,7 +105,7 @@ async def create_sale(
     total = subtotal + tax
 
     client: Client | None = None
-    credit_evaluation: tuple[int, RiskLevel, Decimal, bool, list] | None = None
+    credit_evaluation = None
     if payload.payment_mode == PaymentMode.CREDIT:
         client = await db.get(Client, payload.client_id)
         if not client or not client.is_active:
@@ -121,11 +120,17 @@ async def create_sale(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Due date must be after today",
             )
-        credit_evaluation = await evaluate_credit(db, client.id, total)
-        if not credit_evaluation[3]:
+        credit_evaluation = await evaluate_and_record(
+            db, client.id, total, current_user.id, "credit_sale"
+        )
+        if not credit_evaluation.approved:
+            await db.commit()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Credit rejected. Recommended limit: {credit_evaluation[2]}",
+                detail=(
+                    "Credit rejected. Recommended limit: "
+                    f"{credit_evaluation.recommended_limit}"
+                ),
             )
 
     client_name = (
@@ -173,7 +178,6 @@ async def create_sale(
 
     credit: Credit | None = None
     if client and credit_evaluation:
-        score, risk, recommended_limit, _approved, _factors = credit_evaluation
         credit = Credit(
             code=f"F-{date.today().year}-{uuid4().hex[:8].upper()}",
             client_id=client.id,
@@ -184,9 +188,9 @@ async def create_sale(
             credit_date=date.today(),
             due_date=due_date,
             status=CreditStatus.CURRENT,
-            risk=risk,
-            score=score,
-            recommended_limit=recommended_limit,
+            risk=credit_evaluation.risk,
+            score=credit_evaluation.score,
+            recommended_limit=credit_evaluation.recommended_limit,
         )
         db.add(credit)
 

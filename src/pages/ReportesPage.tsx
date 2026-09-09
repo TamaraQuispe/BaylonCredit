@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import { reportsByPeriod } from '@/data/reportes'
@@ -7,10 +7,13 @@ import { useCreditState } from '@/services/creditRepository'
 import { useReportsState } from '@/services/reportsRepository'
 import { selectDashboardMetrics } from '@/services/dashboardSelectors'
 import { selectSalesMetrics, useSalesState, type SalesPeriod } from '@/services/salesRepository'
+import { localScoringService, type EvaluationSummary } from '@/services/scoringService'
 import { formatCurrency } from '@/utils/format'
 
 export default function ReportesPage() {
   const [period, setPeriod] = useState<SalesPeriod>('mes')
+  const [evaluationSummary, setEvaluationSummary] = useState<EvaluationSummary>()
+  const [summaryLoading, setSummaryLoading] = useState(true)
   const { clients } = useClientState()
   const { credits, payments } = useCreditState()
   const { sales } = useSalesState()
@@ -19,6 +22,21 @@ export default function ReportesPage() {
   const metrics = selectDashboardMetrics(credits, payments, clients, sales)
   const salesMetrics = selectSalesMetrics(sales, period)
   const riskGradient = `conic-gradient(#10b981 0% ${metrics.risk.low}%, #fe932c ${metrics.risk.low}% ${metrics.risk.low + metrics.risk.medium}%, #ef4444 ${metrics.risk.low + metrics.risk.medium}% 100%)`
+
+  useEffect(() => {
+    let active = true
+    localScoringService.getEvaluationSummary()
+      .then((summary) => {
+        if (active) setEvaluationSummary(summary)
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setSummaryLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   const exportReport = () => {
     const rows = [
@@ -76,7 +94,7 @@ export default function ReportesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         {kpis.map((kpi) => (
           <div key={kpi.label} className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high flex flex-col justify-between">
             <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">{kpi.label}</p>
@@ -88,6 +106,12 @@ export default function ReportesPage() {
             </div>
           </div>
         ))}
+        <div className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high flex flex-col justify-between">
+          <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">Clientes evaluados</p>
+          {summaryLoading ? <p className="font-body-md text-on-surface-variant">Cargando...</p> : evaluationSummary ? (
+            <div className="flex items-end gap-2"><h3 className="font-h2-headline text-h2-headline text-on-background">{evaluationSummary.evaluatedClients}/{evaluationSummary.totalClients}</h3><span className="font-label-sm text-label-sm text-primary mb-1">{evaluationSummary.coveragePercent}%</span></div>
+          ) : <p className="font-body-md text-on-surface-variant">No disponible</p>}
+        </div>
         <div className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high relative overflow-hidden">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-error-container rounded-full opacity-20 blur-xl" />
           <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">Tasa de morosidad</p>

@@ -82,7 +82,6 @@ async def create_payment(
             status_code=status.HTTP_404_NOT_FOUND, detail="One or more credits do not exist"
         )
 
-    amount = Decimal("0")
     for credit in credits:
         applied = allocation_map[credit.id]
         if credit.client_id != payload.client_id:
@@ -94,6 +93,15 @@ async def create_payment(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Payment exceeds balance for {credit.code}",
             )
+        if payload.payment_date < credit.credit_date:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Payment date cannot be before credit date for {credit.code}",
+            )
+
+    amount = Decimal("0")
+    for credit in credits:
+        applied = allocation_map[credit.id]
         credit.pending_amount -= applied
         credit.status = CreditStatus.PAID if credit.pending_amount == 0 else CreditStatus.CURRENT
         amount += applied

@@ -1,31 +1,39 @@
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
-from time import perf_counter
+from typing import Literal
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, require_roles
 from app.api.routes.settings import get_settings_record
 from app.db.session import get_db
 from app.models.client import Client
-from app.models.commerce import Credit, CreditStatus, Payment, PaymentAllocation
+from app.models.commerce import (
+    Credit,
+    CreditEvaluation,
+    CreditStatus,
+    Payment,
+    PaymentAllocation,
+)
 from app.models.user import User, UserRole
 from app.schemas.finance import (
+    CreditEvaluationHistoryRead,
     CreditEvaluationRead,
     CreditEvaluationRequest,
+    CreditEvaluationSummary,
     CreditPaymentEntry,
     DirectCreditCreate,
     FinanceCreditRead,
     ScoreFactorRead,
 )
-from app.services.credit_scoring import evaluate_credit
+from app.services.credit_scoring import evaluate_and_record
 
 router = APIRouter(prefix="/credits", tags=["credits"])
 can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
-can_evaluate_risk = require_roles(UserRole.ADMIN, UserRole.VIEWER)
+can_evaluate_risk = require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
 
 
 def current_status(credit: Credit) -> str:
@@ -85,41 +93,110 @@ async def serialize_credit(db: AsyncSession, credit: Credit) -> FinanceCreditRea
     )
 
 
-async def evaluate(db: AsyncSession, client_id: UUID, amount: Decimal) -> CreditEvaluationRead:
-    started_at = perf_counter()
+def serialize_evaluation(evaluation: CreditEvaluation) -> CreditEvaluationRead:
+    return CreditEvaluationRead(
+        score=evaluation.score,
+        risk=evaluation.risk,
+        default_probability=evaluation.default_probability,
+        recommended_limit=evaluation.recommended_limit,
+        approved=evaluation.approved,
+        recommendation=evaluation.recommendation,
+        confidence=evaluation.confidence,
+        factors=[ScoreFactorRead.model_validate(factor) for factor in evaluation.factors],
+        calculated_at=evaluation.created_at,
+        response_time_ms=evaluation.response_time_ms,
+    )
+
+
+async def record_evaluation(
+    db: AsyncSession,
+    client_id: UUID,
+    amount: Decimal,
+    created_by_id: UUID,
+    source: Literal["manual", "direct_credit", "credit_sale"],
+) -> CreditEvaluation:
     client = await db.get(Client, client_id)
     if not client or not client.is_active:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-    score, risk, recommended_limit, approved, factors = await evaluate_credit(db, client_id, amount)
-    max_weight = sum(factor.weight for factor in factors) or 1
-    confidence = min(100, 50 + (len(factors) * 10) + (score * 40) // (5 * max_weight))
-    return CreditEvaluationRead(
-        score=score,
-        risk=risk,
-        default_probability=max(2, 100 - score),
-        recommended_limit=recommended_limit,
-        approved=approved,
-        recommendation=(
-            f"Credit approved up to S/ {recommended_limit}."
-            if approved
-            else f"Amount exceeds the recommended limit of S/ {recommended_limit}."
-        ),
-        confidence=confidence,
-        factors=[
-            ScoreFactorRead.model_validate(factor, from_attributes=True) for factor in factors
-        ],
-        calculated_at=datetime.now(UTC),
-        response_time_ms=round((perf_counter() - started_at) * 1000),
+    return await evaluate_and_record(
+        db,
+        client_id,
+        amount,
+        created_by_id,
+        source,
     )
 
 
 @router.post("/evaluate", response_model=CreditEvaluationRead)
 async def evaluate_requested_credit(
     payload: CreditEvaluationRequest,
-    _: User = Depends(can_evaluate_risk),
+    current_user: User = Depends(can_evaluate_risk),
     db: AsyncSession = Depends(get_db),
 ) -> CreditEvaluationRead:
-    return await evaluate(db, payload.client_id, payload.amount)
+    evaluation = await record_evaluation(
+        db, payload.client_id, payload.amount, current_user.id, "manual"
+    )
+    await db.commit()
+    await db.refresh(evaluation)
+    return serialize_evaluation(evaluation)
+
+
+@router.get("/evaluations", response_model=list[CreditEvaluationHistoryRead])
+async def list_evaluations(
+    client_id: UUID | None = None,
+    limit: int = Query(default=100, ge=1, le=200),
+    _: User = Depends(can_evaluate_risk),
+    db: AsyncSession = Depends(get_db),
+) -> list[CreditEvaluationHistoryRead]:
+    query = (
+        select(CreditEvaluation, Client)
+        .join(Client, Client.id == CreditEvaluation.client_id)
+        .order_by(CreditEvaluation.created_at.desc())
+        .limit(limit)
+    )
+    if client_id is not None:
+        query = query.where(CreditEvaluation.client_id == client_id)
+    rows = (await db.execute(query)).all()
+    return [
+        CreditEvaluationHistoryRead(
+            **serialize_evaluation(evaluation).model_dump(),
+            id=evaluation.id,
+            client_id=evaluation.client_id,
+            client_name=client.business_name
+            or f"{client.first_name} {client.last_name}",
+            created_by_id=evaluation.created_by_id,
+            requested_amount=evaluation.requested_amount,
+            model_version=evaluation.model_version,
+            source=evaluation.source,
+            created_at=evaluation.created_at,
+            updated_at=evaluation.updated_at,
+        )
+        for evaluation, client in rows
+    ]
+
+
+@router.get("/evaluations/summary", response_model=CreditEvaluationSummary)
+async def evaluation_summary(
+    _: User = Depends(can_evaluate_risk),
+    db: AsyncSession = Depends(get_db),
+) -> CreditEvaluationSummary:
+    total_clients = int(
+        await db.scalar(select(func.count(Client.id)).where(Client.is_active.is_(True))) or 0
+    )
+    evaluated_clients = int(
+        await db.scalar(
+            select(func.count(distinct(CreditEvaluation.client_id)))
+            .join(Client, Client.id == CreditEvaluation.client_id)
+            .where(Client.is_active.is_(True))
+        )
+        or 0
+    )
+    coverage = evaluated_clients * 100 / total_clients if total_clients else 0
+    return CreditEvaluationSummary(
+        total_clients=total_clients,
+        evaluated_clients=evaluated_clients,
+        coverage_percent=round(coverage, 2),
+    )
 
 
 @router.get("", response_model=list[FinanceCreditRead])
@@ -155,8 +232,11 @@ async def create_credit(
     current_user: User = Depends(can_write),
     db: AsyncSession = Depends(get_db),
 ) -> FinanceCreditRead:
-    evaluation = await evaluate(db, payload.client_id, payload.amount)
+    evaluation = await record_evaluation(
+        db, payload.client_id, payload.amount, current_user.id, "direct_credit"
+    )
     if not evaluation.approved and not payload.manual_override:
+        await db.commit()
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=evaluation.recommendation,

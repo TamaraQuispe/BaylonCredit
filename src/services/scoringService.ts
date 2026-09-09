@@ -23,8 +23,25 @@ export interface CreditEvaluation {
   responseTimeMs: number
 }
 
+export interface StoredCreditEvaluation extends CreditEvaluation {
+  id: string
+  clientId: string
+  clientName: string
+  requestedAmount: number
+  modelVersion: string
+  source: string
+}
+
+export interface EvaluationSummary {
+  totalClients: number
+  evaluatedClients: number
+  coveragePercent: number
+}
+
 export interface CreditScoringService {
   evaluate(client: Cliente, requestedAmount: number): Promise<CreditEvaluation>
+  listEvaluations(clientId?: string): Promise<StoredCreditEvaluation[]>
+  getEvaluationSummary(): Promise<EvaluationSummary>
 }
 
 interface ApiEvaluation {
@@ -38,6 +55,21 @@ interface ApiEvaluation {
   factors?: ScoreFactor[]
   calculated_at: string
   response_time_ms: number
+}
+
+interface ApiStoredEvaluation extends ApiEvaluation {
+  id: string
+  client_id: string
+  client_name: string
+  requested_amount: string | number
+  model_version: string
+  source: string
+}
+
+interface ApiEvaluationSummary {
+  total_clients: number
+  evaluated_clients: number
+  coverage_percent: number
 }
 
 function mapEvaluation(evaluation: ApiEvaluation): CreditEvaluation {
@@ -55,6 +87,30 @@ function mapEvaluation(evaluation: ApiEvaluation): CreditEvaluation {
   }
 }
 
+export async function listEvaluations(clientId?: string): Promise<StoredCreditEvaluation[]> {
+  const query = new URLSearchParams({ limit: '100' })
+  if (clientId) query.set('client_id', clientId)
+  const evaluations = await apiRequest<ApiStoredEvaluation[]>(`/credits/evaluations?${query}`)
+  return evaluations.map((evaluation) => ({
+    ...mapEvaluation(evaluation),
+    id: evaluation.id,
+    clientId: evaluation.client_id,
+    clientName: evaluation.client_name,
+    requestedAmount: Number(evaluation.requested_amount),
+    modelVersion: evaluation.model_version,
+    source: evaluation.source,
+  }))
+}
+
+export async function getEvaluationSummary(): Promise<EvaluationSummary> {
+  const summary = await apiRequest<ApiEvaluationSummary>('/credits/evaluations/summary')
+  return {
+    totalClients: summary.total_clients,
+    evaluatedClients: summary.evaluated_clients,
+    coveragePercent: summary.coverage_percent,
+  }
+}
+
 export const localScoringService: CreditScoringService = {
   async evaluate(client, requestedAmount) {
     return mapEvaluation(await apiRequest<ApiEvaluation>('/credits/evaluate', {
@@ -62,4 +118,6 @@ export const localScoringService: CreditScoringService = {
       body: JSON.stringify({ client_id: client.id, amount: requestedAmount }),
     }))
   },
+  listEvaluations,
+  getEvaluationSummary,
 }

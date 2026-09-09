@@ -329,6 +329,75 @@ async def test_credit_defaults_from_settings_and_caps_recommended_limit(
     assert credit.json()["recommended_limit"] == "120.00"
 
 
+async def test_operator_evaluation_history_summary_and_rejection_persistence(
+    client: AsyncClient,
+) -> None:
+    admin_session = await login(client)
+    admin_headers = {"Authorization": f"Bearer {admin_session['access_token']}"}
+    client_ids = []
+    for document, first_name in [("44556677", "Elena"), ("44556678", "Luis")]:
+        created = await client.post(
+            "/api/v1/clients",
+            headers=admin_headers,
+            json={
+                "first_name": first_name,
+                "last_name": "Prueba",
+                "document": document,
+                "phone": "987654321",
+            },
+        )
+        assert created.status_code == 201, created.text
+        client_ids.append(created.json()["id"])
+
+    operator_session = await login(client, "vendedor@baylon.com")
+    operator_headers = {"Authorization": f"Bearer {operator_session['access_token']}"}
+    evaluation = await client.post(
+        "/api/v1/credits/evaluate",
+        headers=operator_headers,
+        json={"client_id": client_ids[0], "amount": "50.00"},
+    )
+    assert evaluation.status_code == 200, evaluation.text
+
+    history = await client.get(
+        f"/api/v1/credits/evaluations?client_id={client_ids[0]}&limit=1",
+        headers=operator_headers,
+    )
+    assert history.status_code == 200, history.text
+    assert history.json()[0]["client_name"] == "Elena Prueba"
+    assert history.json()[0]["source"] == "manual"
+    assert history.json()[0]["requested_amount"] == "50.00"
+
+    summary = await client.get(
+        "/api/v1/credits/evaluations/summary", headers=operator_headers
+    )
+    assert summary.status_code == 200, summary.text
+    assert summary.json() == {
+        "total_clients": 2,
+        "evaluated_clients": 1,
+        "coverage_percent": 50.0,
+    }
+
+    rejected = await client.post(
+        "/api/v1/credits",
+        headers=operator_headers,
+        json={
+            "client_id": client_ids[0],
+            "amount": "9999.00",
+            "credit_date": date.today().isoformat(),
+        },
+    )
+    assert rejected.status_code == 422, rejected.text
+    persisted = await client.get(
+        f"/api/v1/credits/evaluations?client_id={client_ids[0]}",
+        headers=operator_headers,
+    )
+    assert len(persisted.json()) == 2
+    rejected_evaluation = next(
+        entry for entry in persisted.json() if entry["source"] == "direct_credit"
+    )
+    assert rejected_evaluation["approved"] is False
+
+
 async def test_invited_user_must_change_password_on_first_login(client: AsyncClient) -> None:
     admin_session = await login(client)
     admin_headers = {"Authorization": f"Bearer {admin_session['access_token']}"}

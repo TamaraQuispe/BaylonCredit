@@ -33,6 +33,24 @@ class CreditEvaluationRead(BaseModel):
     response_time_ms: int
 
 
+class CreditEvaluationHistoryRead(CreditEvaluationRead):
+    id: UUID
+    client_id: UUID
+    client_name: str
+    created_by_id: UUID | None
+    requested_amount: Decimal
+    model_version: str
+    source: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class CreditEvaluationSummary(BaseModel):
+    total_clients: int
+    evaluated_clients: int
+    coverage_percent: float
+
+
 class DirectCreditCreate(BaseModel):
     client_id: UUID
     amount: Decimal = Field(gt=0, max_digits=12, decimal_places=2)

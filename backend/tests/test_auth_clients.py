@@ -267,6 +267,74 @@ async def test_direct_credit_and_partial_payment_are_consistent(client: AsyncCli
     assert len(updated.json()["payments"]) == 1
 
 
+async def test_late_payment_date_reduces_punctuality_score(client: AsyncClient) -> None:
+    login = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@baylon.com", "password": "secure-password"},
+    )
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    async def paid_credit(document: str, due_date: date) -> tuple[str, str]:
+        created_client = await client.post(
+            "/api/v1/clients",
+            headers=headers,
+            json={
+                "first_name": "Cliente",
+                "last_name": document,
+                "document": document,
+                "phone": "987654321",
+            },
+        )
+        client_id = created_client.json()["id"]
+        credit = await client.post(
+            "/api/v1/credits",
+            headers=headers,
+            json={
+                "client_id": client_id,
+                "amount": "50.00",
+                "credit_date": (date.today() - timedelta(days=2)).isoformat(),
+                "due_date": due_date.isoformat(),
+                "manual_override": True,
+            },
+        )
+        assert credit.status_code == 201, credit.text
+        payment = await client.post(
+            "/api/v1/payments",
+            headers=headers,
+            json={
+                "client_id": client_id,
+                "allocations": [{"credit_id": credit.json()["id"], "amount": "50.00"}],
+                "payment_date": date.today().isoformat(),
+                "method": "Efectivo",
+            },
+        )
+        assert payment.status_code == 201, payment.text
+        return client_id, credit.json()["id"]
+
+    late_client_id, _ = await paid_credit(
+        "66778801", date.today() - timedelta(days=1)
+    )
+    timely_client_id, _ = await paid_credit(
+        "66778802", date.today() + timedelta(days=1)
+    )
+    late = await client.post(
+        "/api/v1/credits/evaluate",
+        headers=headers,
+        json={"client_id": late_client_id, "amount": "50.00"},
+    )
+    timely = await client.post(
+        "/api/v1/credits/evaluate",
+        headers=headers,
+        json={"client_id": timely_client_id, "amount": "50.00"},
+    )
+    late_factor = next(f for f in late.json()["factors"] if f["key"] == "punctuality")
+    timely_factor = next(f for f in timely.json()["factors"] if f["key"] == "punctuality")
+    assert "1 pagados con atraso" in late_factor["description"]
+    assert "1 pagados puntualmente" in timely_factor["description"]
+    assert late_factor["contribution"] < timely_factor["contribution"]
+    assert late.json()["score"] < timely.json()["score"]
+
+
 async def test_portfolio_report_reflects_active_and_overdue_fiados(client: AsyncClient) -> None:
     login = await client.post(
         "/api/v1/auth/login",
@@ -325,3 +393,60 @@ async def test_portfolio_report_reflects_active_and_overdue_fiados(client: Async
 
     no_auth = await client.get("/api/v1/reports/portfolio")
     assert no_auth.status_code == 401
+
+
+async def test_payment_before_credit_date_is_rejected(client: AsyncClient) -> None:
+    login = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@baylon.com", "password": "secure-password"},
+    )
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    created_client = await client.post(
+        "/api/v1/clients",
+        headers=headers,
+        json={
+            "first_name": "Yolanda",
+            "last_name": "Castro",
+            "document": "99887766",
+            "phone": "987654321",
+        },
+    )
+    client_id = created_client.json()["id"]
+    credit = await client.post(
+        "/api/v1/credits",
+        headers=headers,
+        json={
+            "client_id": client_id,
+            "amount": "60.00",
+            "credit_date": "2026-05-01",
+            "due_date": "2026-06-01",
+            "manual_override": True,
+        },
+    )
+    assert credit.status_code == 201, credit.text
+    credit_id = credit.json()["id"]
+
+    before_credit = await client.post(
+        "/api/v1/payments",
+        headers=headers,
+        json={
+            "client_id": client_id,
+            "allocations": [{"credit_id": credit_id, "amount": "60.00"}],
+            "payment_date": "2026-04-20",
+            "method": "Efectivo",
+        },
+    )
+    assert before_credit.status_code == 422, before_credit.text
+
+    on_credit_date = await client.post(
+        "/api/v1/payments",
+        headers=headers,
+        json={
+            "client_id": client_id,
+            "allocations": [{"credit_id": credit_id, "amount": "60.00"}],
+            "payment_date": "2026-05-01",
+            "method": "Efectivo",
+        },
+    )
+    assert on_credit_date.status_code == 201, on_credit_date.text
+    assert on_credit_date.json()["amount"] == "60.00"

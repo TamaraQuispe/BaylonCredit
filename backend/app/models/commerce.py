@@ -3,7 +3,7 @@ from decimal import Decimal
 from enum import StrEnum
 from uuid import UUID
 
-from sqlalchemy import Boolean, Date, Enum, ForeignKey, Integer, Numeric, String
+from sqlalchemy import JSON, Boolean, Date, Enum, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin, UUIDMixin
@@ -101,6 +101,33 @@ class Credit(UUIDMixin, TimestampMixin, Base):
     )
     score: Mapped[int] = mapped_column(Integer, nullable=False)
     recommended_limit: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+
+
+class CreditEvaluation(UUIDMixin, TimestampMixin, Base):
+    __tablename__ = "credit_evaluations"
+
+    client_id: Mapped[UUID] = mapped_column(
+        ForeignKey("clients.id", ondelete="RESTRICT"), index=True, nullable=False
+    )
+    created_by_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    requested_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, nullable=False)
+    risk: Mapped[RiskLevel] = mapped_column(
+        Enum(RiskLevel, name="risk_level", native_enum=False), nullable=False
+    )
+    default_probability: Mapped[int] = mapped_column(Integer, nullable=False)
+    recommended_limit: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    approved: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    recommendation: Mapped[str] = mapped_column(Text, nullable=False)
+    confidence: Mapped[int] = mapped_column(Integer, nullable=False)
+    factors: Mapped[list[dict]] = mapped_column(JSON, nullable=False)
+    model_version: Mapped[str] = mapped_column(
+        String(40), default="rules-v1", server_default="rules-v1", nullable=False
+    )
+    source: Mapped[str] = mapped_column(String(30), nullable=False)
+    response_time_ms: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class InventoryMovement(UUIDMixin, TimestampMixin, Base):
