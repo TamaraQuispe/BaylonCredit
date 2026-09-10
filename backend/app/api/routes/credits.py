@@ -103,6 +103,7 @@ def serialize_evaluation(evaluation: CreditEvaluation) -> CreditEvaluationRead:
         recommendation=evaluation.recommendation,
         confidence=evaluation.confidence,
         factors=[ScoreFactorRead.model_validate(factor) for factor in evaluation.factors],
+        model_version=evaluation.model_version,
         calculated_at=evaluation.created_at,
         response_time_ms=evaluation.response_time_ms,
     )
@@ -166,7 +167,6 @@ async def list_evaluations(
             or f"{client.first_name} {client.last_name}",
             created_by_id=evaluation.created_by_id,
             requested_amount=evaluation.requested_amount,
-            model_version=evaluation.model_version,
             source=evaluation.source,
             created_at=evaluation.created_at,
             updated_at=evaluation.updated_at,

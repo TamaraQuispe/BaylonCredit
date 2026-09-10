@@ -1,21 +1,17 @@
 from dataclasses import asdict, dataclass
-from datetime import date
 from decimal import Decimal
 from time import perf_counter
 from typing import Literal
 from uuid import UUID
 
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.ml.features import collect_credit_features
+from app.ml.model import RULES_VERSION, predict_default_probability
 from app.models.client import Client
 from app.models.commerce import (
-    Credit,
     CreditEvaluation,
-    Payment,
-    PaymentAllocation,
     RiskLevel,
-    Sale,
 )
 from app.models.settings import SETTINGS_ID, BusinessSettings
 
@@ -24,6 +20,8 @@ CreditEvaluationSource = Literal["manual", "direct_credit", "credit_sale"]
 
 MAX_SCORE = 100
 INITIAL_CREDIT_SCORE = 50
+ML_MODEL_WEIGHT = 0.7
+RULE_MODEL_WEIGHT = 0.3
 
 
 @dataclass(frozen=True)
@@ -35,9 +33,16 @@ class ScoreFactor:
     description: str
 
 
-async def _max_credit_amount(db: AsyncSession) -> Decimal:
-    settings = await db.get(BusinessSettings, SETTINGS_ID)
-    return settings.max_credit_amount if settings else DEFAULT_MAX_CREDIT_AMOUNT
+@dataclass(frozen=True)
+class EvaluationResult:
+    score: int
+    risk: RiskLevel
+    recommended_limit: Decimal
+    approved: bool
+    factors: list[ScoreFactor]
+    default_probability: int
+    confidence: int
+    model_version: str
 
 
 def risk_from_score(score: int) -> RiskLevel:
@@ -56,9 +61,9 @@ def _volume_contribution(completed_sales: int) -> int:
     return min(completed_sales * 5, 25)
 
 
-def _punctuality_contribution(paid_credits: int, overdue_credits: int) -> int:
-    base = min(paid_credits * 8, 20)
-    if overdue_credits:
+def _punctuality_contribution(paid_on_time: int, overdue: int) -> int:
+    base = min(paid_on_time * 8, 20)
+    if overdue:
         base = max(0, base - 12)
     return base
 
@@ -72,77 +77,71 @@ def _amount_contribution(amount: Decimal, max_credit_amount: Decimal) -> int:
     return max(0, 15 - int(ratio * 15))
 
 
-def _tenure_contribution(client_created_at) -> int:
-    if client_created_at is None:
-        return 0
-    days = max(0, (date.today() - client_created_at.date()).days)
-    return min(days // 36, 10)
+def _tenure_contribution(tenure_days: int) -> int:
+    return min(tenure_days // 36, 10)
+
+
+async def _max_credit_amount(db: AsyncSession) -> Decimal:
+    settings = await db.get(BusinessSettings, SETTINGS_ID)
+    return settings.max_credit_amount if settings else DEFAULT_MAX_CREDIT_AMOUNT
 
 
 async def evaluate_credit(
     db: AsyncSession, client_id: UUID, amount: Decimal
-) -> tuple[int, RiskLevel, Decimal, bool, list[ScoreFactor]]:
+) -> EvaluationResult:
     client = await db.get(Client, client_id)
-    outstanding = await db.scalar(
-        select(func.coalesce(func.sum(Credit.pending_amount), 0)).where(
-            Credit.client_id == client_id,
-            Credit.pending_amount > 0,
-        )
-    )
-    completed_sales = await db.scalar(
-        select(func.count(Sale.id)).where(Sale.client_id == client_id)
-    )
-    paid_credits = int(
-        await db.scalar(
-            select(func.count(Credit.id)).where(
-                Credit.client_id == client_id,
-                Credit.pending_amount == 0,
-            )
-        )
-        or 0
-    )
-    pending_overdue = int(
-        await db.scalar(
-            select(func.count(Credit.id)).where(
-                Credit.client_id == client_id,
-                Credit.pending_amount > 0,
-                Credit.due_date < date.today(),
-            )
-        )
-        or 0
-    )
-    paid_late = int(
-        await db.scalar(
-            select(func.count(func.distinct(Credit.id)))
-            .join(PaymentAllocation, PaymentAllocation.credit_id == Credit.id)
-            .join(Payment, Payment.id == PaymentAllocation.payment_id)
-            .where(
-                Credit.client_id == client_id,
-                Credit.pending_amount == 0,
-                Payment.payment_date > Credit.due_date,
-            )
-        )
-        or 0
-    )
     max_credit_amount = await _max_credit_amount(db)
+    features = await collect_credit_features(db, client, amount, max_credit_amount)
 
-    debt = Decimal(outstanding or 0)
-    volume = _volume_contribution(int(completed_sales or 0))
-    paid_on_time = paid_credits - paid_late
-    punctuality = _punctuality_contribution(paid_on_time, pending_overdue + paid_late)
+    debt = features.outstanding
+    volume = _volume_contribution(features.completed_sales)
+    paid_on_time = features.paid_credits - features.paid_late
+    punctuality = _punctuality_contribution(
+        paid_on_time, features.pending_overdue + features.paid_late
+    )
     debt_factor = _debt_contribution(debt)
     amount_factor = _amount_contribution(amount, max_credit_amount)
-    tenure = _tenure_contribution(client.created_at if client else None)
+    tenure = _tenure_contribution(features.tenure_days)
 
-    score = INITIAL_CREDIT_SCORE + sum(
+    rules_score = INITIAL_CREDIT_SCORE + sum(
         [volume, punctuality, debt_factor, amount_factor, tenure]
     )
-    score = max(0, min(score, MAX_SCORE))
+    rules_score = max(0, min(rules_score, MAX_SCORE))
+
+    model = predict_default_probability(features)
+    if model.ml:
+        default_probability = int(round(model.default_probability))
+        confidence = max(0, min(100, round(50 + abs(model.default_probability - 50))))
+        model_version = model.model_version
+        cold_start = (
+            features.completed_sales == 0
+            and features.paid_credits == 0
+            and features.pending_current == 0
+            and features.pending_overdue == 0
+            and features.tenure_days == 0
+        )
+        if cold_start:
+            score = rules_score
+            default_probability = max(2, 100 - score)
+            confidence = min(100, 40 + score // 5)
+        else:
+            score = round(
+                ML_MODEL_WEIGHT * model.model_score + RULE_MODEL_WEIGHT * rules_score
+            )
+            score = max(0, min(score, MAX_SCORE))
+    else:
+        score = rules_score
+        default_probability = max(2, 100 - score)
+        confidence = min(100, 50 + (score * 40) // 500)
+        model_version = RULES_VERSION
+
     risk = risk_from_score(score)
-    raw_limit = int(completed_sales or 0) * 80 + score * 10 - float(debt) * 0.2
+    raw_limit = int(features.completed_sales) * 80 + score * 10 - float(debt) * 0.2
     recommended_limit = Decimal(max(50, round(raw_limit / 50) * 50))
     recommended_limit = min(recommended_limit, max_credit_amount)
-    approved = amount <= recommended_limit and risk not in {RiskLevel.HIGH, RiskLevel.CRITICAL}
+    approved = (
+        amount <= recommended_limit and risk not in {RiskLevel.HIGH, RiskLevel.CRITICAL}
+    )
 
     factors = [
         ScoreFactor(
@@ -150,7 +149,7 @@ async def evaluate_credit(
             label="Historial de ventas",
             weight=25,
             contribution=volume,
-            description=f"{int(completed_sales or 0)} compras registradas.",
+            description=f"{features.completed_sales} compras registradas.",
         ),
         ScoreFactor(
             key="punctuality",
@@ -158,8 +157,8 @@ async def evaluate_credit(
             weight=20,
             contribution=punctuality,
             description=(
-                f"{paid_on_time} pagados puntualmente, {paid_late} pagados con atraso, "
-                f"{pending_overdue} pendientes vencidos."
+                f"{paid_on_time} pagados puntualmente, {features.paid_late} pagados "
+                f"con atraso, {features.pending_overdue} pendientes vencidos."
             ),
         ),
         ScoreFactor(
@@ -174,7 +173,9 @@ async def evaluate_credit(
             label="Monto solicitado",
             weight=15,
             contribution=amount_factor,
-            description=f"Solicita {amount} de un tope de {max_credit_amount}.",
+            description=(
+                f"Solicita {amount} de un tope de {max_credit_amount}."
+            ),
         ),
         ScoreFactor(
             key="tenure",
@@ -185,7 +186,16 @@ async def evaluate_credit(
         ),
     ]
 
-    return score, risk, recommended_limit, approved, factors
+    return EvaluationResult(
+        score=score,
+        risk=risk,
+        recommended_limit=recommended_limit,
+        approved=approved,
+        factors=factors,
+        default_probability=default_probability,
+        confidence=confidence,
+        model_version=model_version,
+    )
 
 
 async def evaluate_and_record(
@@ -196,28 +206,25 @@ async def evaluate_and_record(
     source: CreditEvaluationSource,
 ) -> CreditEvaluation:
     started_at = perf_counter()
-    score, risk, recommended_limit, approved, factors = await evaluate_credit(
-        db, client_id, amount
-    )
-    max_weight = sum(factor.weight for factor in factors) or 1
-    confidence = min(100, 50 + len(factors) * 10 + (score * 40) // (5 * max_weight))
+    result = await evaluate_credit(db, client_id, amount)
     recommendation = (
-        f"Credit approved up to S/ {recommended_limit}."
-        if approved
-        else f"Amount exceeds the recommended limit of S/ {recommended_limit}."
+        f"Credit approved up to S/ {result.recommended_limit}."
+        if result.approved
+        else f"Amount exceeds the recommended limit of S/ {result.recommended_limit}."
     )
     evaluation = CreditEvaluation(
         client_id=client_id,
         created_by_id=created_by_id,
         requested_amount=amount,
-        score=score,
-        risk=risk,
-        default_probability=max(2, 100 - score),
-        recommended_limit=recommended_limit,
-        approved=approved,
+        score=result.score,
+        risk=result.risk,
+        default_probability=result.default_probability,
+        recommended_limit=result.recommended_limit,
+        approved=result.approved,
         recommendation=recommendation,
-        confidence=confidence,
-        factors=[asdict(factor) for factor in factors],
+        confidence=result.confidence,
+        factors=[asdict(factor) for factor in result.factors],
+        model_version=result.model_version,
         source=source,
         response_time_ms=round((perf_counter() - started_at) * 1000),
     )

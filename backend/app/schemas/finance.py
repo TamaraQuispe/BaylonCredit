@@ -29,6 +29,7 @@ class CreditEvaluationRead(BaseModel):
     recommendation: str
     confidence: int
     factors: list[ScoreFactorRead]
+    model_version: str
     calculated_at: datetime
     response_time_ms: int
 

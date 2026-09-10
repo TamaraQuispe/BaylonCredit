@@ -19,6 +19,7 @@ export interface CreditEvaluation {
   recommendation: string
   confidence?: number
   factors?: ScoreFactor[]
+  modelVersion?: string
   calculatedAt: string
   responseTimeMs: number
 }
@@ -53,6 +54,7 @@ interface ApiEvaluation {
   recommendation: string
   confidence?: number
   factors?: ScoreFactor[]
+  model_version?: string
   calculated_at: string
   response_time_ms: number
 }
@@ -82,6 +84,7 @@ function mapEvaluation(evaluation: ApiEvaluation): CreditEvaluation {
     recommendation: evaluation.recommendation,
     confidence: evaluation.confidence,
     factors: evaluation.factors,
+    modelVersion: evaluation.model_version,
     calculatedAt: evaluation.calculated_at,
     responseTimeMs: evaluation.response_time_ms,
   }

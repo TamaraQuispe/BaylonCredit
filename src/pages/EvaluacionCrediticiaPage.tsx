@@ -125,6 +125,7 @@ export default function EvaluacionCrediticiaPage() {
       `Decisión: ${result.approved ? 'Aprobado' : 'No aprobado'}`,
       `Recomendación: ${result.recommendation}`,
       `Confianza: ${result.confidence ?? 'No disponible'}${result.confidence !== undefined ? '%' : ''}`,
+      `Modelo: ${result.modelVersion ?? 'No disponible'}`,
       `Calculado: ${formatDate(result.calculatedAt)}`,
       '',
       'Factores:',
@@ -196,7 +197,7 @@ export default function EvaluacionCrediticiaPage() {
               <section className="bg-white rounded-xl shadow-sm border border-outline-variant p-card-padding">
                 <h3 className="font-h3-title text-h3-title text-on-surface mb-2">Recomendación de IA</h3>
                 <p className="font-body-lg text-body-lg text-on-surface">{result.recommendation}</p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant mt-2">Límite recomendado: <strong className="text-primary">{formatCurrency(result.recommendedLimit)}</strong> · Calculado {formatDate(result.calculatedAt)}</p>
+                <p className="font-label-sm text-label-sm text-on-surface-variant mt-2">Límite recomendado: <strong className="text-primary">{formatCurrency(result.recommendedLimit)}</strong> · Modelo: {result.modelVersion ?? 'No disponible'} · Calculado {formatDate(result.calculatedAt)}</p>
               </section>
 
               <section className="bg-white rounded-xl shadow-sm border border-outline-variant p-card-padding">

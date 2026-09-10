@@ -316,8 +316,9 @@ async def test_credit_defaults_from_settings_and_caps_recommended_limit(
         "tenure",
     }
     assert 0 <= body["confidence"] <= 100
-    factor_sum = sum(factor["contribution"] for factor in body["factors"])
-    assert body["score"] == 50 + factor_sum
+    assert 0 <= body["score"] <= 100
+    assert 1 <= body["default_probability"] <= 99
+    assert body["model_version"].startswith("ml-")
 
     credit = await client.post(
         "/api/v1/credits",

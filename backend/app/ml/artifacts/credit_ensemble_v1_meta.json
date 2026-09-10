@@ -1,0 +1,56 @@
+{
+  "version": "ml-ensemble-v1",
+  "kind": "voting_ensemble",
+  "estimators": [
+    "logistic_regression",
+    "random_forest"
+  ],
+  "weights": [
+    0.45,
+    0.55
+  ],
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "n_samples_train": 3200,
+  "n_samples_test": 800,
+  "seed": 42,
+  "metrics": {
+    "accuracy": 0.68875,
+    "precision": 0.6972972972972973,
+    "recall": 0.6531645569620254,
+    "f1": 0.6745098039215687,
+    "roc_auc": 0.7434224097515237,
+    "confusion_matrix": [
+      [
+        293,
+        112
+      ],
+      [
+        137,
+        258
+      ]
+    ],
+    "default_rate": 0.49375
+  },
+  "monotonic_directions": {
+    "lateness_score_direction": 0.9999999999999999,
+    "pending_overdue_direction": 0.7999999999999999,
+    "utilization_direction": 1.0,
+    "requested_ratio_direction": 1.0,
+    "overdue_rate_direction": 1.0,
+    "volume_direction": 1.0,
+    "tenure_direction": 1.0,
+    "punctuality_rate_direction": 1.0
+  }
+}
