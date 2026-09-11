@@ -26,7 +26,7 @@ from app.services.credit_scoring import evaluate_and_record
 from app.services.whatsapp import enqueue_evaluation_notification
 
 router = APIRouter(prefix="/sales", tags=["sales"])
-can_sell = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
+can_sell = require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.CREDIT)
 CENT = Decimal("0.01")
 TAX_RATE = Decimal("0.18")
 
@@ -130,8 +130,9 @@ async def create_sale(
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=(
-                    "Credit rejected. Recommended limit: "
-                    f"{credit_evaluation.recommended_limit}"
+                    "Crédito rechazado. "
+                    f"Línea recomendada: S/ {credit_evaluation.recommended_limit}. "
+                    f"{credit_evaluation.recommendation}"
                 ),
             )
 

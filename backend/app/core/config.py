@@ -8,10 +8,10 @@ DEVELOPMENT_JWT_SECRET = "development-only-secret-change-before-production"
 
 
 class Settings(BaseSettings):
-    app_name: str = "BaylonCredit API"
+    app_name: str = "Credify API"
     environment: Literal["development", "test", "staging", "production"] = "development"
     api_v1_prefix: str = "/api/v1"
-    database_url: str = "postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit"
+    database_url: str = "postgresql+asyncpg://credify:credify@localhost:5432/credify"
     jwt_secret_key: str = DEVELOPMENT_JWT_SECRET
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://localhost:8080"
     webauthn_rp_id: str = "localhost"
     webauthn_origin: str = "http://localhost:5173"
-    webauthn_rp_name: str = "BaylonCredit IA"
+    webauthn_rp_name: str = "Credify"
     whatsapp_enabled: bool = False
     whatsapp_token: str = ""
     whatsapp_phone_number_id: str = ""
@@ -33,10 +33,12 @@ class Settings(BaseSettings):
     whatsapp_timeout_seconds: float = 15.0
     whatsapp_notify_evaluations: bool = False
     whatsapp_notify_reminders: bool = False
+    whatsapp_notify_payments: bool = False
     whatsapp_reminder_interval_hours: int = 24
     whatsapp_reminder_days_before: int = 3
     whatsapp_template_evaluation: str = "credit_evaluation_result"
     whatsapp_template_reminder: str = "credit_payment_reminder"
+    whatsapp_template_payment_confirmation: str = "credit_payment_confirmation"
 
     model_config = SettingsConfigDict(
         env_file=".env",

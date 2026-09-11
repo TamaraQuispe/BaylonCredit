@@ -1,1 +1,1 @@
-"""BaylonCredit API application."""
+"""Credify API application."""

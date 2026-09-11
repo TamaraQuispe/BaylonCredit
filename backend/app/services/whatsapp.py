@@ -25,7 +25,14 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from app.core.config import get_settings
 from app.db.session import SessionFactory
 from app.models.client import Client
-from app.models.commerce import Credit, CreditEvaluation, CreditStatus
+from app.models.commerce import (
+    Credit,
+    CreditEvaluation,
+    CreditStatus,
+    Payment,
+    PaymentAllocation,
+)
+from app.models.settings import SETTINGS_ID, BusinessSettings
 from app.models.whatsapp import NotificationStatus, WhatsappNotification
 
 logger = logging.getLogger(__name__)
@@ -114,6 +121,15 @@ def reminder_body_values(client_name: str, credit: Credit) -> list[str]:
     ]
 
 
+def payment_body_values(client_name: str, payment: Payment) -> list[str]:
+    return [
+        client_name,
+        f"{payment.amount:.2f}",
+        payment.payment_date.isoformat(),
+        f"{payment.remaining_balance:.2f}",
+    ]
+
+
 async def send_template_message(
     phone: str,
     template_name: str,
@@ -149,6 +165,45 @@ def enqueue_evaluation_notification(
     settings = get_settings()
     if settings.whatsapp_enabled and settings.whatsapp_notify_evaluations:
         background_tasks.add_task(dispatch_evaluation_notification, evaluation_id)
+
+
+def enqueue_payment_confirmation(
+    background_tasks: BackgroundTasks, payment_id: UUID
+) -> None:
+    settings = get_settings()
+    if settings.whatsapp_enabled and settings.whatsapp_notify_payments:
+        background_tasks.add_task(dispatch_payment_confirmation, payment_id)
+
+
+async def dispatch_payment_confirmation(payment_id: UUID) -> None:
+    settings = get_settings()
+    if not (settings.whatsapp_enabled and settings.whatsapp_notify_payments):
+        return
+    try:
+        async with SessionFactory() as db:
+            payment = await db.get(Payment, payment_id)
+            if payment is None:
+                return
+            client = await db.get(Client, payment.client_id)
+            if client is None or not client.phone:
+                return
+            client_name = client.business_name or f"{client.first_name} {client.last_name}"
+            allocation = await db.scalar(
+                select(PaymentAllocation)
+                .where(PaymentAllocation.payment_id == payment.id)
+                .limit(1)
+            )
+            notification = await _send_and_record(
+                db,
+                template_name=settings.whatsapp_template_payment_confirmation,
+                body_values=payment_body_values(client_name, payment),
+                phone=client.phone,
+                credit_id=allocation.credit_id if allocation else None,
+            )
+            db.add(notification)
+            await db.commit()
+    except Exception:
+        logger.exception("Failed to dispatch payment confirmation %s", payment_id)
 
 
 async def dispatch_evaluation_notification(evaluation_id: UUID) -> None:
@@ -216,7 +271,11 @@ def _as_utc(value: datetime) -> datetime:
 
 async def collect_due_credits(db: AsyncSession) -> list[tuple[Credit, Client]]:
     settings = get_settings()
-    horizon = date.today() + timedelta(days=settings.whatsapp_reminder_days_before)
+    days_before = settings.whatsapp_reminder_days_before
+    policy = await db.get(BusinessSettings, SETTINGS_ID)
+    if policy is not None:
+        days_before = policy.reminder_days_before
+    horizon = date.today() + timedelta(days=days_before)
     rows = (
         await db.execute(
             select(Credit, Client)
@@ -229,6 +288,36 @@ async def collect_due_credits(db: AsyncSession) -> list[tuple[Credit, Client]]:
         )
     ).all()
     return [(credit, client) for credit, client in rows]
+
+
+async def send_credit_reminder(credit_id: UUID) -> dict[str, int]:
+    """Envía un recordatorio puntual para un crédito (uso manual de cobranza)."""
+    settings = get_settings()
+    window = timedelta(hours=settings.whatsapp_reminder_interval_hours)
+    async with SessionFactory() as db:
+        credit = await db.get(Credit, credit_id)
+        if credit is None:
+            return {"sent": 0, "skipped": 0, "failed": 0, "not_found": 1}
+        client = await db.get(Client, credit.client_id)
+        if client is None or not client.phone:
+            return {"sent": 0, "skipped": 0, "failed": 0, "no_phone": 1}
+        if credit.pending_amount == 0 or credit.status == CreditStatus.PAID:
+            return {"sent": 0, "skipped": 1, "failed": 0, "paid": 1}
+        if await _already_notified(db, credit.id, window):
+            return {"sent": 0, "skipped": 1, "failed": 0}
+        client_name = client.business_name or f"{client.first_name} {client.last_name}"
+        notification = await _send_and_record(
+            db,
+            template_name=settings.whatsapp_template_reminder,
+            body_values=reminder_body_values(client_name, credit),
+            phone=client.phone,
+            credit_id=credit.id,
+        )
+        db.add(notification)
+        await db.commit()
+        if notification.status is NotificationStatus.FAILED:
+            return {"sent": 0, "skipped": 0, "failed": 1, "error": notification.error or ""}
+        return {"sent": 1, "skipped": 0, "failed": 0, "message_id": notification.message_id}
 
 
 async def _already_notified(

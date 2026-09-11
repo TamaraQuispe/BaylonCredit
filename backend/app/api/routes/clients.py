@@ -1,18 +1,25 @@
+from datetime import date
+from decimal import Decimal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, require_roles
 from app.db.session import get_db
 from app.models.client import Client
+from app.models.commerce import Credit, CreditEvaluation
+from app.models.settings import DEFAULT_ORGANIZATION_ID, SETTINGS_ID, BusinessSettings
 from app.models.user import User, UserRole
 from app.schemas.client import ClientCreate, ClientRead, ClientUpdate
+from app.schemas.finance import CreditProfileRead
 
 router = APIRouter(prefix="/clients", tags=["clients"])
-can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
+can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.CREDIT)
+
+DEFAULT_MAX_CREDIT_AMOUNT = Decimal("200")
 
 
 @router.get("", response_model=list[ClientRead])
@@ -47,7 +54,7 @@ async def get_client(
 ) -> Client:
     client = await db.get(Client, client_id)
     if not client:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
     return client
 
 
@@ -57,14 +64,14 @@ async def create_client(
     _: User = Depends(can_write),
     db: AsyncSession = Depends(get_db),
 ) -> Client:
-    client = Client(**payload.model_dump())
+    client = Client(**payload.model_dump(), organization_id=DEFAULT_ORGANIZATION_ID)
     db.add(client)
     try:
         await db.commit()
     except IntegrityError:
         await db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Document already registered"
+            status_code=status.HTTP_409_CONFLICT, detail="Documento ya registrado"
         ) from None
     await db.refresh(client)
     return client
@@ -95,7 +102,108 @@ async def archive_client(
 ) -> Response:
     client = await db.get(Client, client_id)
     if not client:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
     client.is_active = False
     await db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+async def _max_overdue_days(db: AsyncSession, client_id: UUID) -> int:
+    due_dates = list(
+        await db.scalars(
+            select(Credit.due_date).where(
+                Credit.client_id == client_id,
+                Credit.pending_amount > 0,
+                Credit.due_date < date.today(),
+            )
+        )
+    )
+    if not due_dates:
+        return 0
+    return max((date.today() - due).days for due in due_dates)
+
+
+@router.get("/{client_id}/credit-profile", response_model=CreditProfileRead)
+async def get_credit_profile(
+    client_id: UUID,
+    _: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> CreditProfileRead:
+    client = await db.get(Client, client_id)
+    if not client:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
+    client_name = client.business_name or f"{client.first_name} {client.last_name}"
+    latest = await db.scalar(
+        select(CreditEvaluation)
+        .where(CreditEvaluation.client_id == client.id)
+        .order_by(CreditEvaluation.created_at.desc())
+        .limit(1)
+    )
+    settings = await db.get(BusinessSettings, SETTINGS_ID)
+    assigned_line = (
+        latest.recommended_limit
+        if latest
+        else (settings.max_credit_amount if settings else DEFAULT_MAX_CREDIT_AMOUNT)
+    )
+    used = Decimal(
+        await db.scalar(
+            select(func.coalesce(func.sum(Credit.pending_amount), 0)).where(
+                Credit.client_id == client.id, Credit.pending_amount > 0
+            )
+        )
+        or 0
+    )
+    available = max(Decimal("0"), assigned_line - used)
+    utilization = float(used / assigned_line * 100) if assigned_line else 0.0
+    overdue_condition = Credit.pending_amount > 0
+    overdue_amount = Decimal(
+        await db.scalar(
+            select(func.coalesce(func.sum(Credit.pending_amount), 0)).where(
+                Credit.client_id == client.id,
+                overdue_condition,
+                Credit.due_date < date.today(),
+            )
+        )
+        or 0
+    )
+    overdue_credits = int(
+        await db.scalar(
+            select(func.count(Credit.id)).where(
+                Credit.client_id == client.id,
+                overdue_condition,
+                Credit.due_date < date.today(),
+            )
+        )
+        or 0
+    )
+    active_credits = int(
+        await db.scalar(
+            select(func.count(Credit.id)).where(
+                Credit.client_id == client.id, overdue_condition
+            )
+        )
+        or 0
+    )
+    next_due_date = await db.scalar(
+        select(func.min(Credit.due_date)).where(
+            Credit.client_id == client.id,
+            overdue_condition,
+            Credit.due_date >= date.today(),
+        )
+    )
+    return CreditProfileRead(
+        client_id=client.id,
+        client_name=client_name,
+        assigned_line=assigned_line,
+        used=used,
+        available=available,
+        utilization_percent=round(utilization, 2),
+        last_score=latest.score if latest else None,
+        last_risk=latest.risk if latest else None,
+        last_evaluation_at=latest.created_at if latest else None,
+        active_credits=active_credits,
+        overdue_credits=overdue_credits,
+        overdue_amount=overdue_amount,
+        max_overdue_days=await _max_overdue_days(db, client.id),
+        next_due_date=next_due_date,
+    )

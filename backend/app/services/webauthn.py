@@ -151,7 +151,7 @@ def build_authentication_options(
         user_verification=UserVerificationRequirement.PREFERRED,
         allow_credentials=[_descriptor(cid) for cid in allow_credential_ids],
     )
-    token = _store(options.challenge, user_id=None, user_name="BaylonCredit")
+    token = _store(options.challenge, user_id=None, user_name="Credify")
     return {
         "session_id": token,
         "options": json.loads(options_to_json(options)),

@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from hmac import compare_digest
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy import select, update
@@ -21,12 +22,12 @@ from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.models.whatsapp import NotificationStatus, WhatsappNotification
 from app.schemas.whatsapp import WhatsappNotificationRead
-from app.services.whatsapp import send_due_reminders, verify_signature
+from app.services.whatsapp import send_credit_reminder, send_due_reminders, verify_signature
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/whatsapp", tags=["whatsapp"])
-console = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
+console = require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.COLLECTIONS)
 admin_only = require_roles(UserRole.ADMIN)
 
 _STATUS_MAP = {
@@ -94,6 +95,20 @@ async def trigger_reminders(_: User = Depends(console)) -> dict[str, int]:
             detail="WhatsApp reminders are not enabled",
         )
     return await send_due_reminders()
+
+
+@router.post("/reminders/{credit_id}")
+async def trigger_single_reminder(
+    credit_id: UUID,
+    _: User = Depends(console),
+) -> dict[str, int]:
+    settings = get_settings()
+    if not (settings.whatsapp_enabled and settings.whatsapp_notify_reminders):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Los recordatorios de WhatsApp no están habilitados",
+        )
+    return await send_credit_reminder(credit_id)
 
 
 @router.get("/notifications", response_model=list[WhatsappNotificationRead])

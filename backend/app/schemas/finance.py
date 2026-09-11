@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
@@ -13,6 +14,7 @@ class ScoreFactorRead(BaseModel):
     weight: int
     contribution: int
     description: str
+    category: Literal["positivo", "riesgo"]
 
 
 class CreditEvaluationRequest(BaseModel):
@@ -58,6 +60,7 @@ class DirectCreditCreate(BaseModel):
     credit_date: date
     due_date: date | None = None
     manual_override: bool = False
+    exception_reason: str | None = Field(default=None, min_length=10, max_length=300)
 
     @model_validator(mode="after")
     def validate_dates(self) -> "DirectCreditCreate":
@@ -136,3 +139,20 @@ class PaymentRead(BaseModel):
     remaining_balance: Decimal
     registered_by: str
     created_at: datetime
+
+
+class CreditProfileRead(BaseModel):
+    client_id: UUID
+    client_name: str
+    assigned_line: Decimal
+    used: Decimal
+    available: Decimal
+    utilization_percent: float
+    last_score: int | None
+    last_risk: RiskLevel | None
+    last_evaluation_at: datetime | None
+    active_credits: int
+    overdue_credits: int
+    overdue_amount: Decimal
+    max_overdue_days: int
+    next_due_date: date | None

@@ -17,6 +17,7 @@ from app.models.commerce import (
     CreditStatus,
     Payment,
     PaymentAllocation,
+    RiskLevel,
 )
 from app.models.user import User, UserRole
 from app.schemas.finance import (
@@ -29,12 +30,23 @@ from app.schemas.finance import (
     FinanceCreditRead,
     ScoreFactorRead,
 )
+from app.services.audit import add_audit_log
 from app.services.credit_scoring import evaluate_and_record
 from app.services.whatsapp import enqueue_evaluation_notification
 
 router = APIRouter(prefix="/credits", tags=["credits"])
-can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
-can_evaluate_risk = require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
+can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.CREDIT)
+can_evaluate_risk = require_roles(
+    UserRole.ADMIN, UserRole.OPERATOR, UserRole.CREDIT, UserRole.VIEWER
+)
+
+_RISK_ORDER = {
+    RiskLevel.VERY_LOW: 0,
+    RiskLevel.LOW: 1,
+    RiskLevel.MEDIUM: 2,
+    RiskLevel.HIGH: 3,
+    RiskLevel.CRITICAL: 4,
+}
 
 
 def current_status(credit: Credit) -> str:
@@ -119,7 +131,7 @@ async def record_evaluation(
 ) -> CreditEvaluation:
     client = await db.get(Client, client_id)
     if not client or not client.is_active:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
     return await evaluate_and_record(
         db,
         client_id,
@@ -208,16 +220,30 @@ async def evaluation_summary(
 
 @router.get("", response_model=list[FinanceCreditRead])
 async def list_credits(
+    search: str | None = Query(default=None, max_length=160),
+    status_filter: str | None = Query(default=None, alias="status"),
+    risk: RiskLevel | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=200),
     _: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[FinanceCreditRead]:
-    credits = list(
-        await db.scalars(
-            select(Credit).order_by(Credit.created_at.desc()).offset(offset).limit(limit)
+    statement = select(Credit).order_by(Credit.created_at.desc())
+    if search:
+        term = f"%{search.strip()}%"
+        clients = select(Client.id).where(
+            Client.first_name.ilike(term)
+            | Client.last_name.ilike(term)
+            | Client.business_name.ilike(term)
+            | Client.document.ilike(term)
         )
-    )
+        statement = statement.where(Credit.client_id.in_(clients))
+    if risk is not None:
+        statement = statement.where(Credit.risk == risk)
+    credits = list(await db.scalars(statement))
+    if status_filter:
+        credits = [credit for credit in credits if current_status(credit) == status_filter]
+    credits = credits[offset : offset + limit]
     return [await serialize_credit(db, credit) for credit in credits]
 
 
@@ -229,7 +255,7 @@ async def get_credit(
 ) -> FinanceCreditRead:
     credit = await db.get(Credit, credit_id)
     if not credit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Credit not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Crédito no encontrado")
     return await serialize_credit(db, credit)
 
 
@@ -243,12 +269,23 @@ async def create_credit(
     evaluation = await record_evaluation(
         db, payload.client_id, payload.amount, current_user.id, "direct_credit"
     )
-    if not evaluation.approved and not payload.manual_override:
-        await db.commit()
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=evaluation.recommendation,
-        )
+    approved = evaluation.approved
+    overridden = False
+    if not approved:
+        if not payload.manual_override:
+            await db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=evaluation.recommendation,
+            )
+        reason = (payload.exception_reason or "").strip()
+        if len(reason) < 10:
+            await db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Debes indicar el motivo de la excepción (mínimo 10 caracteres).",
+            )
+        overridden = True
     if payload.due_date is None:
         settings = await get_settings_record(db)
         due_date = payload.credit_date + timedelta(days=settings.default_credit_term_days)
@@ -269,6 +306,23 @@ async def create_credit(
         recommended_limit=evaluation.recommended_limit,
     )
     db.add(credit)
+    if overridden:
+        add_audit_log(
+            db,
+            "credit_overridden",
+            "credit",
+            actor=current_user,
+            entity_id=credit.id,
+            details={
+                "reason": reason,
+                "score": credit.score,
+                "risk": credit.risk.value,
+                "amount": str(credit.original_amount),
+                "recommended_limit": str(credit.recommended_limit),
+                "evaluation_id": str(evaluation.id),
+            },
+            description="Crédito aprobado como excepción fuera de la política de riesgo.",
+        )
     await db.commit()
     await db.refresh(credit)
     notify_evaluation(background_tasks, evaluation.id)

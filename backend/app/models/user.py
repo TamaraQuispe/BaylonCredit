@@ -11,6 +11,8 @@ from app.db.base import Base, TimestampMixin, UUIDMixin
 class UserRole(StrEnum):
     ADMIN = "admin"
     OPERATOR = "operator"
+    CREDIT = "credit"
+    COLLECTIONS = "collections"
     VIEWER = "viewer"
 
 
@@ -26,6 +28,9 @@ class User(UUIDMixin, TimestampMixin, Base):
         Enum(UserRole, name="user_role", native_enum=False),
         default=UserRole.OPERATOR,
         nullable=False,
+    )
+    organization_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("organizations.id", ondelete="SET NULL"), index=True
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

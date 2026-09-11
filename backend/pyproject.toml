@@ -3,9 +3,9 @@ requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bayloncredit-api"
+name = "credify-api"
 version = "0.1.0"
-description = "API cloud-ready para BaylonCredit IA"
+description = "API cloud-ready para Credify: gestión inteligente de riesgos y créditos"
 requires-python = ">=3.12,<3.14"
 dependencies = [
   "alembic>=1.14,<2",

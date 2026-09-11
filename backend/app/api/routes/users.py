@@ -59,7 +59,7 @@ async def create_user(
     except IntegrityError:
         await db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
+            status_code=status.HTTP_409_CONFLICT, detail="El correo ya está registrado"
         ) from None
     await db.refresh(user)
     return user
@@ -83,11 +83,11 @@ async def update_user(
 ) -> User:
     user = await db.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
     if user.id == current_user.id and payload.role and payload.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot remove your own admin role",
+            detail="No puedes eliminarte tu propio rol de administrador",
         )
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
@@ -106,11 +106,11 @@ async def change_user_status(
 ) -> User:
     user = await db.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
     if user.id == current_user.id and not active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot disable your own account",
+            detail="No puedes desactivar tu propia cuenta",
         )
     user.is_active = active
     add_audit_log(

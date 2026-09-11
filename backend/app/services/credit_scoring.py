@@ -1,15 +1,18 @@
 from dataclasses import asdict, dataclass
+from datetime import date
 from decimal import Decimal
 from time import perf_counter
 from typing import Literal
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ml.features import collect_credit_features
 from app.ml.model import RULES_VERSION, predict_default_probability
 from app.models.client import Client
 from app.models.commerce import (
+    Credit,
     CreditEvaluation,
     RiskLevel,
 )
@@ -17,6 +20,7 @@ from app.models.settings import SETTINGS_ID, BusinessSettings
 
 DEFAULT_MAX_CREDIT_AMOUNT = Decimal("200")
 CreditEvaluationSource = Literal["manual", "direct_credit", "credit_sale"]
+FactorCategory = Literal["positivo", "riesgo"]
 
 MAX_SCORE = 100
 INITIAL_CREDIT_SCORE = 50
@@ -31,6 +35,7 @@ class ScoreFactor:
     weight: int
     contribution: int
     description: str
+    category: FactorCategory
 
 
 @dataclass(frozen=True)
@@ -43,18 +48,29 @@ class EvaluationResult:
     default_probability: int
     confidence: int
     model_version: str
+    blocked_reason: str | None = None
 
 
-def risk_from_score(score: int) -> RiskLevel:
-    if score >= 88:
-        return RiskLevel.VERY_LOW
-    if score >= 76:
+def risk_from_score(score: int, low_min: int = 80, medium_min: int = 60) -> RiskLevel:
+    """Clasifica el puntaje 0-100 en tres niveles configurables.
+
+    - Riesgo bajo:   score >= ``low_min`` (80-100)
+    - Riesgo medio:  ``medium_min`` <= score < ``low_min`` (60-79)
+    - Riesgo alto:   score < ``medium_min`` (0-59)
+    """
+    if score >= low_min:
         return RiskLevel.LOW
-    if score >= 61:
+    if score >= medium_min:
         return RiskLevel.MEDIUM
-    if score >= 46:
-        return RiskLevel.HIGH
-    return RiskLevel.CRITICAL
+    return RiskLevel.HIGH
+
+
+def label_risk(score: int, risk: RiskLevel) -> str:
+    if risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}:
+        return "riesgo alto"
+    if risk is RiskLevel.MEDIUM:
+        return "riesgo medio"
+    return "riesgo bajo"
 
 
 def _volume_contribution(completed_sales: int) -> int:
@@ -81,16 +97,33 @@ def _tenure_contribution(tenure_days: int) -> int:
     return min(tenure_days // 36, 10)
 
 
-async def _max_credit_amount(db: AsyncSession) -> Decimal:
+async def _policy(db: AsyncSession) -> tuple[BusinessSettings | None, Decimal]:
     settings = await db.get(BusinessSettings, SETTINGS_ID)
-    return settings.max_credit_amount if settings else DEFAULT_MAX_CREDIT_AMOUNT
+    if settings is not None:
+        return settings, settings.max_credit_amount
+    return None, DEFAULT_MAX_CREDIT_AMOUNT
+
+
+async def _max_overdue_days(db: AsyncSession, client_id: UUID) -> int:
+    due_dates = list(
+        await db.scalars(
+            select(Credit.due_date).where(
+                Credit.client_id == client_id,
+                Credit.pending_amount > 0,
+                Credit.due_date < date.today(),
+            )
+        )
+    )
+    if not due_dates:
+        return 0
+    return max((date.today() - due).days for due in due_dates)
 
 
 async def evaluate_credit(
     db: AsyncSession, client_id: UUID, amount: Decimal
 ) -> EvaluationResult:
     client = await db.get(Client, client_id)
-    max_credit_amount = await _max_credit_amount(db)
+    settings, max_credit_amount = await _policy(db)
     features = await collect_credit_features(db, client, amount, max_credit_amount)
 
     debt = features.outstanding
@@ -135,12 +168,44 @@ async def evaluate_credit(
         confidence = min(100, 50 + (score * 40) // 500)
         model_version = RULES_VERSION
 
-    risk = risk_from_score(score)
+    low_min = settings.scoring_low_min if settings else 80
+    medium_min = settings.scoring_medium_min if settings else 60
+    min_approved = settings.scoring_min_approved if settings else 60
+    overdue_block_days = settings.overdue_block_days if settings else 30
+    new_client_blocked_days = settings.new_client_blocked_days if settings else 0
+    exposure_percent = settings.max_exposure_percent if settings else 80
+
+    max_overdue_days = await _max_overdue_days(db, client_id)
+    risk = risk_from_score(score, low_min, medium_min)
+
     raw_limit = int(features.completed_sales) * 80 + score * 10 - float(debt) * 0.2
     recommended_limit = Decimal(max(50, round(raw_limit / 50) * 50))
     recommended_limit = min(recommended_limit, max_credit_amount)
+
+    blocked_reason: str | None = None
+    if max_overdue_days > 0 and max_overdue_days >= overdue_block_days:
+        blocked_reason = (
+            f"Cliente con créditos vencidos hace {max_overdue_days} días; "
+            "se bloquean nuevos créditos según la política de riesgo."
+        )
+    elif new_client_blocked_days > 0 and features.tenure_days < new_client_blocked_days:
+        blocked_reason = (
+            f"Cliente con menos de {new_client_blocked_days} días de antigüedad; "
+            "aún no accede a crédito según la política."
+        )
+    elif features.outstanding > 0 and max_credit_amount > 0:
+        utilization = (features.outstanding / max_credit_amount) * 100
+        if float(utilization) >= exposure_percent:
+            blocked_reason = (
+                f"Exposición de {utilization:.1f}% supera el límite del {exposure_percent}% "
+                "de la línea de crédito."
+            )
+
     approved = (
-        amount <= recommended_limit and risk not in {RiskLevel.HIGH, RiskLevel.CRITICAL}
+        score >= min_approved
+        and amount <= recommended_limit
+        and risk not in {RiskLevel.HIGH, RiskLevel.CRITICAL}
+        and blocked_reason is None
     )
 
     factors = [
@@ -150,6 +215,7 @@ async def evaluate_credit(
             weight=25,
             contribution=volume,
             description=f"{features.completed_sales} compras registradas.",
+            category="positivo" if volume >= 10 else "riesgo",
         ),
         ScoreFactor(
             key="punctuality",
@@ -160,6 +226,7 @@ async def evaluate_credit(
                 f"{paid_on_time} pagados puntualmente, {features.paid_late} pagados "
                 f"con atraso, {features.pending_overdue} pendientes vencidos."
             ),
+            category="riesgo" if (features.paid_late or features.pending_overdue) else "positivo",
         ),
         ScoreFactor(
             key="debt",
@@ -167,6 +234,7 @@ async def evaluate_credit(
             weight=30,
             contribution=debt_factor,
             description=f"Deuda pendiente de {debt}.",
+            category="riesgo" if debt > 0 else "positivo",
         ),
         ScoreFactor(
             key="amount",
@@ -176,6 +244,7 @@ async def evaluate_credit(
             description=(
                 f"Solicita {amount} de un tope de {max_credit_amount}."
             ),
+            category="riesgo" if amount_factor < 10 else "positivo",
         ),
         ScoreFactor(
             key="tenure",
@@ -183,6 +252,7 @@ async def evaluate_credit(
             weight=10,
             contribution=tenure,
             description="Cliente reciente con historial limitado.",
+            category="riesgo" if tenure < 10 else "positivo",
         ),
     ]
 
@@ -195,6 +265,7 @@ async def evaluate_credit(
         default_probability=default_probability,
         confidence=confidence,
         model_version=model_version,
+        blocked_reason=blocked_reason,
     )
 
 
@@ -207,11 +278,7 @@ async def evaluate_and_record(
 ) -> CreditEvaluation:
     started_at = perf_counter()
     result = await evaluate_credit(db, client_id, amount)
-    recommendation = (
-        f"Credit approved up to S/ {result.recommended_limit}."
-        if result.approved
-        else f"Amount exceeds the recommended limit of S/ {result.recommended_limit}."
-    )
+    recommendation = build_recommendation(result, amount)
     evaluation = CreditEvaluation(
         client_id=client_id,
         created_by_id=created_by_id,
@@ -230,3 +297,22 @@ async def evaluate_and_record(
     )
     db.add(evaluation)
     return evaluation
+
+
+def build_recommendation(result: EvaluationResult, amount: Decimal) -> str:
+    level = label_risk(result.score, result.risk)
+    if result.blocked_reason:
+        return result.blocked_reason
+    if result.approved:
+        return (
+            f"Crédito aprobado. Puntaje {result.score} ({level}); "
+            f"línea recomendada de S/ {result.recommended_limit}."
+        )
+    reasons: list[str] = []
+    if result.score < 60:
+        reasons.append("puntaje por debajo del mínimo aprobado")
+    if amount > result.recommended_limit:
+        reasons.append(f"monto mayor a la línea recomendada de S/ {result.recommended_limit}")
+    if result.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}:
+        reasons.append(f"nivel de {level}")
+    return f"Crédito rechazado: {', '.join(reasons)}." if reasons else "Crédito rechazado."

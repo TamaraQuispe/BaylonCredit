@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,9 +12,12 @@ from app.models.client import Client
 from app.models.commerce import Credit, CreditStatus, Payment, PaymentAllocation
 from app.models.user import User, UserRole
 from app.schemas.finance import PaymentCreate, PaymentRead
+from app.services.whatsapp import enqueue_payment_confirmation
 
 router = APIRouter(prefix="/payments", tags=["payments"])
-can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
+can_write = require_roles(
+    UserRole.ADMIN, UserRole.OPERATOR, UserRole.CREDIT, UserRole.COLLECTIONS
+)
 
 
 async def serialize_payment(db: AsyncSession, payment: Payment) -> PaymentRead:
@@ -62,12 +65,13 @@ async def list_payments(
 @router.post("", response_model=PaymentRead, status_code=status.HTTP_201_CREATED)
 async def create_payment(
     payload: PaymentCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(can_write),
     db: AsyncSession = Depends(get_db),
 ) -> PaymentRead:
     client = await db.get(Client, payload.client_id)
     if not client or not client.is_active:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
     allocation_map = {allocation.credit_id: allocation.amount for allocation in payload.allocations}
     credits = list(
         await db.scalars(
@@ -79,24 +83,27 @@ async def create_payment(
     )
     if len(credits) != len(allocation_map):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="One or more credits do not exist"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Uno o más créditos no existen"
         )
 
     for credit in credits:
         applied = allocation_map[credit.id]
         if credit.client_id != payload.client_id:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Credit belongs to another client"
+                status_code=status.HTTP_409_CONFLICT, detail="El crédito pertenece a otro cliente"
             )
         if applied > credit.pending_amount:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Payment exceeds balance for {credit.code}",
+                detail=f"El pago excede el saldo del crédito {credit.code}",
             )
         if payload.payment_date < credit.credit_date:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Payment date cannot be before credit date for {credit.code}",
+                detail=(
+                    "La fecha de pago no puede ser anterior a la fecha "
+                    f"del crédito {credit.code}"
+                ),
             )
 
     amount = Decimal("0")
@@ -139,4 +146,5 @@ async def create_payment(
     )
     await db.commit()
     await db.refresh(payment)
+    enqueue_payment_confirmation(background_tasks, payment.id)
     return await serialize_payment(db, payment)

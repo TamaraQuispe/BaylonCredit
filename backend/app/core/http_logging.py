@@ -7,7 +7,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
-logger = logging.getLogger("bayloncredit.http")
+logger = logging.getLogger("credify.http")
 logger.setLevel(logging.INFO)
 
 

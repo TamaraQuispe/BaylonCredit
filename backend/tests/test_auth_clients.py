@@ -153,7 +153,7 @@ async def test_sale_updates_stock_and_creates_credit_atomically(client: AsyncCli
         "/api/v1/sales",
         headers=headers,
         json={
-            "payment_mode": "fiado",
+            "payment_mode": "credito",
             "client_id": created_client.json()["id"],
             "due_date": "2030-01-15",
             "items": [{"product_id": str(PRODUCT_ID), "quantity": 2}],
@@ -179,7 +179,7 @@ async def test_sale_updates_stock_and_creates_credit_atomically(client: AsyncCli
     assert products_after_rejection.json()[0]["stock"] == 3
 
 
-async def test_fiado_sale_uses_default_term_from_settings(client: AsyncClient) -> None:
+async def test_credit_sale_uses_default_term_from_settings(client: AsyncClient) -> None:
     login = await client.post(
         "/api/v1/auth/login",
         data={"username": "admin@baylon.com", "password": "secure-password"},
@@ -205,7 +205,7 @@ async def test_fiado_sale_uses_default_term_from_settings(client: AsyncClient) -
         "/api/v1/sales",
         headers=headers,
         json={
-            "payment_mode": "fiado",
+            "payment_mode": "credito",
             "client_id": created_client.json()["id"],
             "items": [{"product_id": str(PRODUCT_ID), "quantity": 1}],
         },
@@ -335,7 +335,7 @@ async def test_late_payment_date_reduces_punctuality_score(client: AsyncClient) 
     assert late.json()["score"] < timely.json()["score"]
 
 
-async def test_portfolio_report_reflects_active_and_overdue_fiados(client: AsyncClient) -> None:
+async def test_portfolio_report_reflects_active_and_overdue_credits(client: AsyncClient) -> None:
     login = await client.post(
         "/api/v1/auth/login",
         data={"username": "admin@baylon.com", "password": "secure-password"},
@@ -374,6 +374,7 @@ async def test_portfolio_report_reflects_active_and_overdue_fiados(client: Async
             "credit_date": "2026-01-01",
             "due_date": "2026-01-10",
             "manual_override": True,
+            "exception_reason": "Excepción de prueba con motivo obligatorio",
         },
     )
     assert overdue.status_code == 201, overdue.text
@@ -421,6 +422,7 @@ async def test_payment_before_credit_date_is_rejected(client: AsyncClient) -> No
             "credit_date": "2026-05-01",
             "due_date": "2026-06-01",
             "manual_override": True,
+            "exception_reason": "Excepción de prueba con motivo obligatorio",
         },
     )
     assert credit.status_code == 201, credit.text

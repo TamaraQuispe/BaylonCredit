@@ -11,7 +11,7 @@ from app.db.base import Base, TimestampMixin, UUIDMixin
 
 class PaymentMode(StrEnum):
     CASH = "contado"
-    CREDIT = "fiado"
+    CREDIT = "credito"
 
 
 class InventoryMovementType(StrEnum):
