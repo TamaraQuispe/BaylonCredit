@@ -11,6 +11,7 @@ from app.api.routes import (
     settings,
     users,
     webauthn,
+    whatsapp,
 )
 
 api_router = APIRouter()
@@ -24,3 +25,4 @@ api_router.include_router(credits.router)
 api_router.include_router(payments.router)
 api_router.include_router(settings.router)
 api_router.include_router(reports.router)
+api_router.include_router(whatsapp.router)

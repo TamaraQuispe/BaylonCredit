@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,6 +23,7 @@ from app.models.commerce import (
 from app.models.user import User, UserRole
 from app.schemas.commerce import CreditRead, SaleCreate, SaleItemRead, SaleRead
 from app.services.credit_scoring import evaluate_and_record
+from app.services.whatsapp import enqueue_evaluation_notification
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 can_sell = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
@@ -69,6 +70,7 @@ async def list_sales(
 @router.post("", response_model=SaleRead, status_code=status.HTTP_201_CREATED)
 async def create_sale(
     payload: SaleCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(can_sell),
     db: AsyncSession = Depends(get_db),
 ) -> SaleRead:
@@ -198,4 +200,5 @@ async def create_sale(
     await db.refresh(sale)
     if credit:
         await db.refresh(credit)
+        enqueue_evaluation_notification(background_tasks, credit_evaluation.id)
     return await serialize_sale(db, sale, credit)

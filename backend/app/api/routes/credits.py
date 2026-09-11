@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,6 +30,7 @@ from app.schemas.finance import (
     ScoreFactorRead,
 )
 from app.services.credit_scoring import evaluate_and_record
+from app.services.whatsapp import enqueue_evaluation_notification
 
 router = APIRouter(prefix="/credits", tags=["credits"])
 can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR)
@@ -128,9 +129,14 @@ async def record_evaluation(
     )
 
 
+def notify_evaluation(background_tasks: BackgroundTasks, evaluation_id: UUID) -> None:
+    enqueue_evaluation_notification(background_tasks, evaluation_id)
+
+
 @router.post("/evaluate", response_model=CreditEvaluationRead)
 async def evaluate_requested_credit(
     payload: CreditEvaluationRequest,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(can_evaluate_risk),
     db: AsyncSession = Depends(get_db),
 ) -> CreditEvaluationRead:
@@ -139,6 +145,7 @@ async def evaluate_requested_credit(
     )
     await db.commit()
     await db.refresh(evaluation)
+    notify_evaluation(background_tasks, evaluation.id)
     return serialize_evaluation(evaluation)
 
 
@@ -229,6 +236,7 @@ async def get_credit(
 @router.post("", response_model=FinanceCreditRead, status_code=status.HTTP_201_CREATED)
 async def create_credit(
     payload: DirectCreditCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(can_write),
     db: AsyncSession = Depends(get_db),
 ) -> FinanceCreditRead:
@@ -263,4 +271,5 @@ async def create_credit(
     db.add(credit)
     await db.commit()
     await db.refresh(credit)
+    notify_evaluation(background_tasks, evaluation.id)
     return await serialize_credit(db, credit)

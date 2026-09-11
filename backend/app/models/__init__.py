@@ -11,6 +11,7 @@ from app.models.commerce import (
 )
 from app.models.settings import BusinessSettings
 from app.models.user import AuditLog, RefreshToken, User, UserRole, WebauthnCredential
+from app.models.whatsapp import NotificationStatus, WhatsappNotification
 
 __all__ = [
     "Client",
@@ -28,4 +29,6 @@ __all__ = [
     "UserRole",
     "WebauthnCredential",
     "BusinessSettings",
+    "NotificationStatus",
+    "WhatsappNotification",
 ]

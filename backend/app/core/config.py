@@ -22,6 +22,21 @@ class Settings(BaseSettings):
     webauthn_rp_id: str = "localhost"
     webauthn_origin: str = "http://localhost:5173"
     webauthn_rp_name: str = "BaylonCredit IA"
+    whatsapp_enabled: bool = False
+    whatsapp_token: str = ""
+    whatsapp_phone_number_id: str = ""
+    whatsapp_verify_token: str = ""
+    whatsapp_app_secret: str = ""
+    whatsapp_api_version: str = "v21.0"
+    whatsapp_graph_base_url: str = "https://graph.facebook.com"
+    whatsapp_default_country_code: str = "51"
+    whatsapp_timeout_seconds: float = 15.0
+    whatsapp_notify_evaluations: bool = False
+    whatsapp_notify_reminders: bool = False
+    whatsapp_reminder_interval_hours: int = 24
+    whatsapp_reminder_days_before: int = 3
+    whatsapp_template_evaluation: str = "credit_evaluation_result"
+    whatsapp_template_reminder: str = "credit_payment_reminder"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -46,6 +61,10 @@ class Settings(BaseSettings):
             raise ValueError("ACCESS_TOKEN_EXPIRE_MINUTES must be greater than zero")
         if self.refresh_token_expire_days <= 0:
             raise ValueError("REFRESH_TOKEN_EXPIRE_DAYS must be greater than zero")
+        if self.whatsapp_reminder_days_before < 0:
+            raise ValueError("WHATSAPP_REMINDER_DAYS_BEFORE cannot be negative")
+        if self.whatsapp_reminder_interval_hours < 1:
+            raise ValueError("WHATSAPP_REMINDER_INTERVAL_HOURS must be greater than zero")
         return self
 
 
