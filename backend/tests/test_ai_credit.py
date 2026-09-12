@@ -96,6 +96,8 @@ async def test_generate_credit_analysis_uses_structured_anonymous_payload(monkey
     url, payload, headers = _FakeAsyncClient.captured
     assert url.endswith("/chat/completions")
     assert payload["response_format"]["type"] == "json_schema"
+    assert payload["max_tokens"] == 1600
+    assert payload["reasoning"] == {"effort": "low", "exclude": True}
     schema = payload["response_format"]["json_schema"]["schema"]
     assert schema["additionalProperties"] is False
     assert set(schema["required"]) == {"explanation", "risk_factors", "recommendations"}

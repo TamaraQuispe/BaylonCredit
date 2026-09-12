@@ -52,7 +52,8 @@ def _request_payload(evaluation: CreditEvaluation) -> dict:
     return {
         "model": get_settings().openrouter_model,
         "temperature": 0.2,
-        "max_tokens": 550,
+        "max_tokens": 1600,
+        "reasoning": {"effort": "low", "exclude": True},
         "messages": [
             {
                 "role": "system",
