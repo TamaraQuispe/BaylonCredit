@@ -20,13 +20,13 @@ function daysUntil(date: string) {
   return Math.ceil((target.getTime() - today.getTime()) / 86_400_000)
 }
 
-export default function DetalleFiadoPage() {
+export default function DetalleCreditoPage() {
   const { id } = useParams()
   const { credits, loading } = useCreditState()
   const detail = credits.find((credit) => credit.id === id)
 
-  if (loading) return <div className="py-16 text-center text-on-surface-variant">Cargando fiado...</div>
-  if (!detail) return <Navigate to="/fiados" replace />
+  if (loading) return <div className="py-16 text-center text-on-surface-variant">Cargando credito...</div>
+  if (!detail) return <Navigate to="/creditos" replace />
 
   const daysLeft = daysUntil(detail.dueAt)
 
@@ -35,14 +35,14 @@ export default function DetalleFiadoPage() {
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-outline-variant pb-6">
         <div className="space-y-4">
           <Link
-            to="/fiados"
+            to="/creditos"
             className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-label-sm text-label-sm"
           >
             <Icon name="arrow_back" size="18px" />
-            Volver al listado de Fiados
+            Volver al listado de CrÃ©ditos
           </Link>
           <div className="flex items-center gap-4">
-            <h1 className="font-h1-display text-h1-display text-on-surface">Detalle del Fiado</h1>
+            <h1 className="font-h1-display text-h1-display text-on-surface">Detalle del Credito</h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
               <span className="w-2 h-2 rounded-full bg-on-secondary-container" />
               {statusLabels[detail.status]}
@@ -61,7 +61,7 @@ export default function DetalleFiadoPage() {
         <div>
           <Link
             to={`/pagos/nuevo${
-              detail.clientId ? `?cliente=${detail.clientId}&fiado=${detail.id}` : ''
+              detail.clientId ? `?cliente=${detail.clientId}&credito=${detail.id}` : ''
             }`}
           >
             <Button variant="primary" size="lg" className="bg-primary-container">

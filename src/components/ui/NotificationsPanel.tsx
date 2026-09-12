@@ -6,7 +6,7 @@ interface NotificationsPanelProps {
   credits: StoredCredit[]
   open: boolean
   onClose: () => void
-  onViewFiado: (id: string) => void
+  onViewCredito: (id: string) => void
 }
 
 interface NotificationItem {
@@ -48,7 +48,7 @@ function buildNotifications(credits: StoredCredit[]): NotificationItem[] {
         items.push({
           id: `vencido-${credit.id}`,
           creditId: credit.id,
-          title: `Fiado vencido${overdueDays > 0 ? ` · ${overdueDays} d` : ''}`,
+          title: `Credito vencido${overdueDays > 0 ? ` · ${overdueDays} d` : ''}`,
           description: `${credit.client.business} · ${credit.code} · ${overdueDays > 0 ? `${overdueDays} días de retraso` : 'mora'}`,
           amount: credit.pendingAmount,
           tone: 'danger',
@@ -78,7 +78,7 @@ function buildNotifications(credits: StoredCredit[]): NotificationItem[] {
         items.push({
           id: `pendiente-${credit.id}`,
           creditId: credit.id,
-          title: 'Fiado en curso',
+          title: 'Credito en curso',
           description: `${credit.client.business} · ${credit.code}`,
           amount: credit.pendingAmount,
           tone: 'info',
@@ -90,7 +90,7 @@ function buildNotifications(credits: StoredCredit[]): NotificationItem[] {
   return items.sort((a, b) => (a.tone === 'danger' ? -1 : 0) - (b.tone === 'danger' ? -1 : 0) || (b.amount ?? 0) - (a.amount ?? 0))
 }
 
-export default function NotificationsPanel({ credits, open, onClose, onViewFiado }: NotificationsPanelProps) {
+export default function NotificationsPanel({ credits, open, onClose, onViewCredito }: NotificationsPanelProps) {
   if (!open) return null
   const items = buildNotifications(credits)
   const dangerCount = items.filter((item) => item.tone === 'danger').length
@@ -118,8 +118,8 @@ export default function NotificationsPanel({ credits, open, onClose, onViewFiado
         </div>
         <p className="font-body-sm text-body-sm text-on-surface-variant mb-3">
           {items.length > 0
-            ? `Tienes ${items.length} aviso${items.length === 1 ? '' : 's'} sobre tu cartera de fiados.`
-            : 'No hay notificaciones pendientes. Todos los fiados están al día.'}
+            ? `Tienes ${items.length} aviso${items.length === 1 ? '' : 's'} sobre tu cartera de creditos.`
+            : 'No hay notificaciones pendientes. Todos los creditos están al día.'}
         </p>
 
         {items.length === 0 ? (
@@ -151,9 +151,9 @@ export default function NotificationsPanel({ credits, open, onClose, onViewFiado
                 </div>
                 <button
                   type="button"
-                  onClick={() => onViewFiado(item.creditId)}
+                  onClick={() => onViewCredito(item.creditId)}
                   className="text-on-surface-variant hover:text-primary text-sm underline-offset-2 hover:underline text-xs"
-                  aria-label={`Ver fiado de ${item.creditId}`}
+                  aria-label={`Ver credito de ${item.creditId}`}
                 >
                   Ver
                 </button>

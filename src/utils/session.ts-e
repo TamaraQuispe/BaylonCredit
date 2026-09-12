@@ -1,6 +1,6 @@
 import type { AuthUser } from '@/services/apiClient'
 
-const SESSION_KEY = 'credify_auth_session'
+const SESSION_KEY = 'baylon_auth_session'
 
 export interface SessionUser {
   id: string

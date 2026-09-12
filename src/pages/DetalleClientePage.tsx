@@ -6,11 +6,11 @@ import { formatCurrency } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
 
-type HistoryTab = 'compras' | 'fiados' | 'pagos'
+type HistoryTab = 'compras' | 'creditos' | 'pagos'
 
 const tabs: { key: HistoryTab; label: string }[] = [
   { key: 'compras', label: 'Historial de compras' },
-  { key: 'fiados', label: 'Historial de fiados' },
+  { key: 'creditos', label: 'Historial de creditos' },
   { key: 'pagos', label: 'Historial de pagos' },
 ]
 
@@ -33,18 +33,18 @@ export default function DetalleClientePage() {
     ? latestEvaluation?.risk.toUpperCase() ?? client.risk.toUpperCase()
     : 'SIN EVALUAR'
   const additionalDebt = clientCredits.reduce((sum, credit) => sum + credit.pendingAmount, 0)
-  const totalFiado = clientCredits.reduce((sum, credit) => sum + credit.originalAmount, 0)
+  const totalCredito = clientCredits.reduce((sum, credit) => sum + credit.originalAmount, 0)
   const displayedHistory =
     activeTab === 'compras'
       ? client.purchases > 0
         ? clientProfile.history
         : []
-      : activeTab === 'fiados'
+      : activeTab === 'creditos'
         ? clientCredits.map((credit) => ({
             date: credit.createdAt,
-            description: `Fiado ${credit.code}`,
+            description: `Credito ${credit.code}`,
             amount: credit.originalAmount,
-            status: credit.status === 'pagado' ? 'Pagado' : 'Fiado Pdto.',
+            status: credit.status === 'pagado' ? 'Pagado' : 'Credito Pdto.',
           }))
         : clientCredits.flatMap((credit) =>
             credit.timeline
@@ -60,8 +60,8 @@ export default function DetalleClientePage() {
   const kpis = [
     { label: 'Deuda actual', value: formatCurrency(client.debt + additionalDebt), tone: 'text-error' },
     { label: 'Total comprado', value: `${client.purchases} compras`, tone: 'text-on-background' },
-    { label: 'Total fiado', value: formatCurrency(totalFiado), tone: 'text-on-background' },
-    { label: 'Fiados pagados', value: String(clientCredits.filter((credit) => credit.status === 'pagado').length), tone: 'text-emerald-600' },
+    { label: 'Total credito', value: formatCurrency(totalCredito), tone: 'text-on-background' },
+    { label: 'Créditos pagados', value: String(clientCredits.filter((credit) => credit.status === 'pagado').length), tone: 'text-emerald-600' },
     { label: 'Pagos atrasados', value: String(clientCredits.filter((credit) => credit.status === 'vencido').length), tone: 'text-amber-600' },
   ]
 
@@ -97,10 +97,10 @@ export default function DetalleClientePage() {
             <Icon name="psychology_alt" size="18px" /> Evaluar nuevamente
           </Link>
           <Link
-            to={`/fiados/nuevo?cliente=${client.id}`}
+            to={`/creditos/nuevo?cliente=${client.id}`}
             className="bg-primary-container text-white hover:bg-primary transition-colors shadow-sm px-4 py-2 rounded font-label-sm text-label-sm font-semibold flex items-center gap-2"
           >
-            <Icon name="receipt_long" size="18px" /> Registrar fiado
+            <Icon name="receipt_long" size="18px" /> Registrar credito
           </Link>
           <Link
             to="/pagos/nuevo"
@@ -183,7 +183,7 @@ export default function DetalleClientePage() {
             <div className="mt-6 bg-surface-container-low p-4 rounded-lg border border-primary-fixed">
               <p className="font-body-md text-body-md font-medium text-primary-container flex items-start gap-2">
                 <Icon name="check_circle" size="20px" />
-                Cliente apto para recibir un nuevo fiado
+                Cliente apto para recibir un nuevo credito
               </p>
             </div>
           )}

@@ -24,7 +24,7 @@ export default function VentasPage() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Todos')
   const [cart, setCart] = useState<CartLine[]>([])
-  const [paymentMode, setPaymentMode] = useState<'contado' | 'fiado'>('contado')
+  const [paymentMode, setPaymentMode] = useState<'contado' | 'credito'>('contado')
   const [clientId, setClientId] = useState('')
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
@@ -101,7 +101,7 @@ export default function VentasPage() {
       const sale = await salesRepository.create({
         paymentMode,
         clientId: client?.id,
-        dueDate: paymentMode === 'fiado' ? isoDate(dueDate) : undefined,
+        dueDate: paymentMode === 'credito' ? isoDate(dueDate) : undefined,
         items: cart.map((line) => ({ productId: line.product.id, quantity: line.quantity })),
       })
       await productRepository.load(true)
@@ -312,9 +312,9 @@ export default function VentasPage() {
 
           {/* Payment mode tabs */}
           <div className="flex p-1 bg-surface-container rounded-lg border border-outline-variant">
-            {(['contado', 'fiado'] as const).map((mode) => {
+            {(['contado', 'credito'] as const).map((mode) => {
               const active = paymentMode === mode
-              const label = mode === 'contado' ? 'Contado' : 'Fiado'
+              const label = mode === 'contado' ? 'Contado' : 'Credito'
               return (
                 <button
                   key={mode}
@@ -332,8 +332,8 @@ export default function VentasPage() {
             })}
           </div>
 
-          {/* Fiado UI */}
-          {paymentMode === 'fiado' && (
+          {/* Credito UI */}
+          {paymentMode === 'credito' && (
             <div className="flex flex-col gap-3 p-4 bg-surface-container-low rounded-lg border border-primary-fixed">
               <label className="font-label-sm text-label-sm text-primary-container">
                 Seleccionar Cliente
@@ -370,7 +370,7 @@ export default function VentasPage() {
           <button
             type="button"
             onClick={registerSale}
-            disabled={processing || cart.length === 0 || (paymentMode === 'fiado' && !client)}
+            disabled={processing || cart.length === 0 || (paymentMode === 'credito' && !client)}
             className="w-full py-4 rounded-lg bg-primary text-on-primary font-h3-title text-body-lg font-semibold hover:bg-primary-container hover:shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Icon name={processing ? 'progress_activity' : 'check_circle'} className={processing ? 'animate-spin' : ''} />

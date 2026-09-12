@@ -7,7 +7,7 @@ import Icon from '@/components/ui/Icon'
 const navItems = [
   { to: '/inicio', label: 'Inicio', icon: 'dashboard' },
   { to: '/ventas', label: 'Ventas', icon: 'point_of_sale' },
-  { to: '/fiados', label: 'Fiados', icon: 'receipt_long' },
+  { to: '/creditos', label: 'CrÃ©ditos', icon: 'receipt_long' },
   { to: '/clientes', label: 'Clientes', icon: 'group' },
   { to: '/productos', label: 'Productos', icon: 'inventory_2' },
   { to: '/inventario', label: 'Inventario', icon: 'inventory' },
@@ -79,7 +79,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             </div>
             <div>
               <h1 className="font-h3-title text-h3-title font-bold text-primary tracking-tight">
-                BaylonCredit IA
+                Credify
               </h1>
               <p className="font-label-sm text-label-sm text-on-surface-variant">
                 Gestión de Créditos

@@ -113,7 +113,7 @@ export default function EvaluacionCrediticiaPage() {
       `${factor.label}: ${factor.contribution} de ${factor.weight}. ${factor.description}`,
     ) ?? []
     const report = [
-      'BaylonCredit IA - Evaluación Crediticia',
+      'Credify - Evaluación Crediticia',
       `Cliente: ${selectedClient.name}`,
       `Negocio: ${selectedClient.business}`,
       `Documento: ${selectedClient.document}`,

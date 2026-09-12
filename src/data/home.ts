@@ -19,7 +19,7 @@ export const homeStats: StatData[] = [
     iconTone: 'primary',
   },
   {
-    label: 'Total fiado',
+    label: 'Total credito',
     value: 'S/ 4,800.00',
     detail: 'Actualmente',
     icon: 'account_balance_wallet',
@@ -52,27 +52,27 @@ export const homeStats: StatData[] = [
 export interface CustomerAttention {
   id: string
   name: string
-  fiado: string
+  credito: string
   amount: number
   daysOverdue: number
   risk: RiskLevel
 }
 
 export const customersAttention: CustomerAttention[] = [
-  { id: '1', name: 'María Gonzáles', fiado: 'F-2024-018', amount: 320, daysOverdue: 30, risk: 'critico' },
-  { id: '2', name: 'Juan Pérez', fiado: 'F-2024-015', amount: 180, daysOverdue: 15, risk: 'alto' },
-  { id: '3', name: 'Lucía Ramírez', fiado: 'F-2024-022', amount: 95, daysOverdue: 8, risk: 'medio' },
-  { id: '4', name: 'Carlos Torres', fiado: 'F-2024-009', amount: 45, daysOverdue: 3, risk: 'bajo' },
+  { id: '1', name: 'María Gonzáles', credito: 'F-2024-018', amount: 320, daysOverdue: 30, risk: 'critico' },
+  { id: '2', name: 'Juan Pérez', credito: 'F-2024-015', amount: 180, daysOverdue: 15, risk: 'alto' },
+  { id: '3', name: 'Lucía Ramírez', credito: 'F-2024-022', amount: 95, daysOverdue: 8, risk: 'medio' },
+  { id: '4', name: 'Carlos Torres', credito: 'F-2024-009', amount: 45, daysOverdue: 3, risk: 'bajo' },
 ]
 
-export interface FiadoSegment {
+export interface CreditoSegment {
   label: string
   value: string
   color: string
   percent: number
 }
 
-export const fiadoDonut: FiadoSegment[] = [
+export const creditoDonut: CreditoSegment[] = [
   { label: 'Al día', value: 'S/ 3,340.00', color: '#10b981', percent: 60 },
   { label: 'Próximo a vencer', value: 'S/ 1,050.00', color: '#f59e0b', percent: 25 },
   { label: 'Vencido', value: 'S/ 410.00', color: '#ba1a1a', percent: 15 },
@@ -91,15 +91,15 @@ export const recentActivity: ActivityItem[] = [
   {
     id: '1',
     title: 'Pago de S/ 200.00 registrado',
-    description: 'María Gonzáles abonó a su fiado F-2024-018',
+    description: 'María Gonzáles abonó a su credito F-2024-018',
     time: 'Hace 10 min',
     icon: 'payments',
     tone: 'success',
   },
   {
     id: '2',
-    title: 'Fiado vencido',
-    description: 'El fiado F-2024-015 de Juan Pérez venció hoy',
+    title: 'Credito vencido',
+    description: 'El credito F-2024-015 de Juan Pérez venció hoy',
     time: 'Hace 1 h',
     icon: 'warning',
     tone: 'error',
@@ -114,8 +114,8 @@ export const recentActivity: ActivityItem[] = [
   },
   {
     id: '4',
-    title: 'Nuevo fiado creado',
-    description: 'Carlos Torres registró un fiado por S/ 45.00',
+    title: 'Nuevo credito creado',
+    description: 'Carlos Torres registró un credito por S/ 45.00',
     time: 'Ayer',
     icon: 'receipt_long',
     tone: 'secondary',

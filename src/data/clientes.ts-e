@@ -85,7 +85,7 @@ export interface ClientProfile {
   kpis: {
     deudaActual: number
     totalComprado: number
-    totalCredito: number
+    totalFiado: number
     creditosPagados: number
     pagosAtrasados: number
   }
@@ -113,7 +113,7 @@ export const clientProfile: ClientProfile = {
   kpis: {
     deudaActual: 45.5,
     totalComprado: 1250,
-    totalCredito: 380,
+    totalFiado: 380,
     creditosPagados: 12,
     pagosAtrasados: 1,
   },

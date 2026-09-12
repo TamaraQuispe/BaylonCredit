@@ -71,7 +71,7 @@ export default function GlobalSearch({ credits, clients, products }: GlobalSearc
       </span>
       <input
         type="text"
-        placeholder="Buscar clientes, fiados o productos..."
+        placeholder="Buscar clientes, creditos o productos..."
         value={query}
         onChange={(e) => {
           setQuery(e.target.value)
@@ -133,7 +133,7 @@ export default function GlobalSearch({ credits, clients, products }: GlobalSearc
           {matchedCredits.length > 0 && (
             <>
               <p className="px-4 py-2 text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold bg-surface-container-low">
-                Fiados
+                CrÃ©ditos
               </p>
               {matchedCredits.slice(0, 5).map((credit) => (
                 <button
@@ -141,7 +141,7 @@ export default function GlobalSearch({ credits, clients, products }: GlobalSearc
                   type="button"
                   onMouseDown={(e) => {
                     e.preventDefault()
-                    visit(`/fiados/${credit.id}`)
+                    visit(`/creditos/${credit.id}`)
                   }}
                   className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-surface-container-high transition-colors"
                 >

@@ -1,12 +1,12 @@
 import Badge, { type BadgeTone } from './Badge'
 
-export type FiadoStatus = 'al-dia' | 'proximo-a-vencer' | 'vencido' | 'pagado'
+export type CreditoStatus = 'al-dia' | 'proximo-a-vencer' | 'vencido' | 'pagado'
 export type InventoryStatus = 'disponible' | 'stock-bajo' | 'agotado'
 export type GeneralStatus = 'activo' | 'inactivo'
 
-type StatusKey = FiadoStatus | InventoryStatus | GeneralStatus
+type StatusKey = CreditoStatus | InventoryStatus | GeneralStatus
 
-const fiadoMap: Record<FiadoStatus, { tone: BadgeTone; label: string }> = {
+const creditoMap: Record<CreditoStatus, { tone: BadgeTone; label: string }> = {
   'al-dia': { tone: 'primary', label: 'Al día' },
   'proximo-a-vencer': { tone: 'warning', label: 'Próximo a vencer' },
   vencido: { tone: 'danger', label: 'Vencido' },
@@ -30,7 +30,7 @@ interface StatusBadgeProps {
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
   const config =
-    fiadoMap[status as FiadoStatus] ??
+    creditoMap[status as CreditoStatus] ??
     inventoryMap[status as InventoryStatus] ??
     generalMap[status as GeneralStatus]
 

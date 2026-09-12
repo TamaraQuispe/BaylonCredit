@@ -18,7 +18,7 @@ function isoDate(date: Date) {
 
 const today = new Date()
 
-export default function NuevoFiadoPage() {
+export default function NuevoCreditoPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { clients } = useClientState()
@@ -63,7 +63,7 @@ export default function NuevoFiadoPage() {
       return
     }
     if (!creditDate || !dueDate || dueDate <= creditDate) {
-      setError('La fecha de vencimiento debe ser posterior a la fecha del fiado.')
+      setError('La fecha de vencimiento debe ser posterior a la fecha del credito.')
       return
     }
 
@@ -91,9 +91,9 @@ export default function NuevoFiadoPage() {
         dueDate,
         evaluation,
       })
-      navigate(`/fiados/${credit.id}`, { replace: true })
+      navigate(`/creditos/${credit.id}`, { replace: true })
     } catch (creditError) {
-      setError(creditError instanceof Error ? creditError.message : 'No se pudo registrar el fiado.')
+      setError(creditError instanceof Error ? creditError.message : 'No se pudo registrar el credito.')
     } finally {
       setLoading(false)
     }
@@ -104,12 +104,12 @@ export default function NuevoFiadoPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <Link
-            to="/fiados"
+            to="/creditos"
             className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary font-label-sm text-label-sm mb-3"
           >
-            <Icon name="arrow_back" size="18px" /> Volver al control de fiados
+            <Icon name="arrow_back" size="18px" /> Volver al control de creditos
           </Link>
-          <h1 className="font-h1-display text-h1-display text-on-surface">Registrar nuevo fiado</h1>
+          <h1 className="font-h1-display text-h1-display text-on-surface">Registrar nuevo credito</h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
             Evalúa el riesgo del cliente antes de confirmar el crédito.
           </p>
@@ -131,7 +131,7 @@ export default function NuevoFiadoPage() {
           className="lg:col-span-7 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm p-6"
         >
           <h2 className="font-h3-title text-h3-title text-on-surface mb-6 flex items-center gap-2">
-            <Icon name="receipt_long" className="text-primary" /> Datos del fiado
+            <Icon name="receipt_long" className="text-primary" /> Datos del credito
           </h2>
 
           <div className="space-y-5">
@@ -199,7 +199,7 @@ export default function NuevoFiadoPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label className="flex flex-col gap-1.5 font-label-sm text-label-sm text-on-surface">
-                Fecha del fiado
+                Fecha del credito
                 <input
                   required
                   disabled={loading}
@@ -254,7 +254,7 @@ export default function NuevoFiadoPage() {
               <Icon name="query_stats" size="48px" className="text-outline mb-3" />
               <p className="font-medium text-on-surface">Evaluación pendiente</p>
               <p className="font-body-md text-body-md text-on-surface-variant mt-1 max-w-xs">
-                Completa los datos y calcula el score antes de confirmar el fiado.
+                Completa los datos y calcula el score antes de confirmar el credito.
               </p>
             </div>
           ) : (
@@ -337,7 +337,7 @@ export default function NuevoFiadoPage() {
                 disabled={loading}
                 className="mt-auto w-full h-12 bg-primary text-on-primary rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-primary-container"
               >
-                <Icon name="check_circle" /> Confirmar y registrar fiado
+                <Icon name="check_circle" /> Confirmar y registrar credito
               </button>
             </div>
           )}

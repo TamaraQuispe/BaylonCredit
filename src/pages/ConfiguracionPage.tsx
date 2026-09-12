@@ -69,7 +69,7 @@ export default function ConfiguracionPage() {
         maxCreditAmount: maxAmount || '0',
         dueAlertsEnabled: alerts,
       })
-      showNotice('Parámetros de fiados guardados.')
+      showNotice('Parámetros de creditos guardados.')
     } catch (caught) {
       showNotice(caught instanceof Error ? caught.message : 'No se pudieron guardar los parámetros.', 'error')
     } finally {
@@ -176,7 +176,7 @@ export default function ConfiguracionPage() {
 
         <section className="md:col-span-6 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-card-padding">
           <h3 className="font-h3-title text-h3-title mb-6 flex items-center gap-2">
-            <Icon name="request_quote" className="text-primary" /> Configuración de fiados
+            <Icon name="request_quote" className="text-primary" /> Configuración de creditos
           </h3>
           <div className="space-y-6">
             <SettingRow title="Plazo predeterminado" description="Días estándar para nuevos créditos">

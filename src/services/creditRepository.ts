@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react'
-import type { Fiado } from '@/data/fiados'
+import type { Credito } from '@/data/creditos'
 import type { Cliente } from '@/data/clientes'
 import type { PaymentRecord } from '@/data/pagos'
 import type { RiskLevel } from '@/types'
@@ -15,7 +15,7 @@ export interface CreditTimelineEntry {
   type: 'registered' | 'payment' | 'pending'
 }
 
-export interface StoredCredit extends Fiado {
+export interface StoredCredit extends Credito {
   clientId?: string
   phone?: string
   evaluation?: CreditEvaluation
@@ -77,7 +77,7 @@ interface ApiCredit {
   paid_percent: number
   credit_date: string
   due_date: string
-  status: Fiado['status']
+  status: Credito['status']
   risk: RiskLevel
   score: number
   recommended_limit: string | number
@@ -163,7 +163,7 @@ function mapCredit(credit: ApiCredit): StoredCredit {
     timeline: [
       {
         id: `${credit.id}-registered`,
-        title: 'Fiado registrado',
+        title: 'Credito registrado',
         description: `Crédito aprobado con score ${credit.score}.`,
         amount: originalAmount,
         date: formatDateTime(credit.created_at),

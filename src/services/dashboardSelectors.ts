@@ -1,5 +1,5 @@
 import type { ActivityEntry } from '@/components/dashboard/ActivityFeed'
-import type { CustomerAttention, FiadoSegment } from '@/data/home'
+import type { CustomerAttention, CreditoSegment } from '@/data/home'
 import type { RiskLevel } from '@/types'
 import { formatCurrency } from '@/utils/format'
 import type { StoredClient } from './clientRepository'
@@ -16,7 +16,7 @@ interface DashboardMetrics {
   criticalClients: number
   delinquencyRate: number
   attention: CustomerAttention[]
-  fiadoSegments: FiadoSegment[]
+  creditoSegments: CreditoSegment[]
   recentActivity: ActivityEntry[]
   risk: {
     low: number
@@ -78,7 +78,7 @@ function selectRecentActivity(
     ...sales.map((sale) => ({
       id: `activity-${sale.id}`,
       title: `Venta de ${formatCurrency(sale.total)} registrada`,
-      description: `${sale.code} · ${sale.paymentMode === 'contado' ? 'Venta al contado' : `Fiado a ${sale.clientName}`}`,
+      description: `${sale.code} · ${sale.paymentMode === 'contado' ? 'Venta al contado' : `Credito a ${sale.clientName}`}`,
       time: '',
       icon: 'point_of_sale',
       tone: 'primary' as const,
@@ -95,7 +95,7 @@ function selectRecentActivity(
     })),
     ...credits.map((credit) => ({
       id: `activity-${credit.id}`,
-      title: `Fiado de ${formatCurrency(credit.originalAmount)} registrado`,
+      title: `Credito de ${formatCurrency(credit.originalAmount)} registrado`,
       description: `${credit.client.business} · ${credit.code}`,
       time: '',
       icon: 'receipt_long',
@@ -150,7 +150,7 @@ export function selectDashboardMetrics(
     .map((credit) => ({
       id: credit.id,
       name: credit.client.business,
-      fiado: credit.code,
+      credito: credit.code,
       amount: credit.pendingAmount,
       daysOverdue: getDaysOverdue(credit.dueAt, today),
       risk: credit.risk,
@@ -167,7 +167,7 @@ export function selectDashboardMetrics(
       .reduce((sum, credit) => sum + credit.pendingAmount, 0),
     overdue: totalOverdue,
   }
-  const fiadoSegments: FiadoSegment[] = [
+  const creditoSegments: CreditoSegment[] = [
     { label: 'Al día', value: formatCurrency(amountsByStatus.current), color: '#10b981', percent: percentage(amountsByStatus.current, totalPending) },
     { label: 'Próximo a vencer', value: formatCurrency(amountsByStatus.upcoming), color: '#f59e0b', percent: percentage(amountsByStatus.upcoming, totalPending) },
     { label: 'Vencido', value: formatCurrency(amountsByStatus.overdue), color: '#ba1a1a', percent: percentage(amountsByStatus.overdue, totalPending) },
@@ -198,7 +198,7 @@ export function selectDashboardMetrics(
     criticalClients: criticalKeys.size,
     delinquencyRate: percentage(totalOverdue, totalPending),
     attention,
-    fiadoSegments,
+    creditoSegments,
     recentActivity: selectRecentActivity(credits, payments, clients, sales, now),
     risk: {
       low: percentage(riskCounts.low, clients.length),

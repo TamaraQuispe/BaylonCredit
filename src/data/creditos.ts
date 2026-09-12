@@ -1,6 +1,6 @@
-import type { RiskLevel, FiadoStatus } from '@/types'
+import type { RiskLevel, CreditoStatus } from '@/types'
 
-export interface Fiado {
+export interface Credito {
   id: string
   code: string
   client: {
@@ -13,12 +13,12 @@ export interface Fiado {
   paidAmount: number
   createdAt: string
   dueAt: string
-  status: FiadoStatus
+  status: CreditoStatus
   risk: RiskLevel
   paidPercent: number
 }
 
-export interface FiadoDetail extends Fiado {
+export interface CreditoDetail extends Credito {
   phone: string
   hasHistory: boolean
   daysLeft: number
@@ -31,14 +31,14 @@ export interface FiadoDetail extends Fiado {
   }[]
 }
 
-export const fiadoStats = {
-  totalToCollect: { label: 'Total por cobrar', value: 'S/ 45,230.00', detail: 'En 124 fiados activos', icon: 'account_balance_wallet', tone: 'primary-fixed' },
+export const creditoStats = {
+  totalToCollect: { label: 'Total por cobrar', value: 'S/ 45,230.00', detail: 'En 124 creditos activos', icon: 'account_balance_wallet', tone: 'primary-fixed' },
   alDia: { label: 'Deuda al día', value: 'S/ 32,150.00', detail: '71% del total', icon: 'check_circle', tone: 'highest' },
   vencida: { label: 'Deuda vencida', value: 'S/ 13,080.00', detail: '+5.2% esta semana', icon: 'warning', tone: 'error-container' },
   morosos: { label: 'Clientes morosos', value: '18', detail: 'Requieren gestión inmediata', icon: 'group_off', tone: 'secondary-container' },
 }
 
-export const fiados: Fiado[] = [
+export const creditos: Credito[] = [
   {
     id: 'f1',
     code: 'F-2023-0892',
@@ -109,7 +109,7 @@ export const fiados: Fiado[] = [
   },
 ]
 
-export const fiadoDetail: FiadoDetail = {
+export const creditoDetail: CreditoDetail = {
   id: 'f-detail',
   code: 'F-2023-0892',
   client: {
@@ -130,7 +130,7 @@ export const fiadoDetail: FiadoDetail = {
   daysLeft: 14,
   payments: [
     {
-      title: 'Fiado registrado',
+      title: 'Credito registrado',
       description: 'Crédito inicial aprobado.',
       amount: 1200,
       date: '12 Oct 2023, 10:30 AM',

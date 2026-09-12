@@ -1,6 +1,6 @@
 export type RiskLevel = 'bajo' | 'medio' | 'alto' | 'critico' | 'muy-bajo'
 
-export type FiadoStatus = 'al-dia' | 'proximo-a-vencer' | 'vencido' | 'pagado'
+export type CreditoStatus = 'al-dia' | 'proximo-a-vencer' | 'vencido' | 'pagado'
 
 export type InventoryStatus = 'disponible' | 'stock-bajo' | 'agotado'
 

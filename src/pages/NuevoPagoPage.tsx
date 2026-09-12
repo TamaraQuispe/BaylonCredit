@@ -27,7 +27,7 @@ export default function NuevoPagoPage() {
   const { clients } = useClientState()
   const { credits } = useCreditState()
   const requestedClient = searchParams.get('cliente') ?? ''
-  const requestedCredit = searchParams.get('fiado') ?? ''
+  const requestedCredit = searchParams.get('credito') ?? ''
   const payableCredits = credits.filter((credit) => credit.clientId && credit.pendingAmount > 0)
   const availableClients = clients.filter((client) =>
     payableCredits.some((credit) => credit.clientId === client.id),
@@ -108,11 +108,11 @@ export default function NuevoPagoPage() {
 
   const applyPayment = async () => {
     if (!client || amount <= 0 || selectedCredits.length === 0) {
-      setError('Selecciona al menos un fiado e ingresa un monto válido.')
+      setError('Selecciona al menos un credito e ingresa un monto válido.')
       return
     }
     if (amount > selectedTotal) {
-      setError('El pago no puede superar el saldo de los fiados seleccionados.')
+      setError('El pago no puede superar el saldo de los creditos seleccionados.')
       return
     }
     if (!paymentDate) {
@@ -166,7 +166,7 @@ export default function NuevoPagoPage() {
       <div className="mb-8">
         <h2 className="font-h1-display text-h1-display text-on-surface mb-2">Registrar Pago</h2>
         <p className="font-body-lg text-body-lg text-on-surface-variant">
-          Aplica un pago total o parcial a los fiados pendientes de un cliente.
+          Aplica un pago total o parcial a los creditos pendientes de un cliente.
         </p>
       </div>
 
@@ -230,13 +230,13 @@ export default function NuevoPagoPage() {
               {availableClients.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-outline-variant rounded-lg bg-surface-bright">
                   <Icon name="receipt_long" size="48px" className="text-outline mb-2" />
-                  <p className="text-on-surface-variant mb-4">No existen fiados pendientes asociados a clientes.</p>
-                  <Link to="/fiados/nuevo" className="text-primary font-medium hover:underline">Registrar el primer fiado</Link>
+                  <p className="text-on-surface-variant mb-4">No existen creditos pendientes asociados a clientes.</p>
+                  <Link to="/creditos/nuevo" className="text-primary font-medium hover:underline">Registrar el primer credito</Link>
                 </div>
               ) : !client ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-outline-variant rounded-lg bg-surface-bright">
                   <Icon name="person_off" size="48px" className="text-outline mb-2" />
-                  <p className="text-on-surface-variant">Selecciona un cliente para consultar sus fiados pendientes.</p>
+                  <p className="text-on-surface-variant">Selecciona un cliente para consultar sus creditos pendientes.</p>
                 </div>
               ) : (
                 <div>
@@ -257,7 +257,7 @@ export default function NuevoPagoPage() {
                   </div>
 
                   <h4 className="font-body-lg text-body-lg font-semibold text-on-surface mb-3 flex items-center gap-2">
-                    <Icon name="receipt_long" size="20px" className="text-primary" /> Fiados Pendientes
+                    <Icon name="receipt_long" size="20px" className="text-primary" /> CrÃ©ditos Pendientes
                   </h4>
                   <div className="border border-outline-variant rounded-lg overflow-hidden bg-surface-bright">
                     <div className="overflow-x-auto">
@@ -266,7 +266,7 @@ export default function NuevoPagoPage() {
                           <tr>
                             <th className="p-3 w-12" />
                             <th className="p-3 font-table-header text-table-header text-on-surface-variant uppercase">Fecha</th>
-                            <th className="p-3 font-table-header text-table-header text-on-surface-variant uppercase">Fiado</th>
+                            <th className="p-3 font-table-header text-table-header text-on-surface-variant uppercase">Credito</th>
                             <th className="p-3 font-table-header text-table-header text-on-surface-variant uppercase text-right">Saldo</th>
                           </tr>
                         </thead>
@@ -277,7 +277,7 @@ export default function NuevoPagoPage() {
                                 <input type="checkbox" checked={selectedCredits.includes(credit.id)} onChange={() => toggleCredit(credit.id)} className="rounded border-outline-variant text-primary focus:ring-primary" />
                               </td>
                               <td className="p-3">{credit.createdAt}</td>
-                              <td className="p-3"><Link to={`/fiados/${credit.id}`} className="text-primary hover:underline">{credit.code}</Link></td>
+                              <td className="p-3"><Link to={`/creditos/${credit.id}`} className="text-primary hover:underline">{credit.code}</Link></td>
                               <td className="p-3 font-semibold text-right">{formatCurrency(credit.pendingAmount)}</td>
                             </tr>
                           ))}

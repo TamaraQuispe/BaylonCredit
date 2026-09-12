@@ -23,9 +23,9 @@ const attentionColumns: Column<CustomerAttention>[] = [
     cell: (row) => <span className="font-medium text-on-surface">{row.name}</span>,
   },
   {
-    key: 'fiado',
-    header: 'Fiado',
-    cell: (row) => <span className="text-on-surface-variant">{row.fiado}</span>,
+    key: 'credito',
+    header: 'Credito',
+    cell: (row) => <span className="text-on-surface-variant">{row.credito}</span>,
   },
   {
     key: 'amount',
@@ -54,7 +54,7 @@ const attentionColumns: Column<CustomerAttention>[] = [
     align: 'right',
     cell: (row) => (
       <Link
-        to={`/fiados/${row.id}`}
+        to={`/creditos/${row.id}`}
         className="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline"
       >
         Ver
@@ -94,9 +94,9 @@ export default function HomePage() {
       iconTone: 'primary' as const,
     },
     {
-      label: 'Total fiado',
+      label: 'Total credito',
       value: formatCurrency(metrics.totalPending),
-      detail: `En ${metrics.activeCredits} fiados activos`,
+      detail: `En ${metrics.activeCredits} creditos activos`,
       icon: 'account_balance_wallet',
       iconTone: 'secondary' as const,
     },
@@ -130,10 +130,10 @@ export default function HomePage() {
         title={`Buenos días, ${roleLabel}`}
         subtitle="Aquí tienes un resumen de la actividad de hoy."
         actions={
-          <Link to="/fiados/nuevo">
+          <Link to="/creditos/nuevo">
             <Button variant="primary-container" size="md">
               <span className="material-symbols-outlined text-[18px]">add</span>
-              Nuevo Fiado
+              Nuevo Credito
             </Button>
           </Link>
         }
@@ -169,11 +169,11 @@ export default function HomePage() {
         </div>
 
         <div className="xl:col-span-1 flex flex-col gap-6">
-          <Card title="Estado de los fiados">
+          <Card title="Estado de los creditos">
             <DonutChart
-              segments={metrics.fiadoSegments}
+              segments={metrics.creditoSegments}
               centerValue={formatCurrency(metrics.totalPending)}
-              centerLabel="en fiados"
+              centerLabel="en creditos"
             />
           </Card>
         </div>

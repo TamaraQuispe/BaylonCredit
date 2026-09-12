@@ -41,7 +41,7 @@ export default function AppLayout() {
         credits={credits}
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
-        onViewCredito={(id) => {
+        onViewFiado={(id) => {
           setNotificationsOpen(false)
           navigate(`/creditos/${id}`)
         }}

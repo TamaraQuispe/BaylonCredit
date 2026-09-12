@@ -48,7 +48,7 @@ export default function ReportesPage() {
       ['Tasa de morosidad actual', `${metrics.delinquencyRate}%`],
       [],
       ...(portfolio ? [
-        ['Cartera por cliente', 'Deuda', 'Vencido', 'Fiados', 'Vencidos'],
+        ['Cartera por cliente', 'Deuda', 'Vencido', 'Créditos', 'Vencidos'],
         ...portfolio.clients.map((client) => [
           client.clientName,
           client.totalPending,
@@ -128,14 +128,14 @@ export default function ReportesPage() {
               <div key={bar.label} className="flex flex-col items-center gap-2 z-10 flex-1 max-w-28">
                 <div className="flex items-end justify-center gap-1 h-[210px] w-full">
                   <div className="w-7 md:w-10 bg-primary rounded-t-sm hover:opacity-80" style={{ height: `${bar.cash}%` }} title={`Contado: ${bar.cash}%`} />
-                  <div className="w-7 md:w-10 bg-secondary-container rounded-t-sm hover:opacity-80" style={{ height: `${bar.credit}%` }} title={`Fiado: ${bar.credit}%`} />
+                  <div className="w-7 md:w-10 bg-secondary-container rounded-t-sm hover:opacity-80" style={{ height: `${bar.credit}%` }} title={`Credito: ${bar.credit}%`} />
                 </div>
                 <span className="font-label-sm text-label-sm text-on-surface-variant">{bar.label}</span>
               </div>
             ))}
           </div>
           <div className="flex justify-center gap-6 mt-4 border-t border-surface-container-high pt-4">
-            <Legend color="bg-primary" label="Contado" /><Legend color="bg-secondary-container" label="Fiado" />
+            <Legend color="bg-primary" label="Contado" /><Legend color="bg-secondary-container" label="Credito" />
           </div>
         </section>
 
@@ -157,13 +157,13 @@ export default function ReportesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <section className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high flex flex-col">
-          <h3 className="font-h3-title text-h3-title text-on-background mb-1">Cartera de fiados por cliente</h3>
+          <h3 className="font-h3-title text-h3-title text-on-background mb-1">Cartera de creditos por cliente</h3>
           <p className="font-label-sm text-label-sm text-on-surface-variant mb-6">
-            {portfolio?.summary?.activeCredits ?? 0} fiados activos · {portfolio?.summary?.overdueCredits ?? 0} vencidos · {portfolio?.summary?.dueSoonCredits ?? 0} por vencer (≤5 días)
+            {portfolio?.summary?.activeCredits ?? 0} creditos activos · {portfolio?.summary?.overdueCredits ?? 0} vencidos · {portfolio?.summary?.dueSoonCredits ?? 0} por vencer (≤5 días)
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[560px]">
-              <thead><tr className="border-b border-surface-container-high"><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2">CLIENTE</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">DEUDA</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">VENCIDO</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">FIADOS</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">MORA</th></tr></thead>
+              <thead><tr className="border-b border-surface-container-high"><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2">CLIENTE</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">DEUDA</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">VENCIDO</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">CrÃ©ditos</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">MORA</th></tr></thead>
               <tbody>
                 {portfolio?.clients.map((client) => (
                   <tr key={client.clientId} className="border-b border-surface-container-high last:border-0 hover:bg-surface-container-low h-[56px]">
@@ -174,7 +174,7 @@ export default function ReportesPage() {
                     <td className="py-3 px-2 text-center">{client.overdueCredits > 0 ? <span className="px-2 py-1 rounded text-xs font-semibold bg-error-container text-on-error-container">{client.overdueCredits} vencido{client.overdueCredits > 1 ? 's' : ''}</span> : <span className="px-2 py-1 rounded text-xs font-semibold bg-green-50 text-green-700">Al día</span>}</td>
                   </tr>
                 ))}
-                {(!portfolio || portfolio.clients.length === 0) && <tr><td colSpan={5} className="py-12 text-center text-on-surface-variant">No hay fiados registrados en la cartera.</td></tr>}
+                {(!portfolio || portfolio.clients.length === 0) && <tr><td colSpan={5} className="py-12 text-center text-on-surface-variant">No hay creditos registrados en la cartera.</td></tr>}
               </tbody>
             </table>
           </div>

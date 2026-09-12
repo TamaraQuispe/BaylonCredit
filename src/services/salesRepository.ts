@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { apiRequest } from './apiClient'
 
-export type SalePaymentMode = 'contado' | 'fiado'
+export type SalePaymentMode = 'contado' | 'credito'
 export type SalesPeriod = 'hoy' | 'semana' | 'mes'
 
 export interface SaleLine {
@@ -232,7 +232,7 @@ export function selectSalesMetrics(sales: StoredSale[], period: SalesPeriod, now
   return {
     total,
     cash: current.filter((sale) => sale.paymentMode === 'contado').reduce((sum, sale) => sum + sale.total, 0),
-    credit: current.filter((sale) => sale.paymentMode === 'fiado').reduce((sum, sale) => sum + sale.total, 0),
+    credit: current.filter((sale) => sale.paymentMode === 'credito').reduce((sum, sale) => sum + sale.total, 0),
     count: current.length,
     trend: previousTotal > 0 ? Number((((total - previousTotal) / previousTotal) * 100).toFixed(1)) : 0,
     bars: buildBars(current, period),

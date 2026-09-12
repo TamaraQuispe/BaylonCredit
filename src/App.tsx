@@ -4,9 +4,9 @@ import ProtectedRoute from '@/routes/ProtectedRoute'
 import LoginPage from '@/pages/LoginPage'
 import HomePage from '@/pages/HomePage'
 import VentasPage from '@/pages/VentasPage'
-import FiadosPage from '@/pages/FiadosPage'
-import NuevoFiadoPage from '@/pages/NuevoFiadoPage'
-import DetalleFiadoPage from '@/pages/DetalleFiadoPage'
+import CreditosPage from '@/pages/CreditosPage'
+import NuevoCreditoPage from '@/pages/NuevoCreditoPage'
+import DetalleCreditoPage from '@/pages/DetalleCreditoPage'
 import ClientesPage from '@/pages/ClientesPage'
 import NuevoClientePage from '@/pages/NuevoClientePage'
 import DetalleClientePage from '@/pages/DetalleClientePage'
@@ -34,9 +34,9 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route path="/inicio" element={<HomePage />} />
           <Route path="/ventas" element={<VentasPage />} />
-          <Route path="/fiados" element={<FiadosPage />} />
-          <Route path="/fiados/nuevo" element={<NuevoFiadoPage />} />
-          <Route path="/fiados/:id" element={<DetalleFiadoPage />} />
+          <Route path="/creditos" element={<CreditosPage />} />
+          <Route path="/creditos/nuevo" element={<NuevoCreditoPage />} />
+          <Route path="/creditos/:id" element={<DetalleCreditoPage />} />
           <Route path="/clientes" element={<ClientesPage />} />
           <Route path="/clientes/nuevo" element={<NuevoClientePage />} />
           <Route path="/clientes/:id" element={<DetalleClientePage />} />

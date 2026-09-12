@@ -54,7 +54,7 @@ export default function PagosPage() {
               <tr className="border-b border-surface-container-high bg-surface-bright">
                 <th className="font-table-header text-table-header text-on-surface-variant py-4 px-6 uppercase">Cliente</th>
                 <th className="font-table-header text-table-header text-on-surface-variant py-4 px-6 uppercase text-right">Monto pagado</th>
-                <th className="font-table-header text-table-header text-on-surface-variant py-4 px-6 uppercase">Fiado relacionado</th>
+                <th className="font-table-header text-table-header text-on-surface-variant py-4 px-6 uppercase">Credito relacionado</th>
                 <th className="font-table-header text-table-header text-on-surface-variant py-4 px-6 uppercase">Fecha de pago</th>
                 <th className="font-table-header text-table-header text-on-surface-variant py-4 px-6 uppercase text-right">Saldo restante</th>
                 <th className="font-table-header text-table-header text-on-surface-variant py-4 px-6 uppercase">Registrado por</th>
@@ -83,9 +83,9 @@ export default function PagosPage() {
                   <td className="py-3 px-6 text-right">
                     {payment.creditIds[0] ? (
                       <Link
-                        to={`/fiados/${payment.creditIds[0]}`}
+                        to={`/creditos/${payment.creditIds[0]}`}
                         className="text-on-surface-variant hover:text-primary opacity-100 sm:opacity-0 group-hover:opacity-100"
-                        aria-label="Ver fiado relacionado"
+                        aria-label="Ver credito relacionado"
                       >
                         <Icon name="visibility" size="18px" />
                       </Link>

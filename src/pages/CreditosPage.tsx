@@ -4,13 +4,13 @@ import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import { formatCurrency } from '@/utils/format'
 import { useCreditState } from '@/services/creditRepository'
-import type { RiskLevel, FiadoStatus } from '@/types'
+import type { RiskLevel, CreditoStatus } from '@/types'
 
-type StatusFilter = 'todos' | FiadoStatus
+type StatusFilter = 'todos' | CreditoStatus
 
-type FiadoTone = 'primary-fixed' | 'highest' | 'error-container' | 'secondary-container'
+type CreditoTone = 'primary-fixed' | 'highest' | 'error-container' | 'secondary-container'
 
-const statToneClasses: Record<FiadoTone, { icon: string; value: string }> = {
+const statToneClasses: Record<CreditoTone, { icon: string; value: string }> = {
   'primary-fixed': { icon: 'bg-primary-fixed text-on-primary-fixed', value: 'text-on-surface' },
   highest: { icon: 'bg-surface-container-highest text-primary', value: 'text-on-surface' },
   'error-container': { icon: 'bg-error-container text-on-error-container', value: 'text-error' },
@@ -25,7 +25,7 @@ const riskBadge: Record<RiskLevel, string> = {
   critico: 'bg-error-container text-error',
 }
 
-const statusBadge: Record<FiadoStatus, { className: string; label: string; dot?: string; icon?: string }> = {
+const statusBadge: Record<CreditoStatus, { className: string; label: string; dot?: string; icon?: string }> = {
   'al-dia': {
     className: 'bg-surface-container-highest text-primary',
     label: 'Al día',
@@ -56,7 +56,7 @@ const statusFilters: { key: StatusFilter; label: string }[] = [
   { key: 'pagado', label: 'Pagados' },
 ]
 
-export default function FiadosPage() {
+export default function CreditosPage() {
   const [filter, setFilter] = useState<StatusFilter>('todos')
   const { credits } = useCreditState()
 
@@ -78,7 +78,7 @@ export default function FiadosPage() {
     {
       label: 'Total por cobrar',
       value: formatCurrency(totalToCollect),
-      detail: `En ${activeCredits.length} fiados activos`,
+      detail: `En ${activeCredits.length} creditos activos`,
       icon: 'account_balance_wallet',
       tone: 'primary-fixed' as const,
     },
@@ -124,7 +124,7 @@ export default function FiadosPage() {
     )
     const link = document.createElement('a')
     link.href = url
-    link.download = 'fiados.csv'
+    link.download = 'creditos.csv'
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -133,15 +133,15 @@ export default function FiadosPage() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col md:flex-row justify-between items-end gap-4">
         <div>
-          <h2 className="font-h1-display text-h1-display text-on-surface mb-2">Control de fiados</h2>
+          <h2 className="font-h1-display text-h1-display text-on-surface mb-2">Control de creditos</h2>
           <p className="font-body-md text-body-md text-on-surface-variant">
             Monitorea y gestiona los créditos pendientes de tus clientes.
           </p>
         </div>
-        <Link to="/fiados/nuevo">
+        <Link to="/creditos/nuevo">
           <Button variant="primary-container" size="md">
             <span className="material-symbols-outlined text-[18px]">add</span>
-            Nuevo Fiado
+            Nuevo Credito
           </Button>
         </Link>
       </div>
@@ -149,7 +149,7 @@ export default function FiadosPage() {
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
         {stats.map((stat) => {
-          const tone = statToneClasses[stat.tone as FiadoTone]
+          const tone = statToneClasses[stat.tone as CreditoTone]
           return (
             <div
               key={stat.label}
@@ -230,7 +230,7 @@ export default function FiadosPage() {
                 <th className="py-3 px-4 font-table-header text-table-header text-on-surface-variant uppercase">Cliente</th>
                 <th className="py-3 px-4 font-table-header text-table-header text-on-surface-variant uppercase text-right">Monto Original</th>
                 <th className="py-3 px-4 font-table-header text-table-header text-on-surface-variant uppercase text-right">Saldo Pendiente</th>
-                <th className="py-3 px-4 font-table-header text-table-header text-on-surface-variant uppercase">Fecha Fiado</th>
+                <th className="py-3 px-4 font-table-header text-table-header text-on-surface-variant uppercase">Fecha Credito</th>
                 <th className="py-3 px-4 font-table-header text-table-header text-on-surface-variant uppercase">Vencimiento</th>
                 <th className="py-3 px-4 font-table-header text-table-header text-on-surface-variant uppercase">Estado</th>
                 <th className="py-3 px-4 font-table-header text-table-header text-on-surface-variant uppercase text-center">Riesgo IA</th>
@@ -287,7 +287,7 @@ export default function FiadosPage() {
                     </td>
                     <td className="py-2 px-4 text-right">
                       <Link
-                        to={`/fiados/${row.id}`}
+                        to={`/creditos/${row.id}`}
                         className="p-1 inline-flex text-on-surface-variant hover:text-primary transition-colors"
                         aria-label="Ver detalle"
                       >
@@ -304,7 +304,7 @@ export default function FiadosPage() {
         {/* Pagination */}
         <div className="p-4 border-t border-outline-variant flex items-center justify-between bg-surface-bright">
           <span className="font-label-sm text-label-sm text-on-surface-variant">
-            Mostrando {filtered.length} de {credits.length} fiados
+            Mostrando {filtered.length} de {credits.length} creditos
           </span>
           <div className="flex gap-1">
             <button
