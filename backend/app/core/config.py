@@ -39,6 +39,13 @@ class Settings(BaseSettings):
     whatsapp_template_evaluation: str = "credit_evaluation_result"
     whatsapp_template_reminder: str = "credit_payment_reminder"
     whatsapp_template_payment_confirmation: str = "credit_payment_confirmation"
+    openrouter_enabled: bool = False
+    openrouter_api_key: str = ""
+    openrouter_model: str = "nvidia/nemotron-3-super-120b-a12b:free"
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    openrouter_site_url: str = "https://credifycredit.duckdns.org"
+    openrouter_app_name: str = "Credifycredit"
+    openrouter_timeout_seconds: float = 10.0
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -67,6 +74,10 @@ class Settings(BaseSettings):
             raise ValueError("WHATSAPP_REMINDER_DAYS_BEFORE cannot be negative")
         if self.whatsapp_reminder_interval_hours < 1:
             raise ValueError("WHATSAPP_REMINDER_INTERVAL_HOURS must be greater than zero")
+        if self.openrouter_enabled and not self.openrouter_api_key:
+            raise ValueError("OPENROUTER_API_KEY is required when OpenRouter is enabled")
+        if self.openrouter_timeout_seconds <= 0:
+            raise ValueError("OPENROUTER_TIMEOUT_SECONDS must be greater than zero")
         return self
 
 

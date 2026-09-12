@@ -20,6 +20,13 @@ export interface CreditEvaluation {
   confidence?: number
   factors?: ScoreFactor[]
   modelVersion?: string
+  aiExplanation?: string
+  aiRiskFactors?: string[]
+  aiRecommendations?: string[]
+  aiStatus?: 'disabled' | 'pending' | 'completed' | 'failed'
+  aiModel?: string
+  aiPromptVersion?: string
+  aiGeneratedAt?: string
   calculatedAt: string
   responseTimeMs: number
 }
@@ -55,6 +62,13 @@ interface ApiEvaluation {
   confidence?: number
   factors?: ScoreFactor[]
   model_version?: string
+  ai_explanation?: string | null
+  ai_risk_factors?: string[] | null
+  ai_recommendations?: string[] | null
+  ai_status?: 'disabled' | 'pending' | 'completed' | 'failed'
+  ai_model?: string | null
+  ai_prompt_version?: string | null
+  ai_generated_at?: string | null
   calculated_at: string
   response_time_ms: number
 }
@@ -85,6 +99,13 @@ function mapEvaluation(evaluation: ApiEvaluation): CreditEvaluation {
     confidence: evaluation.confidence,
     factors: evaluation.factors,
     modelVersion: evaluation.model_version,
+    aiExplanation: evaluation.ai_explanation ?? undefined,
+    aiRiskFactors: evaluation.ai_risk_factors ?? undefined,
+    aiRecommendations: evaluation.ai_recommendations ?? undefined,
+    aiStatus: evaluation.ai_status,
+    aiModel: evaluation.ai_model ?? undefined,
+    aiPromptVersion: evaluation.ai_prompt_version ?? undefined,
+    aiGeneratedAt: evaluation.ai_generated_at ?? undefined,
     calculatedAt: evaluation.calculated_at,
     responseTimeMs: evaluation.response_time_ms,
   }

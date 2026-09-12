@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from enum import StrEnum
 from uuid import UUID
@@ -128,6 +128,15 @@ class CreditEvaluation(UUIDMixin, TimestampMixin, Base):
     )
     source: Mapped[str] = mapped_column(String(30), nullable=False)
     response_time_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    ai_explanation: Mapped[str | None] = mapped_column(Text)
+    ai_risk_factors: Mapped[list[str] | None] = mapped_column(JSON)
+    ai_recommendations: Mapped[list[str] | None] = mapped_column(JSON)
+    ai_status: Mapped[str] = mapped_column(
+        String(20), default="disabled", server_default="disabled", nullable=False
+    )
+    ai_model: Mapped[str | None] = mapped_column(String(120))
+    ai_prompt_version: Mapped[str | None] = mapped_column(String(40))
+    ai_generated_at: Mapped[datetime | None]
 
 
 class InventoryMovement(UUIDMixin, TimestampMixin, Base):

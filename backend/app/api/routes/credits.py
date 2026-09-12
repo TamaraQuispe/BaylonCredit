@@ -30,6 +30,7 @@ from app.schemas.finance import (
     FinanceCreditRead,
     ScoreFactorRead,
 )
+from app.services.ai_credit import dispatch_ai_explanation, enqueue_ai_explanation
 from app.services.audit import add_audit_log
 from app.services.credit_scoring import evaluate_and_record
 from app.services.whatsapp import enqueue_evaluation_notification
@@ -119,6 +120,13 @@ def serialize_evaluation(evaluation: CreditEvaluation) -> CreditEvaluationRead:
         model_version=evaluation.model_version,
         calculated_at=evaluation.created_at,
         response_time_ms=evaluation.response_time_ms,
+        ai_explanation=evaluation.ai_explanation,
+        ai_risk_factors=evaluation.ai_risk_factors,
+        ai_recommendations=evaluation.ai_recommendations,
+        ai_status=evaluation.ai_status,
+        ai_model=evaluation.ai_model,
+        ai_prompt_version=evaluation.ai_prompt_version,
+        ai_generated_at=evaluation.ai_generated_at,
     )
 
 
@@ -141,8 +149,12 @@ async def record_evaluation(
     )
 
 
-def notify_evaluation(background_tasks: BackgroundTasks, evaluation_id: UUID) -> None:
+def notify_evaluation(
+    background_tasks: BackgroundTasks, evaluation_id: UUID, *, include_ai: bool = True
+) -> None:
     enqueue_evaluation_notification(background_tasks, evaluation_id)
+    if include_ai:
+        enqueue_ai_explanation(background_tasks, evaluation_id)
 
 
 @router.post("/evaluate", response_model=CreditEvaluationRead)
@@ -157,7 +169,9 @@ async def evaluate_requested_credit(
     )
     await db.commit()
     await db.refresh(evaluation)
-    notify_evaluation(background_tasks, evaluation.id)
+    await dispatch_ai_explanation(evaluation.id)
+    await db.refresh(evaluation)
+    notify_evaluation(background_tasks, evaluation.id, include_ai=False)
     return serialize_evaluation(evaluation)
 
 

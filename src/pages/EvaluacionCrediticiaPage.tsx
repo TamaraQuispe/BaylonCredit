@@ -124,6 +124,9 @@ export default function EvaluacionCrediticiaPage() {
       `Límite recomendado: ${formatCurrency(result.recommendedLimit)}`,
       `Decisión: ${result.approved ? 'Aprobado' : 'No aprobado'}`,
       `Recomendación: ${result.recommendation}`,
+      ...(result.aiExplanation ? [`Explicación IA: ${result.aiExplanation}`] : []),
+      ...(result.aiRiskFactors?.map((factor) => `Factor IA: ${factor}`) ?? []),
+      ...(result.aiRecommendations?.map((item) => `Acción sugerida: ${item}`) ?? []),
       `Confianza: ${result.confidence ?? 'No disponible'}${result.confidence !== undefined ? '%' : ''}`,
       `Modelo: ${result.modelVersion ?? 'No disponible'}`,
       `Calculado: ${formatDate(result.calculatedAt)}`,
@@ -195,10 +198,12 @@ export default function EvaluacionCrediticiaPage() {
               </div>
 
               <section className="bg-white rounded-xl shadow-sm border border-outline-variant p-card-padding">
-                <h3 className="font-h3-title text-h3-title text-on-surface mb-2">Recomendación de IA</h3>
+                <h3 className="font-h3-title text-h3-title text-on-surface mb-2">Decisión del motor de riesgo</h3>
                 <p className="font-body-lg text-body-lg text-on-surface">{result.recommendation}</p>
                 <p className="font-label-sm text-label-sm text-on-surface-variant mt-2">Límite recomendado: <strong className="text-primary">{formatCurrency(result.recommendedLimit)}</strong> · Modelo: {result.modelVersion ?? 'No disponible'} · Calculado {formatDate(result.calculatedAt)}</p>
               </section>
+
+              <AiAnalysis result={result} />
 
               <section className="bg-white rounded-xl shadow-sm border border-outline-variant p-card-padding">
                 <h3 className="font-h3-title text-h3-title text-on-surface mb-6 border-b border-outline-variant pb-2">Desglose de Factores de Riesgo</h3>
@@ -233,6 +238,25 @@ export default function EvaluacionCrediticiaPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function AiAnalysis({ result }: { result: CreditEvaluation }) {
+  if (result.aiStatus === 'disabled' || !result.aiStatus) return null
+  if (result.aiStatus === 'pending') {
+    return <section className="bg-white rounded-xl shadow-sm border border-outline-variant p-card-padding"><EmptyState icon="auto_awesome" message="Generando explicación con IA..." compact spin /></section>
+  }
+  if (result.aiStatus === 'failed') {
+    return <section className="bg-white rounded-xl shadow-sm border border-outline-variant p-card-padding"><EmptyState icon="info" message="La decisión se calculó correctamente, pero la explicación de IA no estuvo disponible." compact /></section>
+  }
+  return (
+    <section className="bg-white rounded-xl shadow-sm border border-outline-variant p-card-padding">
+      <h3 className="font-h3-title text-h3-title text-on-surface mb-2 flex items-center gap-2"><Icon name="auto_awesome" className="text-primary" /> Explicación de IA</h3>
+      <p className="font-body-lg text-body-lg text-on-surface">{result.aiExplanation}</p>
+      {result.aiRiskFactors?.length ? <div className="mt-4"><h4 className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-2">Factores relevantes</h4><ul className="list-disc pl-5 space-y-1 text-on-surface">{result.aiRiskFactors.map((factor) => <li key={factor}>{factor}</li>)}</ul></div> : null}
+      {result.aiRecommendations?.length ? <div className="mt-4"><h4 className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-2">Acciones sugeridas</h4><ul className="list-disc pl-5 space-y-1 text-on-surface">{result.aiRecommendations.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
+      <p className="font-label-sm text-label-sm text-on-surface-variant mt-4">Modelo: {result.aiModel ?? 'OpenRouter'} · Esta explicación no modifica la decisión crediticia.</p>
+    </section>
   )
 }
 

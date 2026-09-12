@@ -22,6 +22,7 @@ from app.models.commerce import (
 )
 from app.models.user import User, UserRole
 from app.schemas.commerce import CreditRead, SaleCreate, SaleItemRead, SaleRead
+from app.services.ai_credit import enqueue_ai_explanation
 from app.services.credit_scoring import evaluate_and_record
 from app.services.whatsapp import enqueue_evaluation_notification
 
@@ -202,4 +203,5 @@ async def create_sale(
     if credit:
         await db.refresh(credit)
         enqueue_evaluation_notification(background_tasks, credit_evaluation.id)
+        enqueue_ai_explanation(background_tasks, credit_evaluation.id)
     return await serialize_sale(db, sale, credit)

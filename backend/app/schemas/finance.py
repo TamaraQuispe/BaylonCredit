@@ -34,6 +34,13 @@ class CreditEvaluationRead(BaseModel):
     model_version: str
     calculated_at: datetime
     response_time_ms: int
+    ai_explanation: str | None = None
+    ai_risk_factors: list[str] | None = None
+    ai_recommendations: list[str] | None = None
+    ai_status: Literal["disabled", "pending", "completed", "failed"] = "disabled"
+    ai_model: str | None = None
+    ai_prompt_version: str | None = None
+    ai_generated_at: datetime | None = None
 
 
 class CreditEvaluationHistoryRead(CreditEvaluationRead):

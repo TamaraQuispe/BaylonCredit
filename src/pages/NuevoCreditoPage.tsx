@@ -261,7 +261,7 @@ export default function NuevoCreditoPage() {
             <div className="flex-1 flex flex-col">
               <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-primary-fixed mb-5">
                 <div>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Score Baylón</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Score Credifycredit</p>
                   <p className="font-h1-display text-h1-display text-primary">{evaluation.score}</p>
                 </div>
                 <div className="text-right">

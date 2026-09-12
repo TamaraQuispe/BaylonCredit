@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.ml.features import collect_credit_features
 from app.ml.model import RULES_VERSION, predict_default_probability
 from app.models.client import Client
@@ -279,6 +280,7 @@ async def evaluate_and_record(
     started_at = perf_counter()
     result = await evaluate_credit(db, client_id, amount)
     recommendation = build_recommendation(result, amount)
+    settings = get_settings()
     evaluation = CreditEvaluation(
         client_id=client_id,
         created_by_id=created_by_id,
@@ -294,6 +296,11 @@ async def evaluate_and_record(
         model_version=result.model_version,
         source=source,
         response_time_ms=round((perf_counter() - started_at) * 1000),
+        ai_status=(
+            "pending"
+            if settings.openrouter_enabled and settings.openrouter_api_key
+            else "disabled"
+        ),
     )
     db.add(evaluation)
     return evaluation
