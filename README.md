@@ -203,12 +203,14 @@ y `docker-compose.caddy.yml`.
    DOMAIN=tunegocio.duckdns.org
    CORS_ORIGINS=https://tunegocio.duckdns.org
    ```
-3. Mantén la IP actualizada en DuckDNS añadiendo a `/etc/crontab` o el crontab del
-   usuario un job que llame:
+3. Mantén la IP actualizada en DuckDNS con `deploy/duck.sh`. En la VM el script se
+   copia a `/root/duckdns/duck.sh` (chmod +x) y se programa en crontab cada 5 min;
+   el token se inyecta solo desde el entorno (`DUCKDNS_TOKEN`) y se prueba antes:
    ```bash
-   curl -s "https://www.duckdns.org/update?domains=tunegocio&token=TU_TOKEN&ip="
+   DUCKDNS_TOKEN=TU_TOKEN /root/duckdns/duck.sh   # → debe imprimir "OK"
+   # crontab: */5 * * * * DUCKDNS_TOKEN=TU_TOKEN /root/duckdns/duck.sh >/dev/null 2>&1
    ```
-   (periodicidad recomendada: cada 5 minutos).
+   Nunca se pega el token dentro de `deploy/duck.sh` (quedaría versionado).
 4. Levanta Caddy junto al stack:
    ```bash
    docker compose --env-file .env.prod -f docker-compose.yml \
