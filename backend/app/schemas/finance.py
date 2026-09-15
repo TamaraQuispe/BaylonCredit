@@ -1,9 +1,9 @@
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, PlainSerializer, model_validator
 
 from app.models.commerce import RiskLevel
 
@@ -40,7 +40,13 @@ class CreditEvaluationRead(BaseModel):
     ai_status: Literal["disabled", "pending", "completed", "failed"] = "disabled"
     ai_model: str | None = None
     ai_prompt_version: str | None = None
-    ai_generated_at: datetime | None = None
+    ai_generated_at: Annotated[
+        datetime | None,
+        PlainSerializer(
+            lambda v: v.astimezone(UTC).isoformat() if v is not None else None,
+            return_type=str | None,
+        ),
+    ] = None
 
 
 class CreditEvaluationHistoryRead(CreditEvaluationRead):
