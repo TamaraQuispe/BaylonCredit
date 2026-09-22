@@ -24,10 +24,13 @@ export default function NuevoCreditoPage() {
   const { clients } = useClientState()
   const { settings } = useSettingsState()
   const requestedClient = searchParams.get('cliente') ?? ''
+  const requestedAmount = Number(searchParams.get('monto'))
   const [clientId, setClientId] = useState(
     clients.some((client) => client.id === requestedClient) ? requestedClient : '',
   )
-  const [amount, setAmount] = useState('')
+  const [amount, setAmount] = useState(
+    Number.isFinite(requestedAmount) && requestedAmount > 0 ? String(requestedAmount) : '',
+  )
   const [creditDate, setCreditDate] = useState(isoDate(today))
   const [dueDate, setDueDate] = useState('')
   const [evaluation, setEvaluation] = useState<CreditEvaluation | null>(null)

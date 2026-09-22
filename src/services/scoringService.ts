@@ -8,6 +8,7 @@ export interface ScoreFactor {
   weight: number
   contribution: number
   description: string
+  category: 'positivo' | 'riesgo'
 }
 
 export interface CreditEvaluation {
