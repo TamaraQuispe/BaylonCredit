@@ -9,6 +9,7 @@ WORKDIR /app
 RUN groupadd --system app && useradd --system --gid app --create-home app
 COPY pyproject.toml ./
 COPY app ./app
+COPY scripts/export_real_credit_outcomes.py scripts/train_real_credit_model.py ./scripts/
 COPY alembic ./alembic
 COPY alembic.ini ./
 RUN pip install --upgrade pip && pip install .

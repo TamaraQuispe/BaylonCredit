@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.ml.features import collect_credit_features
+from app.ml.features import FEATURE_NAMES, collect_credit_features
 from app.ml.model import RULES_VERSION, predict_default_probability
 from app.models.client import Client
 from app.models.commerce import (
@@ -49,6 +49,7 @@ class EvaluationResult:
     default_probability: int
     confidence: int
     model_version: str
+    feature_snapshot: dict[str, float]
     blocked_reason: str | None = None
 
 
@@ -266,6 +267,7 @@ async def evaluate_credit(
         default_probability=default_probability,
         confidence=confidence,
         model_version=model_version,
+        feature_snapshot=dict(zip(FEATURE_NAMES, features.vector(), strict=True)),
         blocked_reason=blocked_reason,
     )
 
@@ -296,6 +298,7 @@ async def evaluate_and_record(
         model_version=result.model_version,
         source=source,
         response_time_ms=round((perf_counter() - started_at) * 1000),
+        feature_snapshot=result.feature_snapshot,
         ai_status=(
             "pending"
             if settings.openrouter_enabled and settings.openrouter_api_key

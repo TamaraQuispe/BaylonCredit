@@ -86,6 +86,9 @@ class Credit(UUIDMixin, TimestampMixin, Base):
     sale_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("sales.id", ondelete="RESTRICT"), unique=True
     )
+    evaluation_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("credit_evaluations.id", ondelete="SET NULL"), unique=True
+    )
     created_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     original_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     pending_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
@@ -128,6 +131,8 @@ class CreditEvaluation(UUIDMixin, TimestampMixin, Base):
     )
     source: Mapped[str] = mapped_column(String(30), nullable=False)
     response_time_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Snapshot prevents future client activity from altering a training row.
+    feature_snapshot: Mapped[dict[str, float] | None] = mapped_column(JSON)
     ai_explanation: Mapped[str | None] = mapped_column(Text)
     ai_risk_factors: Mapped[list[str] | None] = mapped_column(JSON)
     ai_recommendations: Mapped[list[str] | None] = mapped_column(JSON)

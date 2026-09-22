@@ -140,13 +140,15 @@ async def record_evaluation(
     client = await db.get(Client, client_id)
     if not client or not client.is_active:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
-    return await evaluate_and_record(
+    evaluation = await evaluate_and_record(
         db,
         client_id,
         amount,
         created_by_id,
         source,
     )
+    await db.flush()
+    return evaluation
 
 
 def notify_evaluation(
@@ -309,6 +311,7 @@ async def create_credit(
         code=f"F-{date.today().year}-{uuid4().hex[:8].upper()}",
         client_id=payload.client_id,
         sale_id=None,
+        evaluation_id=evaluation.id,
         created_by_id=current_user.id,
         original_amount=payload.amount,
         pending_amount=payload.amount,

@@ -186,6 +186,7 @@ async def create_sale(
             code=f"F-{date.today().year}-{uuid4().hex[:8].upper()}",
             client_id=client.id,
             sale_id=sale.id,
+            evaluation_id=credit_evaluation.id,
             created_by_id=current_user.id,
             original_amount=total,
             pending_amount=total,
