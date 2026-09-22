@@ -22,11 +22,15 @@ from sklearn.preprocessing import StandardScaler
 from app.ml.features import FEATURE_NAMES
 from app.ml.training import load_real_dataset
 
+MODEL_FILENAME = "credit_ensemble_v1.joblib"
+META_FILENAME = "credit_ensemble_v1_meta.json"
+MODEL_VERSION = "ml-real-v1"
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset", type=Path, help="CSV exportado de desenlaces reales")
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
 
     x, y = load_real_dataset(args.dataset)
@@ -45,10 +49,20 @@ def main() -> None:
         "n_rows": int(len(y)),
         "default_rate": float(np.mean(y)),
     }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(pipeline, args.output, compress=3)
-    args.output.with_suffix(".json").write_text(
-        json.dumps({"feature_names": FEATURE_NAMES, "metrics": metrics}, indent=2) + "\n"
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    joblib.dump(pipeline, args.output_dir / MODEL_FILENAME, compress=3)
+    (args.output_dir / META_FILENAME).write_text(
+        json.dumps(
+            {
+                "version": MODEL_VERSION,
+                "data_source": "real",
+                "kind": "logistic_regression",
+                "feature_names": FEATURE_NAMES,
+                "metrics": metrics,
+            },
+            indent=2,
+        )
+        + "\n"
     )
     print(json.dumps(metrics, indent=2))
 
