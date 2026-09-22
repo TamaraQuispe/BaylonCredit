@@ -2,7 +2,7 @@
 # Caddy activa TLS/Https automaticamente para el dominio (emite y renueva el certificado).
 # Redirige HTTP->HTTPS y reenvia al frontend (nginx) que sirve la SPA y proxy /api.
 
-{$DOMAIN} {
+{$DOMAIN}, {$ALT_DOMAIN} {
     # Headers de seguridad
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
