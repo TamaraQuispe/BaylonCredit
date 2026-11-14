@@ -1,0 +1,1770 @@
+{
+  "version": "academic-grouped-cv-v3",
+  "generated_utc": "2026-11-12T22:38:17.519091+00:00",
+  "origen": "simulado",
+  "research_only": true,
+  "target": "late_payment",
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "provenance": {
+    "recorded_utc": "2026-11-12T22:38:13.466825+00:00",
+    "protocol_sha256": "8fcb49d60e3a7705761894a0bf106ca6eac9c507273f1beda8e79e76ad8b0094",
+    "source_sha256": "6723f15d0310ee2948a0eb376c03ab325334630cb56cbed0774ca4f03be706ce",
+    "development_sha256": "f640bd82d284f661f8c52e8e6f9e5cf8565186148e609786aeb6c9bfbc62c3da",
+    "code_sha256": {
+      "runner": "9ad30618093d5e066e8b3f9dcc37344bb44d73bd920c86e460e352840b0a969a",
+      "synthetic": "b1c96b9a0a8135b74bf7d7115d0b08adbbd917e2bf7df01e9382c6ab91d29e78",
+      "features": "ec22f6675b9eab61749a86a0ae613781503fab3905e80da08c73f7b8f568fcc1",
+      "outcomes": "c385d1c91af185f305a7fc0429e0c937f5dc11df3ac5af515d810ce751ba59fc"
+    },
+    "runtime": {
+      "python": "3.12.14",
+      "sklearn": "1.9.1",
+      "numpy": "2.5.3",
+      "joblib": "1.6.0",
+      "scipy": "1.18.1"
+    },
+    "feature_names": [
+      "completed_sales",
+      "paid_credits",
+      "paid_late",
+      "pending_overdue",
+      "pending_current",
+      "outstanding",
+      "utilization",
+      "requested_ratio",
+      "tenure_days",
+      "punctuality_rate",
+      "overdue_rate"
+    ],
+    "development_rows": 1289,
+    "development_clients": 125,
+    "excluded_rows": 333,
+    "source_path": "/package/datos/ledger_desarrollo_original.json",
+    "policy": "Original train + validation only, resolved labels; old test excluded"
+  },
+  "selection": {
+    "frozen_utc": "2026-11-12T22:38:16.850762+00:00",
+    "feature_names": [
+      "completed_sales",
+      "paid_credits",
+      "paid_late",
+      "pending_overdue",
+      "pending_current",
+      "outstanding",
+      "utilization",
+      "requested_ratio",
+      "tenure_days",
+      "punctuality_rate",
+      "overdue_rate"
+    ],
+    "protocol_sha256": "8fcb49d60e3a7705761894a0bf106ca6eac9c507273f1beda8e79e76ad8b0094",
+    "source_sha256": "6723f15d0310ee2948a0eb376c03ab325334630cb56cbed0774ca4f03be706ce",
+    "development_sha256": "f640bd82d284f661f8c52e8e6f9e5cf8565186148e609786aeb6c9bfbc62c3da",
+    "families": {
+      "tree": {
+        "family": "tree",
+        "candidate_index": 7,
+        "params": {
+          "family": "tree",
+          "max_depth": 3,
+          "min_samples_leaf": 16,
+          "class_weight": "balanced",
+          "random_state": 42
+        },
+        "threshold": 0.7,
+        "metrics": {
+          "n": 1289,
+          "f2": 0.2564102564102564,
+          "precision": 0.5081081081081081,
+          "recall": 0.22815533980582525,
+          "f1": 0.3149078726968174,
+          "accuracy": 0.682699767261443,
+          "balanced_accuracy": 0.5621962559918522,
+          "roc_auc": 0.6056503304513401,
+          "brier": 0.2426082397286879,
+          "confusion_matrix": [
+            [
+              786,
+              91
+            ],
+            [
+              318,
+              94
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        },
+        "feasible": true,
+        "constraint_failure": false,
+        "research_only": true
+      },
+      "svm": {
+        "family": "svm",
+        "candidate_index": 12,
+        "params": {
+          "family": "svm",
+          "C": 0.1,
+          "class_weight": null,
+          "kernel": "linear",
+          "probability": false,
+          "random_state": 42
+        },
+        "threshold": 0.5,
+        "metrics": {
+          "n": 1289,
+          "f2": 0.02107164358819988,
+          "precision": 0.5384615384615384,
+          "recall": 0.01699029126213592,
+          "f1": 0.03294117647058824,
+          "accuracy": 0.6811481768813034,
+          "balanced_accuracy": 0.5050743930655036,
+          "roc_auc": 0.545693062182418,
+          "brier": 0.21623942809926497,
+          "confusion_matrix": [
+            [
+              871,
+              6
+            ],
+            [
+              405,
+              7
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        },
+        "feasible": true,
+        "constraint_failure": false,
+        "research_only": true
+      }
+    },
+    "global_winner": {
+      "family": "tree",
+      "candidate_index": 7,
+      "params": {
+        "family": "tree",
+        "max_depth": 3,
+        "min_samples_leaf": 16,
+        "class_weight": "balanced",
+        "random_state": 42
+      },
+      "threshold": 0.7,
+      "metrics": {
+        "n": 1289,
+        "f2": 0.2564102564102564,
+        "precision": 0.5081081081081081,
+        "recall": 0.22815533980582525,
+        "f1": 0.3149078726968174,
+        "accuracy": 0.682699767261443,
+        "balanced_accuracy": 0.5621962559918522,
+        "roc_auc": 0.6056503304513401,
+        "brier": 0.2426082397286879,
+        "confusion_matrix": [
+          [
+            786,
+            91
+          ],
+          [
+            318,
+            94
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "feasible": true,
+      "constraint_failure": false,
+      "research_only": true
+    },
+    "baselines": {
+      "most_frequent": {
+        "params": {
+          "family": "most_frequent"
+        },
+        "threshold": 0.5,
+        "metrics": {
+          "n": 1289,
+          "f2": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.6803723816912335,
+          "balanced_accuracy": 0.5,
+          "roc_auc": 0.5,
+          "brier": 0.31962761830876646,
+          "confusion_matrix": [
+            [
+              877,
+              0
+            ],
+            [
+              412,
+              0
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        },
+        "feasible": false
+      },
+      "constant_1": {
+        "params": {
+          "family": "constant_1"
+        },
+        "threshold": 0.5,
+        "metrics": {
+          "n": 1289,
+          "f2": 0.7013959822948587,
+          "precision": 0.31962761830876646,
+          "recall": 1.0,
+          "f1": 0.4844209288653733,
+          "accuracy": 0.31962761830876646,
+          "balanced_accuracy": 0.5,
+          "roc_auc": 0.5,
+          "brier": 0.6803723816912335,
+          "confusion_matrix": [
+            [
+              0,
+              877
+            ],
+            [
+              0,
+              412
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        },
+        "feasible": false
+      }
+    },
+    "constraint_failure": false,
+    "research_only": true,
+    "oof_caveat": "OOF metrics are used for search and therefore optimistic for the chosen candidate, not an unbiased final estimate"
+  },
+  "development": {
+    "rows": 1289,
+    "clients": 125,
+    "original_split_counts": {
+      "train": 943,
+      "validation": 346
+    }
+  },
+  "final_cohort": {
+    "seed": 20261117,
+    "clients": 120,
+    "labeled_rows": 1073,
+    "checks": {
+      "clients": 120,
+      "loans": 1091,
+      "payments": 1412,
+      "scenarios": {
+        "abonos_puntuales": 275,
+        "puntual": 312,
+        "abonos_tardios": 93,
+        "anticipado": 108,
+        "sin_pago": 36,
+        "atraso_largo": 80,
+        "atraso_corto": 144,
+        "abono_incompleto": 25,
+        "aun_sin_desenlace": 18
+      },
+      "labels": {
+        "0": 695,
+        "1": 378,
+        "None": 18
+      },
+      "checks": [
+        "amounts_positive_and_capped",
+        "payments_never_exceed_debt",
+        "one_day_terms",
+        "payments_within_observation",
+        "snapshots_recomputed_before_credit",
+        "labels_recomputed_from_payments",
+        "clients_do_not_cross_splits"
+      ]
+    },
+    "source_clients_disjoint": true,
+    "evaluation_calls_per_model": {
+      "tree": 1,
+      "svm": 1,
+      "most_frequent": 1,
+      "constant_1": 1
+    },
+    "policy": "One final evaluation of all frozen models on same cohort; no post-result tuning or seed changes"
+  },
+  "models": {
+    "tree": {
+      "params": {
+        "family": "tree",
+        "max_depth": 3,
+        "min_samples_leaf": 16,
+        "class_weight": "balanced",
+        "random_state": 42
+      },
+      "threshold": 0.7,
+      "oof_feasible": true,
+      "train": {
+        "n": 1289,
+        "f2": 0.16222479721900349,
+        "precision": 0.717948717948718,
+        "recall": 0.13592233009708737,
+        "f1": 0.22857142857142856,
+        "accuracy": 0.7067494181536075,
+        "balanced_accuracy": 0.5554184056414742,
+        "roc_auc": 0.6649212341278188,
+        "brier": 0.22441429967690021,
+        "confusion_matrix": [
+          [
+            855,
+            22
+          ],
+          [
+            356,
+            56
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "oof": {
+        "n": 1289,
+        "f2": 0.2564102564102564,
+        "precision": 0.5081081081081081,
+        "recall": 0.22815533980582525,
+        "f1": 0.3149078726968174,
+        "accuracy": 0.682699767261443,
+        "balanced_accuracy": 0.5621962559918522,
+        "roc_auc": 0.6056503304513401,
+        "brier": 0.2426082397286879,
+        "confusion_matrix": [
+          [
+            786,
+            91
+          ],
+          [
+            318,
+            94
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "tree.joblib",
+      "interpretation": {
+        "raw_unit_rules": "|--- utilization <= 0.048950\n|   |--- paid_late <= 3.500000\n|   |   |--- punctuality_rate <= 0.763889\n|   |   |   |--- class: 0\n|   |   |--- punctuality_rate >  0.763889\n|   |   |   |--- class: 0\n|   |--- paid_late >  3.500000\n|   |   |--- class: 1\n|--- utilization >  0.048950\n|   |--- punctuality_rate <= 0.527778\n|   |   |--- requested_ratio <= 0.277850\n|   |   |   |--- class: 1\n|   |   |--- requested_ratio >  0.277850\n|   |   |   |--- class: 1\n|   |--- punctuality_rate >  0.527778\n|   |   |--- requested_ratio <= 0.188650\n|   |   |   |--- class: 1\n|   |   |--- requested_ratio >  0.188650\n|   |   |   |--- class: 0\n",
+        "caveat": "Rules use raw units after training-median imputation; saved pipeline is unchanged. Rules are not causal."
+      },
+      "final": {
+        "n": 1073,
+        "f2": 0.14133165829145727,
+        "precision": 0.5625,
+        "recall": 0.11904761904761904,
+        "f1": 0.1965065502183406,
+        "accuracy": 0.6570363466915191,
+        "balanced_accuracy": 0.5343439534087016,
+        "roc_auc": 0.6278862624186365,
+        "brier": 0.23869292023654842,
+        "confusion_matrix": [
+          [
+            660,
+            35
+          ],
+          [
+            333,
+            45
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "error_count": 368,
+      "error_cases": [
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00015",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 11.0,
+            "paid_credits": 2.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.0947,
+            "tenure_days": 31.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.33009138676021355,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00018",
+          "scenario": "sin_pago",
+          "features": {
+            "completed_sales": 16.0,
+            "paid_credits": 5.0,
+            "paid_late": 1.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.52265,
+            "tenure_days": 40.0,
+            "punctuality_rate": 0.8,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.33009138676021355,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00022",
+          "scenario": "atraso_largo",
+          "features": {
+            "completed_sales": 23.0,
+            "paid_credits": 8.0,
+            "paid_late": 1.0,
+            "pending_overdue": 1.0,
+            "pending_current": 0.0,
+            "outstanding": 104.53,
+            "utilization": 0.52265,
+            "requested_ratio": 0.1696,
+            "tenure_days": 54.0,
+            "punctuality_rate": 0.875,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.6048536574852369,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00023",
+          "scenario": "atraso_corto",
+          "features": {
+            "completed_sales": 5.0,
+            "paid_credits": 0.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.09875,
+            "tenure_days": 64.0,
+            "punctuality_rate": 0.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.4559958404028253,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00026",
+          "scenario": "atraso_corto",
+          "features": {
+            "completed_sales": 9.0,
+            "paid_credits": 3.0,
+            "paid_late": 1.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.22985,
+            "tenure_days": 74.0,
+            "punctuality_rate": 0.6666666666666666,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.4559958404028253,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00027",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 11.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.3739,
+            "tenure_days": 78.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.4559958404028253,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00028",
+          "scenario": "atraso_largo",
+          "features": {
+            "completed_sales": 12.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 1.0,
+            "pending_current": 0.0,
+            "outstanding": 37.39,
+            "utilization": 0.18695,
+            "requested_ratio": 0.2333,
+            "tenure_days": 82.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.6771893168604659,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00029",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 13.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 2.0,
+            "pending_current": 0.0,
+            "outstanding": 84.05,
+            "utilization": 0.42025,
+            "requested_ratio": 0.16925,
+            "tenure_days": 86.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.6771893168604659,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00030",
+          "scenario": "abono_incompleto",
+          "features": {
+            "completed_sales": 15.0,
+            "paid_credits": 5.0,
+            "paid_late": 3.0,
+            "pending_overdue": 2.0,
+            "pending_current": 0.0,
+            "outstanding": 63.59,
+            "utilization": 0.31795,
+            "requested_ratio": 0.20305,
+            "tenure_days": 88.0,
+            "punctuality_rate": 0.4,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.6771893168604659,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.7,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00031",
+          "scenario": "puntual",
+          "features": {
+            "completed_sales": 17.0,
+            "paid_credits": 6.0,
+            "paid_late": 4.0,
+            "pending_overdue": 2.0,
+            "pending_current": 0.0,
+            "outstanding": 66.97,
+            "utilization": 0.33485,
+            "requested_ratio": 0.31305,
+            "tenure_days": 93.0,
+            "punctuality_rate": 0.3333333333333333,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.8703555781473143,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.7,
+          "error_type": "FP"
+        }
+      ],
+      "error_cases_note": "First up to ten errors, not selected for tuning; fewer than three only if fewer than three errors exist"
+    },
+    "svm": {
+      "params": {
+        "family": "svm",
+        "C": 0.1,
+        "class_weight": null,
+        "kernel": "linear",
+        "probability": false,
+        "random_state": 42
+      },
+      "threshold": 0.5,
+      "oof_feasible": true,
+      "train": {
+        "n": 1289,
+        "f2": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "accuracy": 0.6803723816912335,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.6460088452469253,
+        "brier": 0.21756765246536355,
+        "confusion_matrix": [
+          [
+            877,
+            0
+          ],
+          [
+            412,
+            0
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "oof": {
+        "n": 1289,
+        "f2": 0.02107164358819988,
+        "precision": 0.5384615384615384,
+        "recall": 0.01699029126213592,
+        "f1": 0.03294117647058824,
+        "accuracy": 0.6811481768813034,
+        "balanced_accuracy": 0.5050743930655036,
+        "roc_auc": 0.545693062182418,
+        "brier": 0.21623942809926497,
+        "confusion_matrix": [
+          [
+            871,
+            6
+          ],
+          [
+            405,
+            7
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "svm.joblib",
+      "interpretation": {
+        "standardized_coefficients": {
+          "completed_sales": -8.418842942582712e-05,
+          "paid_credits": -0.00031633881959513177,
+          "paid_late": 0.0005501994243762566,
+          "pending_overdue": 0.0002532142271544341,
+          "pending_current": 4.416770605022893e-05,
+          "outstanding": -1.8627042888327112e-06,
+          "utilization": -1.8627042681152556e-06,
+          "requested_ratio": 7.292301189900222e-05,
+          "tenure_days": 8.107611870528879e-06,
+          "punctuality_rate": 0.00019403228692036292,
+          "overdue_rate": -5.0212629224841596e-05
+        },
+        "intercept": -0.9998971264895634,
+        "caveat": "Coefficients describe standardized linear SVM margin, not calibrated probabilities, causal effects or business importance."
+      },
+      "final": {
+        "n": 1073,
+        "f2": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "accuracy": 0.6477166821994408,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.6336911423242358,
+        "brier": 0.23010219099506815,
+        "confusion_matrix": [
+          [
+            695,
+            0
+          ],
+          [
+            378,
+            0
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "error_count": 378,
+      "error_cases": [
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00015",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 11.0,
+            "paid_credits": 2.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.0947,
+            "tenure_days": 31.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.3079855538431821,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00018",
+          "scenario": "sin_pago",
+          "features": {
+            "completed_sales": 16.0,
+            "paid_credits": 5.0,
+            "paid_late": 1.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.52265,
+            "tenure_days": 40.0,
+            "punctuality_rate": 0.8,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.3080218561304491,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00022",
+          "scenario": "atraso_largo",
+          "features": {
+            "completed_sales": 23.0,
+            "paid_credits": 8.0,
+            "paid_late": 1.0,
+            "pending_overdue": 1.0,
+            "pending_current": 0.0,
+            "outstanding": 104.53,
+            "utilization": 0.52265,
+            "requested_ratio": 0.1696,
+            "tenure_days": 54.0,
+            "punctuality_rate": 0.875,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.3079367694524642,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00023",
+          "scenario": "atraso_corto",
+          "features": {
+            "completed_sales": 5.0,
+            "paid_credits": 0.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.09875,
+            "tenure_days": 64.0,
+            "punctuality_rate": 0.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.30791979317599566,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00026",
+          "scenario": "atraso_corto",
+          "features": {
+            "completed_sales": 9.0,
+            "paid_credits": 3.0,
+            "paid_late": 1.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.22985,
+            "tenure_days": 74.0,
+            "punctuality_rate": 0.6666666666666666,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.3080449447531424,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00027",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 11.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.3739,
+            "tenure_days": 78.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.30811235801483117,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00028",
+          "scenario": "atraso_largo",
+          "features": {
+            "completed_sales": 12.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 1.0,
+            "pending_current": 0.0,
+            "outstanding": 37.39,
+            "utilization": 0.18695,
+            "requested_ratio": 0.2333,
+            "tenure_days": 82.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.30815193427306214,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00029",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 13.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 2.0,
+            "pending_current": 0.0,
+            "outstanding": 84.05,
+            "utilization": 0.42025,
+            "requested_ratio": 0.16925,
+            "tenure_days": 86.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.3082316071597296,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00030",
+          "scenario": "abono_incompleto",
+          "features": {
+            "completed_sales": 15.0,
+            "paid_credits": 5.0,
+            "paid_late": 3.0,
+            "pending_overdue": 2.0,
+            "pending_current": 0.0,
+            "outstanding": 63.59,
+            "utilization": 0.31795,
+            "requested_ratio": 0.20305,
+            "tenure_days": 88.0,
+            "punctuality_rate": 0.4,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.30829378087188725,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0004",
+          "loan_id": "CV3-L00033",
+          "scenario": "atraso_corto",
+          "features": {
+            "completed_sales": 3.0,
+            "paid_credits": 1.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.25695,
+            "tenure_days": 103.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.30807029707526834,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        }
+      ],
+      "error_cases_note": "First up to ten errors, not selected for tuning; fewer than three only if fewer than three errors exist"
+    },
+    "most_frequent": {
+      "params": {
+        "family": "most_frequent"
+      },
+      "threshold": 0.5,
+      "oof_feasible": false,
+      "train": {
+        "n": 1289,
+        "f2": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "accuracy": 0.6803723816912335,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.31962761830876646,
+        "confusion_matrix": [
+          [
+            877,
+            0
+          ],
+          [
+            412,
+            0
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "oof": {
+        "n": 1289,
+        "f2": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "accuracy": 0.6803723816912335,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.31962761830876646,
+        "confusion_matrix": [
+          [
+            877,
+            0
+          ],
+          [
+            412,
+            0
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "most_frequent.joblib",
+      "interpretation": {
+        "caveat": "Dummy reference, not a learned risk model"
+      },
+      "final": {
+        "n": 1073,
+        "f2": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "accuracy": 0.6477166821994408,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.35228331780055916,
+        "confusion_matrix": [
+          [
+            695,
+            0
+          ],
+          [
+            378,
+            0
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "error_count": 378,
+      "error_cases": [
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00015",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 11.0,
+            "paid_credits": 2.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.0947,
+            "tenure_days": 31.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00018",
+          "scenario": "sin_pago",
+          "features": {
+            "completed_sales": 16.0,
+            "paid_credits": 5.0,
+            "paid_late": 1.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.52265,
+            "tenure_days": 40.0,
+            "punctuality_rate": 0.8,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0002",
+          "loan_id": "CV3-L00022",
+          "scenario": "atraso_largo",
+          "features": {
+            "completed_sales": 23.0,
+            "paid_credits": 8.0,
+            "paid_late": 1.0,
+            "pending_overdue": 1.0,
+            "pending_current": 0.0,
+            "outstanding": 104.53,
+            "utilization": 0.52265,
+            "requested_ratio": 0.1696,
+            "tenure_days": 54.0,
+            "punctuality_rate": 0.875,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00023",
+          "scenario": "atraso_corto",
+          "features": {
+            "completed_sales": 5.0,
+            "paid_credits": 0.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.09875,
+            "tenure_days": 64.0,
+            "punctuality_rate": 0.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00026",
+          "scenario": "atraso_corto",
+          "features": {
+            "completed_sales": 9.0,
+            "paid_credits": 3.0,
+            "paid_late": 1.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.22985,
+            "tenure_days": 74.0,
+            "punctuality_rate": 0.6666666666666666,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00027",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 11.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.3739,
+            "tenure_days": 78.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00028",
+          "scenario": "atraso_largo",
+          "features": {
+            "completed_sales": 12.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 1.0,
+            "pending_current": 0.0,
+            "outstanding": 37.39,
+            "utilization": 0.18695,
+            "requested_ratio": 0.2333,
+            "tenure_days": 82.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00029",
+          "scenario": "abonos_tardios",
+          "features": {
+            "completed_sales": 13.0,
+            "paid_credits": 4.0,
+            "paid_late": 2.0,
+            "pending_overdue": 2.0,
+            "pending_current": 0.0,
+            "outstanding": 84.05,
+            "utilization": 0.42025,
+            "requested_ratio": 0.16925,
+            "tenure_days": 86.0,
+            "punctuality_rate": 0.5,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0003",
+          "loan_id": "CV3-L00030",
+          "scenario": "abono_incompleto",
+          "features": {
+            "completed_sales": 15.0,
+            "paid_credits": 5.0,
+            "paid_late": 3.0,
+            "pending_overdue": 2.0,
+            "pending_current": 0.0,
+            "outstanding": 63.59,
+            "utilization": 0.31795,
+            "requested_ratio": 0.20305,
+            "tenure_days": 88.0,
+            "punctuality_rate": 0.4,
+            "overdue_rate": 1.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0004",
+          "loan_id": "CV3-L00033",
+          "scenario": "atraso_corto",
+          "features": {
+            "completed_sales": 3.0,
+            "paid_credits": 1.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.25695,
+            "tenure_days": 103.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 0.0,
+          "actual": 1,
+          "predicted": 0,
+          "threshold": 0.5,
+          "error_type": "FN"
+        }
+      ],
+      "error_cases_note": "First up to ten errors, not selected for tuning; fewer than three only if fewer than three errors exist"
+    },
+    "constant_1": {
+      "params": {
+        "family": "constant_1"
+      },
+      "threshold": 0.5,
+      "oof_feasible": false,
+      "train": {
+        "n": 1289,
+        "f2": 0.7013959822948587,
+        "precision": 0.31962761830876646,
+        "recall": 1.0,
+        "f1": 0.4844209288653733,
+        "accuracy": 0.31962761830876646,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.6803723816912335,
+        "confusion_matrix": [
+          [
+            0,
+            877
+          ],
+          [
+            0,
+            412
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "oof": {
+        "n": 1289,
+        "f2": 0.7013959822948587,
+        "precision": 0.31962761830876646,
+        "recall": 1.0,
+        "f1": 0.4844209288653733,
+        "accuracy": 0.31962761830876646,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.6803723816912335,
+        "confusion_matrix": [
+          [
+            0,
+            877
+          ],
+          [
+            0,
+            412
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "constant_1.joblib",
+      "interpretation": {
+        "caveat": "Dummy reference, not a learned risk model"
+      },
+      "final": {
+        "n": 1073,
+        "f2": 0.7311411992263056,
+        "precision": 0.35228331780055916,
+        "recall": 1.0,
+        "f1": 0.5210199862164024,
+        "accuracy": 0.35228331780055916,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.6477166821994408,
+        "confusion_matrix": [
+          [
+            0,
+            695
+          ],
+          [
+            0,
+            378
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "error_count": 695,
+      "error_cases": [
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00001",
+          "scenario": "abonos_puntuales",
+          "features": {
+            "completed_sales": 3.0,
+            "paid_credits": 0.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.2269,
+            "tenure_days": 116.0,
+            "punctuality_rate": 0.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00002",
+          "scenario": "abonos_puntuales",
+          "features": {
+            "completed_sales": 5.0,
+            "paid_credits": 1.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.4259,
+            "tenure_days": 119.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00003",
+          "scenario": "abonos_puntuales",
+          "features": {
+            "completed_sales": 7.0,
+            "paid_credits": 2.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.67685,
+            "tenure_days": 122.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00004",
+          "scenario": "abonos_puntuales",
+          "features": {
+            "completed_sales": 8.0,
+            "paid_credits": 2.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 1.0,
+            "outstanding": 67.69,
+            "utilization": 0.33845,
+            "requested_ratio": 0.47935,
+            "tenure_days": 123.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00005",
+          "scenario": "puntual",
+          "features": {
+            "completed_sales": 10.0,
+            "paid_credits": 4.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.1655,
+            "tenure_days": 127.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00006",
+          "scenario": "puntual",
+          "features": {
+            "completed_sales": 12.0,
+            "paid_credits": 5.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.3051,
+            "tenure_days": 129.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00007",
+          "scenario": "puntual",
+          "features": {
+            "completed_sales": 14.0,
+            "paid_credits": 6.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.1539,
+            "tenure_days": 132.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00008",
+          "scenario": "puntual",
+          "features": {
+            "completed_sales": 16.0,
+            "paid_credits": 7.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.27855,
+            "tenure_days": 135.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00009",
+          "scenario": "abonos_puntuales",
+          "features": {
+            "completed_sales": 17.0,
+            "paid_credits": 8.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.1272,
+            "tenure_days": 140.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        },
+        {
+          "origen": "simulado",
+          "client_id": "CV3-C0001",
+          "loan_id": "CV3-L00010",
+          "scenario": "puntual",
+          "features": {
+            "completed_sales": 19.0,
+            "paid_credits": 9.0,
+            "paid_late": 0.0,
+            "pending_overdue": 0.0,
+            "pending_current": 0.0,
+            "outstanding": 0.0,
+            "utilization": 0.0,
+            "requested_ratio": 0.348,
+            "tenure_days": 143.0,
+            "punctuality_rate": 1.0,
+            "overdue_rate": 0.0
+          },
+          "probability": 1.0,
+          "actual": 0,
+          "predicted": 1,
+          "threshold": 0.5,
+          "error_type": "FP"
+        }
+      ],
+      "error_cases_note": "First up to ten errors, not selected for tuning; fewer than three only if fewer than three errors exist"
+    }
+  },
+  "baseline_comparison": {
+    "train": {
+      "baselines": {
+        "most_frequent": {
+          "f2": 0.0,
+          "feasible": false,
+          "selected_f2_strictly_higher": true
+        },
+        "constant_1": {
+          "f2": 0.7013959822948587,
+          "feasible": false,
+          "selected_f2_strictly_higher": false
+        }
+      },
+      "selected_feasible": true,
+      "selected_superior_to_both": false,
+      "caveat": "Descriptive F2 comparison only, not statistical or business superiority; no superiority claim if a baseline is ineligible or not beaten."
+    },
+    "oof": {
+      "baselines": {
+        "most_frequent": {
+          "f2": 0.0,
+          "feasible": false,
+          "selected_f2_strictly_higher": true
+        },
+        "constant_1": {
+          "f2": 0.7013959822948587,
+          "feasible": false,
+          "selected_f2_strictly_higher": false
+        }
+      },
+      "selected_feasible": true,
+      "selected_superior_to_both": false,
+      "caveat": "Descriptive F2 comparison only, not statistical or business superiority; no superiority claim if a baseline is ineligible or not beaten."
+    },
+    "final": {
+      "baselines": {
+        "most_frequent": {
+          "f2": 0.0,
+          "feasible": false,
+          "selected_f2_strictly_higher": true
+        },
+        "constant_1": {
+          "f2": 0.7311411992263056,
+          "feasible": false,
+          "selected_f2_strictly_higher": false
+        }
+      },
+      "selected_feasible": true,
+      "selected_superior_to_both": false,
+      "caveat": "Descriptive F2 comparison only, not statistical or business superiority; no superiority claim if a baseline is ineligible or not beaten."
+    }
+  },
+  "illustrative_inference": {
+    "origen": "simulado",
+    "illustrative_only": true,
+    "known_label": null,
+    "family": "tree",
+    "feature_names": [
+      "completed_sales",
+      "paid_credits",
+      "paid_late",
+      "pending_overdue",
+      "pending_current",
+      "outstanding",
+      "utilization",
+      "requested_ratio",
+      "tenure_days",
+      "punctuality_rate",
+      "overdue_rate"
+    ],
+    "features": {
+      "completed_sales": 3,
+      "paid_credits": 2,
+      "paid_late": 1,
+      "pending_overdue": 0,
+      "pending_current": 0,
+      "outstanding": 0,
+      "utilization": 0,
+      "requested_ratio": 0.25,
+      "tenure_days": 45,
+      "punctuality_rate": 0.5,
+      "overdue_rate": 0
+    },
+    "probability": 0.4559958404028253,
+    "threshold": 0.7,
+    "predicted": 0,
+    "research_only": true
+  },
+  "artifact_sha256": {
+    "tree.joblib": "bdf0490fcd0f9759b9033f35c41bac3d77ef9c21ba193d746f7e2c79d2b5bafc",
+    "svm.joblib": "3026fd057b9136a7965991ee0b37b9e3d8f5b78e1b760a970f91121393337cde",
+    "most_frequent.joblib": "318d87fd64d9f41f93a809c196283263694aa8edb3fb75b989d509f4ea4e74ff",
+    "constant_1.joblib": "2d8998ccceba781a3dd8332e66f3d943e74a6ee05fb12763d59dc00f0574db9a",
+    "selected_model.joblib": "bdf0490fcd0f9759b9033f35c41bac3d77ef9c21ba193d746f7e2c79d2b5bafc"
+  },
+  "limitations": [
+    "Simulator parameters remain uncalibrated to quantitative business evidence",
+    "Final cohort comes from same generator, not external validation",
+    "All records fictional",
+    "Numerical precision floor and F2 are provisional technical assumptions, not business commitments",
+    "An unseen test must be reserved for any later experimental selection",
+    "OOF metrics are used for search and therefore optimistic for the chosen candidate, not an unbiased final estimate",
+    "Precision floor and F2 are technical assumptions, not business readiness"
+  ]
+}

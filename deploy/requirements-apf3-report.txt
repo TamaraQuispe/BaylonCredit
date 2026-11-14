@@ -1,0 +1,5 @@
+python-docx==1.2.0
+matplotlib==3.11.2
+Markdown==3.8.2
+pypdf==6.21.4
+python-pptx==1.0.2

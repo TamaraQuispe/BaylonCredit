@@ -1,0 +1,174 @@
+{
+  "version": "academic-synthetic-late-v1",
+  "data_source": "synthetic",
+  "generated_utc": "2026-10-29T14:08:07.728676+00:00",
+  "seed": 20261028,
+  "teacher_permission": "Reported by the user; no independent teacher message attached",
+  "scope": "Academic experiment only. No production changes, real personal data, or business-performance validation.",
+  "simulated_period": {
+    "start": "2026-09-01T09:00:00",
+    "observation_cutoff": "2026-10-31"
+  },
+  "target": "late_payment",
+  "target_definition": "Not fully paid by the end of the contractual due date",
+  "features": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "excluded_from_features": [
+    "profile",
+    "scenario",
+    "pending_at_cutoff",
+    "late_payment",
+    "client_id",
+    "loan_id",
+    "split"
+  ],
+  "split": "60/20/20 by fictional client; assigned before simulation, no client crosses partitions",
+  "class_counts": {
+    "train": {
+      "0": 627,
+      "1": 316
+    },
+    "validation": {
+      "0": 250,
+      "1": 96
+    },
+    "test": {
+      "0": 195,
+      "1": 114
+    }
+  },
+  "clients_per_split": {
+    "train": 108,
+    "validation": 36,
+    "test": 36
+  },
+  "consistency": {
+    "clients": 180,
+    "loans": 1622,
+    "payments": 2078,
+    "scenarios": {
+      "abonos_puntuales": 409,
+      "puntual": 509,
+      "anticipado": 154,
+      "atraso_largo": 123,
+      "atraso_corto": 212,
+      "abono_incompleto": 36,
+      "abonos_tardios": 111,
+      "sin_pago": 44,
+      "aun_sin_desenlace": 24
+    },
+    "labels": {
+      "0": 1072,
+      "1": 526,
+      "None": 24
+    },
+    "checks": [
+      "amounts_positive_and_capped",
+      "payments_never_exceed_debt",
+      "one_day_terms",
+      "payments_within_observation",
+      "snapshots_recomputed_before_credit",
+      "labels_recomputed_from_payments",
+      "clients_do_not_cross_splits"
+    ]
+  },
+  "validation_metrics": {
+    "logistic_regression": {
+      "accuracy": 0.6502890173410405,
+      "precision": 0.40310077519379844,
+      "recall": 0.5416666666666666,
+      "f1": 0.4622222222222222,
+      "roc_auc": 0.651,
+      "brier_score": 0.22526827792086124,
+      "confusion_matrix_labels_0_1": [
+        [
+          173,
+          77
+        ],
+        [
+          44,
+          52
+        ]
+      ]
+    },
+    "random_forest": {
+      "accuracy": 0.6069364161849711,
+      "precision": 0.35507246376811596,
+      "recall": 0.5104166666666666,
+      "f1": 0.4188034188034188,
+      "roc_auc": 0.6240833333333333,
+      "brier_score": 0.2298572079605532,
+      "confusion_matrix_labels_0_1": [
+        [
+          161,
+          89
+        ],
+        [
+          47,
+          49
+        ]
+      ]
+    }
+  },
+  "selection": "Highest validation F1, no selection or tuning on test",
+  "selected_model": "logistic_regression",
+  "threshold": 0.5,
+  "held_out_synthetic_test_metrics": {
+    "accuracy": 0.6181229773462783,
+    "precision": 0.4859154929577465,
+    "recall": 0.6052631578947368,
+    "f1": 0.5390625,
+    "roc_auc": 0.6304543409806568,
+    "brier_score": 0.23644857309265974,
+    "confusion_matrix_labels_0_1": [
+      [
+        122,
+        73
+      ],
+      [
+        45,
+        69
+      ]
+    ]
+  },
+  "baseline_synthetic_test_metrics": {
+    "accuracy": 0.6310679611650486,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "roc_auc": 0.5,
+    "brier_score": 0.2339657461804767,
+    "confusion_matrix_labels_0_1": [
+      [
+        195,
+        0
+      ],
+      [
+        114,
+        0
+      ]
+    ]
+  },
+  "sha256": {
+    "synthetic_credit_dataset.csv": "0adc529735628f20c8b96d38ea71a66bf5967f2eab2ec6fcb1b5676ae0b734cb",
+    "synthetic_transactions.json": "6723f15d0310ee2948a0eb376c03ab325334630cb56cbed0774ca4f03be706ce"
+  },
+  "limitations": [
+    "Simulation assumptions, not estimated business distributions",
+    "No guarantee of real-world performance or calibrated probabilities",
+    "Synthetic granted credits are observations, not automatic approval recommendations",
+    "The 5% loss-to-sales estimate is not used as the lateness/target distribution",
+    "Unresolved cases excluded, IDs and future outcomes not used as predictors"
+  ]
+}

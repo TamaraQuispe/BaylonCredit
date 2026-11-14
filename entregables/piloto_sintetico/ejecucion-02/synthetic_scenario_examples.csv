@@ -1,0 +1,10 @@
+data_source,client_id,loan_id,scenario,evaluated_at,due_date,requested_amount,pending_at_cutoff,late_payment
+synthetic,SYN-C0001,SYN-L00001,abonos_puntuales,2026-09-12T09:00:00,2026-09-13,13.70,0.00,0
+synthetic,SYN-C0001,SYN-L00002,puntual,2026-09-17T09:00:00,2026-09-18,40.12,0.00,0
+synthetic,SYN-C0002,SYN-L00012,anticipado,2026-09-11T09:00:00,2026-09-12,50,0.00,0
+synthetic,SYN-C0002,SYN-L00013,atraso_largo,2026-09-16T09:00:00,2026-09-17,71.51,0.00,1
+synthetic,SYN-C0002,SYN-L00015,atraso_corto,2026-09-23T09:00:00,2026-09-24,93.30,0.00,1
+synthetic,SYN-C0002,SYN-L00017,abono_incompleto,2026-10-01T09:00:00,2026-10-02,42.91,21.45,1
+synthetic,SYN-C0003,SYN-L00028,abonos_tardios,2026-09-14T09:00:00,2026-09-15,67.81,0.00,1
+synthetic,SYN-C0003,SYN-L00032,sin_pago,2026-09-28T09:00:00,2026-09-29,127.03,127.03,1
+synthetic,SYN-C0006,SYN-L00052,aun_sin_desenlace,2026-10-31T09:00:00,2026-11-01,21.15,21.15,

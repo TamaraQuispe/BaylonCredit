@@ -1,0 +1,188 @@
+{
+  "version": "academic-synthetic-late-v2",
+  "data_source": "synthetic",
+  "generated_utc": "2026-10-29T14:31:10.682037+00:00",
+  "protocol": {
+    "recorded_utc": "2026-10-29T14:31:09.392094+00:00",
+    "data_source": "synthetic",
+    "training_source_sha256": {
+      "synthetic_credit_dataset.csv": "0adc529735628f20c8b96d38ea71a66bf5967f2eab2ec6fcb1b5676ae0b734cb",
+      "synthetic_transactions.json": "6723f15d0310ee2948a0eb376c03ab325334630cb56cbed0774ca4f03be706ce"
+    },
+    "old_test_policy": "Excluded from selection; previously published, not a fresh final test",
+    "models": [
+      "logistic_C0.1_unweighted",
+      "logistic_C1.0_unweighted",
+      "logistic_C10.0_unweighted",
+      "forest_depth3_unweighted",
+      "forest_depth6_unweighted",
+      "logistic_C0.1_balanced",
+      "logistic_C1.0_balanced",
+      "logistic_C10.0_balanced",
+      "forest_depth3_balanced",
+      "forest_depth6_balanced"
+    ],
+    "thresholds": [
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8
+    ],
+    "selection": "Highest validation accuracy with recall >= 0.30; balanced accuracy/F1 tie breaks",
+    "recall_floor": 0.3,
+    "cost_assumption": "FP and FN equally weighted for accuracy; not business cost estimates",
+    "final_cohort_seed": 20261030,
+    "final_cohort_clients": 120,
+    "generator_changes": "None; same coherent simulator as academic execution-02",
+    "deployment": "Read-only academic demonstration only; no credit decisions or production",
+    "python": "3.12.14",
+    "sklearn": "1.9.1",
+    "generator_sha256": "b1c96b9a0a8135b74bf7d7115d0b08adbbd917e2bf7df01e9382c6ab91d29e78"
+  },
+  "target": "late_payment",
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "chosen": {
+    "model": "logistic_C0.1_unweighted",
+    "threshold": 0.4,
+    "metrics": {
+      "accuracy": 0.6994219653179191,
+      "balanced_accuracy": 0.5930833333333333,
+      "precision": 0.4473684210526316,
+      "recall": 0.3541666666666667,
+      "f1": 0.3953488372093023,
+      "roc_auc": 0.6512916666666667,
+      "brier_score": 0.18835489420181759,
+      "confusion_matrix": [
+        [
+          208,
+          42
+        ],
+        [
+          62,
+          34
+        ]
+      ]
+    }
+  },
+  "training_rows": 943,
+  "validation_rows": 346,
+  "fresh_final_checks": {
+    "clients": 120,
+    "loans": 1088,
+    "payments": 1413,
+    "scenarios": {
+      "puntual": 355,
+      "atraso_corto": 138,
+      "abonos_puntuales": 281,
+      "abonos_tardios": 84,
+      "anticipado": 85,
+      "atraso_largo": 81,
+      "abono_incompleto": 21,
+      "sin_pago": 25,
+      "aun_sin_desenlace": 18
+    },
+    "labels": {
+      "0": 721,
+      "1": 349,
+      "None": 18
+    },
+    "checks": [
+      "amounts_positive_and_capped",
+      "payments_never_exceed_debt",
+      "one_day_terms",
+      "payments_within_observation",
+      "snapshots_recomputed_before_credit",
+      "labels_recomputed_from_payments",
+      "clients_do_not_cross_splits"
+    ]
+  },
+  "final_labeled_rows": 1070,
+  "comparison_on_same_fresh_cohort": {
+    "second_model": {
+      "accuracy": 0.6626168224299065,
+      "balanced_accuracy": 0.6143826824412131,
+      "precision": 0.48255813953488375,
+      "recall": 0.47564469914040114,
+      "f1": 0.4790764790764791,
+      "roc_auc": 0.6584316593079494,
+      "brier_score": 0.20471921972807372,
+      "confusion_matrix": [
+        [
+          543,
+          178
+        ],
+        [
+          183,
+          166
+        ]
+      ]
+    },
+    "first_model_same_fresh_cohort": {
+      "accuracy": 0.6074766355140186,
+      "balanced_accuracy": 0.6096872776985165,
+      "precision": 0.4291417165668663,
+      "recall": 0.6160458452722063,
+      "f1": 0.5058823529411764,
+      "roc_auc": 0.656384995370168,
+      "brier_score": 0.23634338852149245,
+      "confusion_matrix": [
+        [
+          435,
+          286
+        ],
+        [
+          134,
+          215
+        ]
+      ]
+    },
+    "majority_baseline": {
+      "accuracy": 0.6738317757009346,
+      "balanced_accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5,
+      "brier_score": 0.2198623036347073,
+      "confusion_matrix": [
+        [
+          721,
+          0
+        ],
+        [
+          349,
+          0
+        ]
+      ]
+    }
+  },
+  "limitations": [
+    "Single synthetic generator, not external real-world validation",
+    "Final cohort must not be reused for more tuning",
+    "Probabilities not calibrated for real customers",
+    "Prior experiment already inspected old test; it was excluded here",
+    "Read-only academic lab eligible, never automatic credit approval"
+  ],
+  "artifact_sha256": "490b8bc012996b8061e00cb42e1bc905bdc54cb10b7329d20ff8d6801172d92d"
+}

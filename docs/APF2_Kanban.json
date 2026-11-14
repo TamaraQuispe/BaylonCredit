@@ -1,0 +1,456 @@
+{
+  "title": "APF2 - Tablero operativo iniciado durante el cierre de pendientes",
+  "created_utc": "2026-10-07T21:10:14Z",
+  "scope": "Tablero iniciado el 07/10/2026, continuado con movimientos reales; asignaciones humanas confirmadas por el usuario para seguimiento futuro, no prueba de trabajo humano pasado ni gestión previa.",
+  "wip": {
+    "En curso": 2,
+    "Revisión": 2
+  },
+  "cards": [
+    {
+      "id": "P01",
+      "title": "Alinear etiqueta APF3 a atraso",
+      "state": "Hecho",
+      "owner": "Asistencia técnica OpenCode; decisión confirmada por el usuario",
+      "evidence": "Etiqueta late_payment alineada al vencimiento; 58 tests aprobados; tooling independiente desplegado y exportador ejecutado con 0 casos elegibles, sin entrenar"
+    },
+    {
+      "id": "P02",
+      "title": "Localizar o declarar ausentes capturas T1-T6",
+      "state": "Hecho",
+      "owner": "Grupo 2",
+      "evidence": "Ficha ampliada (1) recibida con doce capturas y firma en imagen; distinguirla de capturas técnicas posteriores"
+    },
+    {
+      "id": "P03",
+      "title": "Registrar tablero y evidencia de movimientos",
+      "state": "Hecho",
+      "owner": "Pablo: continuidad Kanban y evidencias",
+      "evidence": "Tablero y captura generados con movimientos reales; responsables humanos y continuidad a cargo del grupo"
+    },
+    {
+      "id": "P04",
+      "title": "Precisar denominador y periodo del 5 %",
+      "state": "Revisión",
+      "owner": "Omara y Rildo: confirmar definición del 5 %",
+      "evidence": "Según ficha de revalidación del 08/10: 5 % pérdida mensual estimada sobre ventas; definición recibida, corroboración contable pendiente"
+    },
+    {
+      "id": "P05",
+      "title": "Confirmar factura Oracle y estimar horas",
+      "state": "Revisión",
+      "owner": "Tamara: confirmar alcance Oracle y presupuesto",
+      "evidence": "Cost Analysis recibido: PEN 0.00 del 1 al 7 octubre; filtros no visibles, no factura; horas/costos restantes estimados"
+    },
+    {
+      "id": "P06",
+      "title": "Recuperar prompts y fechas de Anexo C",
+      "state": "Hecho",
+      "owner": "Asistencia técnica OpenCode; revisión humana Grupo 2",
+      "evidence": "Seis prompts exactos recuperados con UTC, hora Lima, proveedor y modelo; revisión humana y registro Claude pendientes"
+    },
+    {
+      "id": "R01",
+      "title": "Acciones accesibles sin hover",
+      "state": "Hecho",
+      "owner": "Tamara: aplicación; Pablo: pruebas; Omara: nueva sesión Rildo",
+      "evidence": "Cierre técnico; ficha de revalidación del 08/10 registra detalle sin hover y edición deshabilitada; continuar con condiciones"
+    },
+    {
+      "id": "R02",
+      "title": "Reverificar contador y solicitar aceptación",
+      "state": "Hecho",
+      "owner": "Pablo: verificación; Omara: coordinación Rildo",
+      "evidence": "Cierre técnico; ficha del 08/10 registra contador 21/21 en esa sesión, no valor fijo actual"
+    },
+    {
+      "id": "R03",
+      "title": "Diagnosticar nombres compartidos",
+      "state": "Hecho",
+      "owner": "César: separación y revisión de datos; Pablo: evidencia",
+      "evidence": "Diagnóstico y aviso por documento; ficha del 08/10 distingue nombres iguales; DNI/RUC en selectores es condición nueva pendiente"
+    },
+    {
+      "id": "R04",
+      "title": "Calcular días reales de vencimiento",
+      "state": "Hecho",
+      "owner": "Tamara: aplicación; Pablo: pruebas",
+      "evidence": "Días reales publicados; ficha del 08/10 registra Vence en 1 día y Falta 1 día"
+    },
+    {
+      "id": "R05",
+      "title": "Ingreso explícito del monto de abono",
+      "state": "Hecho",
+      "owner": "Tamara: aplicación; Pablo: pruebas; Omara: coordinación Rildo",
+      "evidence": "Monto explícito y abono publicados; ficha del 08/10 registra S/20 y S/30 pendiente, sin pago total automático"
+    },
+    {
+      "id": "R06",
+      "title": "Fechas consistentes en Lima",
+      "state": "Hecho",
+      "owner": "Tamara: aplicación; Pablo: pruebas",
+      "evidence": "Formato publicado; ficha del 08/10 registra fechas y saldo legibles; no certifica toda interfaz"
+    },
+    {
+      "id": "R07",
+      "title": "Advertir historial limitado",
+      "state": "Hecho",
+      "owner": "Tamara: aplicación; César: datos; Omara: coordinación Rildo",
+      "evidence": "Aviso e indicador publicados; ficha del 08/10 declara comprensión de historial limitado, sin garantía ni modelo validado"
+    }
+  ],
+  "events": [
+    {
+      "date_utc": "2026-10-07T21:10:14Z",
+      "card": "P01",
+      "from": "Por hacer",
+      "to": "En curso",
+      "actor": "OpenCode",
+      "evidence": "Inicio del cierre técnico y solicitud de decisión de etiqueta"
+    },
+    {
+      "date_utc": "2026-10-07T21:21:20.498193+00:00",
+      "card": "P02",
+      "from": "Por hacer",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Búsqueda T1–T6 sin resultados; se declaran no entregadas y no se sustituyen por pruebas técnicas"
+    },
+    {
+      "date_utc": "2026-10-07T21:21:20.521724+00:00",
+      "card": "P06",
+      "from": "Por hacer",
+      "to": "En curso",
+      "actor": "OpenCode",
+      "evidence": "Consulta de historial solo de prompts académicos y modelos asociados"
+    },
+    {
+      "date_utc": "2026-10-07T21:21:21.276514+00:00",
+      "card": "P06",
+      "from": "En curso",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Seis prompts exactos recuperados con UTC, hora Lima, proveedor y modelo; revisión humana y registro Claude pendientes"
+    },
+    {
+      "date_utc": "2026-10-07T21:25:16.465820+00:00",
+      "card": "P01",
+      "from": "En curso",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Etiqueta late_payment alineada al vencimiento; 58 tests aprobados; tooling independiente desplegado y exportador ejecutado con 0 casos elegibles, sin entrenar"
+    },
+    {
+      "date_utc": "2026-10-07T21:25:16.490389+00:00",
+      "card": "P03",
+      "from": "Por hacer",
+      "to": "En curso",
+      "actor": "OpenCode",
+      "evidence": "Registro de movimientos actuales con límite WIP y captura del tablero"
+    },
+    {
+      "date_utc": "2026-10-07T21:27:30.551429+00:00",
+      "card": "P03",
+      "from": "En curso",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Tablero con seis tarjetas y eventos reales; se verifica límite WIP antes de entregar evidencia"
+    },
+    {
+      "date_utc": "2026-10-07T21:27:31.189348+00:00",
+      "card": "P03",
+      "from": "Revisión",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Tablero y captura generados con movimientos reales; responsables humanos y continuidad a cargo del grupo"
+    },
+    {
+      "date_utc": "2026-10-07T22:49:03.721028+00:00",
+      "card": "P05",
+      "from": "Bloqueado",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Cost Analysis recibido: PEN 0.00 del 1 al 7 octubre; filtros no visibles, no factura; horas/costos restantes estimados"
+    },
+    {
+      "date_utc": "2026-10-08T21:49:04.328601+00:00",
+      "card": "R01",
+      "from": "Por hacer",
+      "to": "En curso",
+      "actor": "OpenCode",
+      "evidence": "Implementación local preparada; comienza verificación de acciones visibles"
+    },
+    {
+      "date_utc": "2026-10-08T21:49:04.352216+00:00",
+      "card": "R04",
+      "from": "Por hacer",
+      "to": "En curso",
+      "actor": "OpenCode",
+      "evidence": "Implementación local preparada; comienza verificación de días y singular/plural"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.705498+00:00",
+      "card": "R01",
+      "from": "En curso",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Prueba en demo: detalle visible sin hover y clic móvil; edición inexistente deshabilitada"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.729397+00:00",
+      "card": "R01",
+      "from": "Revisión",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Publicado y probado; nueva aceptación de Rildo pendiente"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.752244+00:00",
+      "card": "R04",
+      "from": "En curso",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Prueba en demo: Vence en 1 día y Falta 1 día; constantes eliminadas"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.774739+00:00",
+      "card": "R04",
+      "from": "Revisión",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Publicado, pruebas de fechas multizona y navegador aprobadas; repetir con Rildo"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.796237+00:00",
+      "card": "R02",
+      "from": "Por hacer",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Contador comparado con registros cargados en nueva prueba"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.817936+00:00",
+      "card": "R02",
+      "from": "Revisión",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Regresión técnica aprobada; aceptación del propietario pendiente"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.839763+00:00",
+      "card": "R03",
+      "from": "Por hacer",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "IDs y documentos únicos comprobados en registros cargados; nombre compartido explícito"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.861542+00:00",
+      "card": "R03",
+      "from": "Revisión",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Diagnóstico técnico y aviso publicados; no hubo borrado por nombre"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.882985+00:00",
+      "card": "R05",
+      "from": "Por hacer",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Pago empieza vacío, total por botón explícito, abono S/20 confirmado en UI"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.905046+00:00",
+      "card": "R05",
+      "from": "Revisión",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Saldo S/30 persistido; publicado y probado; repetir con Rildo"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.926638+00:00",
+      "card": "R06",
+      "from": "Por hacer",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Formato civil DD/MM/YYYY y timestamps Lima comprobados en utilidades y pagos"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.949055+00:00",
+      "card": "R06",
+      "from": "Revisión",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Pruebas en UTC, Lima y Tokio, build/lint y navegador aprobados; publicado"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.970395+00:00",
+      "card": "R07",
+      "from": "Por hacer",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Cliente nuevo muestra Historial limitado e indicador por reglas"
+    },
+    {
+      "date_utc": "2026-10-08T21:57:26.992255+00:00",
+      "card": "R07",
+      "from": "Revisión",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Advertencia publicada y probada; no se entrenó modelo ni se cambió aprobación backend"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:53.837408+00:00",
+      "card": "R01",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Tamara: aplicación; Pablo: pruebas; Omara: nueva sesión Rildo. Distribución futura aceptada por usuario; implementación técnica fue de OpenCode"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:53.863078+00:00",
+      "card": "R02",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Pablo: verificación; Omara: coordinación Rildo. Distribución futura confirmada, no aceptación del propietario realizada"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:53.887501+00:00",
+      "card": "R03",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: César: separación y revisión de datos; Pablo: evidencia. No borrar por nombre; asignación futura confirmada"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:53.912599+00:00",
+      "card": "R04",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Tamara: aplicación; Pablo: pruebas. Asignación futura confirmada"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:53.934891+00:00",
+      "card": "R05",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Tamara: aplicación; Pablo: pruebas; Omara: coordinación Rildo. Asignación futura confirmada"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:53.958621+00:00",
+      "card": "R06",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Tamara: aplicación; Pablo: pruebas. Asignación futura confirmada"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:53.982129+00:00",
+      "card": "R07",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Tamara: aplicación; César: datos; Omara: coordinación Rildo. Asignación futura confirmada, no modelo entrenado"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:54.004507+00:00",
+      "card": "P04",
+      "from": "Bloqueado",
+      "to": "Bloqueado",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Omara y Rildo: confirmar definición del 5 %. Respuesta del propietario sigue pendiente"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:54.028978+00:00",
+      "card": "P05",
+      "from": "Revisión",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Tamara: confirmar alcance Oracle y presupuesto. Asignación futura confirmada; no factura mensual nueva"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:54.053721+00:00",
+      "card": "P03",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Asignación futura confirmada: Pablo: continuidad Kanban y evidencias. Asignación futura confirmada; eventos técnicos existentes conservados"
+    },
+    {
+      "date_utc": "2026-10-08T22:58:54.076261+00:00",
+      "card": "P02",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Ficha ampliada (1) recibida con doce capturas y firma en imagen; distinguirla de capturas técnicas posteriores"
+    },
+    {
+      "date_utc": "2026-10-12T21:48:22.430024+00:00",
+      "card": "P04",
+      "from": "Bloqueado",
+      "to": "Revisión",
+      "actor": "OpenCode",
+      "evidence": "Según ficha de revalidación del 08/10: 5 % pérdida mensual estimada sobre ventas; definición recibida, corroboración contable pendiente"
+    },
+    {
+      "date_utc": "2026-10-12T21:48:22.453590+00:00",
+      "card": "R01",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Cierre técnico; ficha de revalidación del 08/10 registra detalle sin hover y edición deshabilitada; continuar con condiciones"
+    },
+    {
+      "date_utc": "2026-10-12T21:48:22.478071+00:00",
+      "card": "R02",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Cierre técnico; ficha del 08/10 registra contador 21/21 en esa sesión, no valor fijo actual"
+    },
+    {
+      "date_utc": "2026-10-12T21:48:22.501696+00:00",
+      "card": "R03",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Diagnóstico y aviso por documento; ficha del 08/10 distingue nombres iguales; DNI/RUC en selectores es condición nueva pendiente"
+    },
+    {
+      "date_utc": "2026-10-12T21:48:22.525869+00:00",
+      "card": "R04",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Días reales publicados; ficha del 08/10 registra Vence en 1 día y Falta 1 día"
+    },
+    {
+      "date_utc": "2026-10-12T21:48:22.562520+00:00",
+      "card": "R05",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Monto explícito y abono publicados; ficha del 08/10 registra S/20 y S/30 pendiente, sin pago total automático"
+    },
+    {
+      "date_utc": "2026-10-12T21:48:22.586241+00:00",
+      "card": "R06",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Formato publicado; ficha del 08/10 registra fechas y saldo legibles; no certifica toda interfaz"
+    },
+    {
+      "date_utc": "2026-10-12T21:48:22.613167+00:00",
+      "card": "R07",
+      "from": "Hecho",
+      "to": "Hecho",
+      "actor": "OpenCode",
+      "evidence": "Aviso e indicador publicados; ficha del 08/10 declara comprensión de historial limitado, sin garantía ni modelo validado"
+    }
+  ]
+}

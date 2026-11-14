@@ -2,6 +2,24 @@
 
 Sistema de gestión de ventas, créditos, pagos y evaluación crediticia para Cervecería Baylón.
 
+## Avances Académicos Y Evidencias
+
+- [APF3: código, datos simulados, modelos, informe y sustentación](entregables/APF3_CV3/README.md).
+- [Taller S14: notebook autónomo para Google Colab](entregables/taller_s14/README.md).
+- [Experimentos sintéticos anteriores y laboratorio v2](entregables/piloto_sintetico/README.md).
+- [Pruebas locales reales de fallos del backend](entregables/fallos_backend/README.md).
+- [Criterios de publicación, procedencia y privacidad](docs/PUBLICATION.md).
+
+CV3 es una comparación reproducible de árbol y SVM con validación agrupada, no un
+modelo listo para decisiones reales: el árbol seleccionado detectó 45 de 378
+atrasos del test sintético. La demo web conserva su laboratorio v2. Publicar los
+archivos no entrena, no despliega y no sustituye el modelo de producción.
+
+Los datos de experimentos y pruebas son ficticios. Una ficha hipotética completada
+desde el CSV no equivale a entrevista del propietario ni calibra por sí sola el
+simulador. Las revisiones humanas y fuentes comerciales pendientes permanecen
+declaradas. No publicar `.env`, llaves, contraseñas, firmas o datos de clientes.
+
 ## Arquitectura
 
 - Frontend: React, TypeScript, Vite y Tailwind CSS.

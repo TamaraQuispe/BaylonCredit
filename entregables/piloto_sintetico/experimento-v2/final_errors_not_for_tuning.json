@@ -1,0 +1,198 @@
+{
+  "counts": {
+    "sin_pagos_previos": {
+      "TP": 14,
+      "FN": 38,
+      "FP": 25,
+      "TN": 78
+    },
+    "puntual": {
+      "TP": 0,
+      "FN": 0,
+      "FP": 85,
+      "TN": 270
+    },
+    "con_pagos_previos": {
+      "TP": 152,
+      "FN": 145,
+      "FP": 153,
+      "TN": 465
+    },
+    "atraso_corto": {
+      "TP": 73,
+      "FN": 65,
+      "FP": 0,
+      "TN": 0
+    },
+    "abonos_puntuales": {
+      "TP": 0,
+      "FN": 0,
+      "FP": 72,
+      "TN": 209
+    },
+    "abonos_tardios": {
+      "TP": 40,
+      "FN": 44,
+      "FP": 0,
+      "TN": 0
+    },
+    "anticipado": {
+      "TP": 0,
+      "FN": 0,
+      "FP": 21,
+      "TN": 64
+    },
+    "atraso_largo": {
+      "TP": 31,
+      "FN": 50,
+      "FP": 0,
+      "TN": 0
+    },
+    "abono_incompleto": {
+      "TP": 11,
+      "FN": 10,
+      "FP": 0,
+      "TN": 0
+    },
+    "sin_pago": {
+      "TP": 11,
+      "FN": 14,
+      "FP": 0,
+      "TN": 0
+    }
+  },
+  "examples": [
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00003",
+      "scenario": "atraso_corto",
+      "error": "FN",
+      "estimated_probability": 0.3892808273780996,
+      "actual": 1,
+      "paid_credits_before": 1.0,
+      "paid_late_before": 0.0,
+      "outstanding_before": 64.55
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00004",
+      "scenario": "puntual",
+      "error": "FP",
+      "estimated_probability": 0.45925537224509083,
+      "actual": 0,
+      "paid_credits_before": 2.0,
+      "paid_late_before": 0.0,
+      "outstanding_before": 29.9
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00005",
+      "scenario": "puntual",
+      "error": "FP",
+      "estimated_probability": 0.45174166914945313,
+      "actual": 0,
+      "paid_credits_before": 2.0,
+      "paid_late_before": 0.0,
+      "outstanding_before": 61.23
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00012",
+      "scenario": "abonos_tardios",
+      "error": "FN",
+      "estimated_probability": 0.3361273242940324,
+      "actual": 1,
+      "paid_credits_before": 1.0,
+      "paid_late_before": 0.0,
+      "outstanding_before": 81.11
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00014",
+      "scenario": "atraso_corto",
+      "error": "FN",
+      "estimated_probability": 0.25597424993893225,
+      "actual": 1,
+      "paid_credits_before": 4.0,
+      "paid_late_before": 1.0,
+      "outstanding_before": 0.0
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00016",
+      "scenario": "atraso_corto",
+      "error": "FN",
+      "estimated_probability": 0.2633343525114382,
+      "actual": 1,
+      "paid_credits_before": 6.0,
+      "paid_late_before": 2.0,
+      "outstanding_before": 0.0
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00017",
+      "scenario": "puntual",
+      "error": "FP",
+      "estimated_probability": 0.42715495288006644,
+      "actual": 0,
+      "paid_credits_before": 6.0,
+      "paid_late_before": 2.0,
+      "outstanding_before": 34.36
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00019",
+      "scenario": "puntual",
+      "error": "FP",
+      "estimated_probability": 0.4439609373146976,
+      "actual": 0,
+      "paid_credits_before": 8.0,
+      "paid_late_before": 3.0,
+      "outstanding_before": 21.66
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00022",
+      "scenario": "atraso_corto",
+      "error": "FN",
+      "estimated_probability": 0.2561193643525985,
+      "actual": 1,
+      "paid_credits_before": 0.0,
+      "paid_late_before": 0.0,
+      "outstanding_before": 0.0
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00025",
+      "scenario": "atraso_corto",
+      "error": "FN",
+      "estimated_probability": 0.3460021180489858,
+      "actual": 1,
+      "paid_credits_before": 2.0,
+      "paid_late_before": 1.0,
+      "outstanding_before": 24.45
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00027",
+      "scenario": "abonos_puntuales",
+      "error": "FP",
+      "estimated_probability": 0.44800125844943844,
+      "actual": 0,
+      "paid_credits_before": 4.0,
+      "paid_late_before": 2.0,
+      "outstanding_before": 35.79
+    },
+    {
+      "data_source": "synthetic",
+      "loan_id": "FINAL-L00037",
+      "scenario": "abonos_puntuales",
+      "error": "FP",
+      "estimated_probability": 0.429028784826103,
+      "actual": 0,
+      "paid_credits_before": 1.0,
+      "paid_late_before": 0.0,
+      "outstanding_before": 12.05
+    }
+  ]
+}

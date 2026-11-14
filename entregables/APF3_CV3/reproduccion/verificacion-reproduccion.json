@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "clean_venv_no_system_site_packages": true,
+  "network_during_execution": "disabled",
+  "all_12_metric_sets_identical": true,
+  "same_frozen_selection": true,
+  "same_illustrative_prediction": true,
+  "independent_new_validation": false,
+  "note": "Reproduction of fixed protocol, not a new independent confirmation or post-test tuning",
+  "runtime": {
+    "python": "3.12.14",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.3",
+    "joblib": "1.6.0",
+    "scipy": "1.18.1"
+  }
+}

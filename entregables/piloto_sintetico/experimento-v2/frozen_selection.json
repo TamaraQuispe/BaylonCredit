@@ -1,0 +1,24 @@
+{
+  "frozen_utc": "2026-10-29T14:31:10.108524+00:00",
+  "model": "logistic_C0.1_unweighted",
+  "threshold": 0.4,
+  "metrics": {
+    "accuracy": 0.6994219653179191,
+    "balanced_accuracy": 0.5930833333333333,
+    "precision": 0.4473684210526316,
+    "recall": 0.3541666666666667,
+    "f1": 0.3953488372093023,
+    "roc_auc": 0.6512916666666667,
+    "brier_score": 0.18835489420181759,
+    "confusion_matrix": [
+      [
+        208,
+        42
+      ],
+      [
+        62,
+        34
+      ]
+    ]
+  }
+}

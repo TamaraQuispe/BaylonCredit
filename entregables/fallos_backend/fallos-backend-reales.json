@@ -1,0 +1,73 @@
+{
+  "started": "2026-11-03T17:07:08.820Z",
+  "finished": "2026-11-03T17:07:25.999Z",
+  "scope": "Contenedores LOCALES exclusivos credify-resilience; sin servicios públicos ni datos del negocio",
+  "source": "http://127.0.0.1:8093",
+  "database": "PostgreSQL 17 aislado",
+  "server_timeouts_seconds": 2,
+  "proxy_connect_timeout_seconds": 3,
+  "form_submission": "HTMLFormElement.requestSubmit; handler React real",
+  "no_browser_network_interception": true,
+  "results": [
+    {
+      "name": "01-postgresql-detenido",
+      "expected_http": [
+        503
+      ],
+      "actual_http": 503,
+      "elapsed_ms": 20,
+      "form_preserved": true,
+      "automatic_retries": 0,
+      "passed": true,
+      "request_id": "76a508a4-e3d7-4560-b264-fb41d385c68f",
+      "liveness_http": 200,
+      "readiness_http": 503
+    },
+    {
+      "name": "Recuperación después de postgresql-detenido",
+      "passed": true,
+      "rows_before_retry": 0,
+      "rows_after_retry": 1
+    },
+    {
+      "name": "02-postgresql-timeout",
+      "expected_http": [
+        503
+      ],
+      "actual_http": 503,
+      "elapsed_ms": 2029,
+      "form_preserved": true,
+      "automatic_retries": 0,
+      "passed": true,
+      "request_id": "cc65e555-7c95-4dcf-8d95-7d1e9f541250",
+      "liveness_http": 200,
+      "readiness_http": 503
+    },
+    {
+      "name": "Recuperación después de postgresql-timeout",
+      "passed": true,
+      "rows_before_retry": 0,
+      "rows_after_retry": 1
+    },
+    {
+      "name": "03-api-detenida-proxy",
+      "expected_http": [
+        502,
+        504
+      ],
+      "actual_http": 504,
+      "elapsed_ms": 3026,
+      "form_preserved": true,
+      "automatic_retries": 0,
+      "passed": true,
+      "request_id": null
+    },
+    {
+      "name": "Recuperación después de api-detenida",
+      "passed": true,
+      "rows_before_retry": 0,
+      "rows_after_retry": 1
+    }
+  ],
+  "limits": "No demuestra exactamente-una-vez si un commit remoto se confirmó y se perdió su respuesta; verificar historial antes de reenviar. No es validación de propietario ni caída de producción."
+}

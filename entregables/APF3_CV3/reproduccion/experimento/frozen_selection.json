@@ -1,0 +1,211 @@
+{
+  "frozen_utc": "2026-11-12T22:38:16.850762+00:00",
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "protocol_sha256": "8fcb49d60e3a7705761894a0bf106ca6eac9c507273f1beda8e79e76ad8b0094",
+  "source_sha256": "6723f15d0310ee2948a0eb376c03ab325334630cb56cbed0774ca4f03be706ce",
+  "development_sha256": "f640bd82d284f661f8c52e8e6f9e5cf8565186148e609786aeb6c9bfbc62c3da",
+  "families": {
+    "tree": {
+      "family": "tree",
+      "candidate_index": 7,
+      "params": {
+        "family": "tree",
+        "max_depth": 3,
+        "min_samples_leaf": 16,
+        "class_weight": "balanced",
+        "random_state": 42
+      },
+      "threshold": 0.7,
+      "metrics": {
+        "n": 1289,
+        "f2": 0.2564102564102564,
+        "precision": 0.5081081081081081,
+        "recall": 0.22815533980582525,
+        "f1": 0.3149078726968174,
+        "accuracy": 0.682699767261443,
+        "balanced_accuracy": 0.5621962559918522,
+        "roc_auc": 0.6056503304513401,
+        "brier": 0.2426082397286879,
+        "confusion_matrix": [
+          [
+            786,
+            91
+          ],
+          [
+            318,
+            94
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "feasible": true,
+      "constraint_failure": false,
+      "research_only": true
+    },
+    "svm": {
+      "family": "svm",
+      "candidate_index": 12,
+      "params": {
+        "family": "svm",
+        "C": 0.1,
+        "class_weight": null,
+        "kernel": "linear",
+        "probability": false,
+        "random_state": 42
+      },
+      "threshold": 0.5,
+      "metrics": {
+        "n": 1289,
+        "f2": 0.02107164358819988,
+        "precision": 0.5384615384615384,
+        "recall": 0.01699029126213592,
+        "f1": 0.03294117647058824,
+        "accuracy": 0.6811481768813034,
+        "balanced_accuracy": 0.5050743930655036,
+        "roc_auc": 0.545693062182418,
+        "brier": 0.21623942809926497,
+        "confusion_matrix": [
+          [
+            871,
+            6
+          ],
+          [
+            405,
+            7
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "feasible": true,
+      "constraint_failure": false,
+      "research_only": true
+    }
+  },
+  "global_winner": {
+    "family": "tree",
+    "candidate_index": 7,
+    "params": {
+      "family": "tree",
+      "max_depth": 3,
+      "min_samples_leaf": 16,
+      "class_weight": "balanced",
+      "random_state": 42
+    },
+    "threshold": 0.7,
+    "metrics": {
+      "n": 1289,
+      "f2": 0.2564102564102564,
+      "precision": 0.5081081081081081,
+      "recall": 0.22815533980582525,
+      "f1": 0.3149078726968174,
+      "accuracy": 0.682699767261443,
+      "balanced_accuracy": 0.5621962559918522,
+      "roc_auc": 0.6056503304513401,
+      "brier": 0.2426082397286879,
+      "confusion_matrix": [
+        [
+          786,
+          91
+        ],
+        [
+          318,
+          94
+        ]
+      ],
+      "confusion_labels": [
+        0,
+        1
+      ]
+    },
+    "feasible": true,
+    "constraint_failure": false,
+    "research_only": true
+  },
+  "baselines": {
+    "most_frequent": {
+      "params": {
+        "family": "most_frequent"
+      },
+      "threshold": 0.5,
+      "metrics": {
+        "n": 1289,
+        "f2": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "accuracy": 0.6803723816912335,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.31962761830876646,
+        "confusion_matrix": [
+          [
+            877,
+            0
+          ],
+          [
+            412,
+            0
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "feasible": false
+    },
+    "constant_1": {
+      "params": {
+        "family": "constant_1"
+      },
+      "threshold": 0.5,
+      "metrics": {
+        "n": 1289,
+        "f2": 0.7013959822948587,
+        "precision": 0.31962761830876646,
+        "recall": 1.0,
+        "f1": 0.4844209288653733,
+        "accuracy": 0.31962761830876646,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.6803723816912335,
+        "confusion_matrix": [
+          [
+            0,
+            877
+          ],
+          [
+            0,
+            412
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "feasible": false
+    }
+  },
+  "constraint_failure": false,
+  "research_only": true,
+  "oof_caveat": "OOF metrics are used for search and therefore optimistic for the chosen candidate, not an unbiased final estimate"
+}

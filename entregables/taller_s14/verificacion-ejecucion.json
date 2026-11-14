@@ -1,0 +1,63 @@
+{
+  "started_utc": "2026-11-12T21:39:22.124194+00:00",
+  "finished_utc": "2026-11-12T21:39:24.444360+00:00",
+  "source_sha256": "5c21f2a9de7ab3fb32ea7f52fb452345128709e9abcfb0dffeb43e7bb662dea4",
+  "dataset_sha256": "6c8639a7a0be1b19c8a42613dadd7dbe80f7f5deae02d09e22cd64f063828548",
+  "notebook_sha256": "02e69a57de89187c544a6f2c2c45c9b3663a7b3aba7681c99c242faae9a53300",
+  "executed_code_cells": 12,
+  "embedded_figures": 3,
+  "errors": 0,
+  "results": {
+    "versiones": {
+      "scikit-learn": "1.8.0",
+      "pandas": "2.2.3",
+      "numpy": "2.3.5",
+      "matplotlib": "3.10.8"
+    },
+    "filas": 160,
+    "entrenamiento": 120,
+    "prueba": 40,
+    "comparacion": {
+      "SVM": {
+        "Accuracy": 0.95,
+        "Precisión": 0.9166666666666666,
+        "Recall": 0.9166666666666666,
+        "F1": 0.9166666666666666
+      },
+      "KNN (k=3)": {
+        "Accuracy": 0.9,
+        "Precisión": 0.9,
+        "Recall": 0.75,
+        "F1": 0.8181818181818182
+      },
+      "Árbol": {
+        "Accuracy": 0.8,
+        "Precisión": 0.6111111111111112,
+        "Recall": 0.9166666666666666,
+        "F1": 0.7333333333333333
+      },
+      "Boosting": {
+        "Accuracy": 0.95,
+        "Precisión": 0.9166666666666666,
+        "Recall": 0.9166666666666666,
+        "F1": 0.9166666666666666
+      }
+    },
+    "matriz_adaboost": [
+      [
+        27,
+        1
+      ],
+      [
+        1,
+        11
+      ]
+    ],
+    "llamadas": 10,
+    "atrasados_en_llamadas": 9,
+    "precision_top10": 0.9,
+    "recall_top10": 0.75,
+    "passed": true
+  },
+  "human_review": "Pending; technical execution is not student acceptance"
+}

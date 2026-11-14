@@ -1,0 +1,149 @@
+{
+  "pages": [
+    {
+      "title": "Solución de Machine Learning para el fiado a un día en Cervecería Baylón",
+      "height_px": 446,
+      "width_px": 800
+    },
+    {
+      "title": "1. Resumen ejecutivo y continuidad",
+      "height_px": 493,
+      "width_px": 800
+    },
+    {
+      "title": "2. Datos, procedencia y alcance",
+      "height_px": 640,
+      "width_px": 800
+    },
+    {
+      "title": "2.3. Contrato de variables y preparación",
+      "height_px": 679,
+      "width_px": 800
+    },
+    {
+      "title": "2.4. EDA de desarrollo: balance y escala",
+      "height_px": 740,
+      "width_px": 800
+    },
+    {
+      "title": "2.5. EDA de desarrollo: relaciones",
+      "height_px": 653,
+      "width_px": 800
+    },
+    {
+      "title": "3. Modelado y comparación CV3",
+      "height_px": 615,
+      "width_px": 800
+    },
+    {
+      "title": "3.3. Criterio y selección congelada",
+      "height_px": 605,
+      "width_px": 800
+    },
+    {
+      "title": "3.4. Contraste de entrenamiento, OOF y final",
+      "height_px": 624,
+      "width_px": 800
+    },
+    {
+      "title": "4. Evaluación e interpretación de negocio",
+      "height_px": 647,
+      "width_px": 800
+    },
+    {
+      "title": "4.2. Matriz y lectura de negocio",
+      "height_px": 789,
+      "width_px": 800
+    },
+    {
+      "title": "4.3. Tres errores finales ya registrados",
+      "height_px": 471,
+      "width_px": 800
+    },
+    {
+      "title": "4.4. Interpretabilidad del modelo exportado",
+      "height_px": 634,
+      "width_px": 800
+    },
+    {
+      "title": "5. Integración mínima con el MVP",
+      "height_px": 598,
+      "width_px": 800
+    },
+    {
+      "title": "6. Normativa y proyección a PROY",
+      "height_px": 722,
+      "width_px": 800
+    },
+    {
+      "title": "Referencias",
+      "height_px": 577,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo A. Diccionario y trazabilidad",
+      "height_px": 698,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo A. Ficha de coherencia y simulación",
+      "height_px": 550,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo B. Interpretación exacta guardada",
+      "height_px": 465,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo B. Coeficientes de la SVM",
+      "height_px": 508,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo C. Reproducibilidad e inferencia",
+      "height_px": 681,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo C. Contrato de inferencia local",
+      "height_px": 287,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo C. Integridad y frontera experimental",
+      "height_px": 668,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo D. Estado de cierre y plan de entrega",
+      "height_px": 334,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo D. Pendientes de entrega",
+      "height_px": 479,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo D. Riesgos hacia PROY",
+      "height_px": 548,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo E. Registro de IA y revisión humana",
+      "height_px": 701,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo F. Taller de Bodega Doña Rosa",
+      "height_px": 294,
+      "width_px": 800
+    },
+    {
+      "title": "Anexo F. Transferencia al proyecto",
+      "height_px": 370,
+      "width_px": 800
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+"""Credify API application."""

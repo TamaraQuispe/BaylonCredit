@@ -1,0 +1,29 @@
+{
+  "started": "2026-10-29T14:56:14.145Z",
+  "finished": "2026-10-29T14:56:37.676Z",
+  "url": "https://demo-credify.168-75-71-113.sslip.io/laboratorio-academico",
+  "scope": "Prueba técnica de laboratorio sintético; no aceptación humana ni operación productiva",
+  "results": [
+    {
+      "case": "Laboratorio requiere autenticación",
+      "passed": true
+    },
+    {
+      "case": "Ruta y enlace de demo funcionan; comparación visible",
+      "passed": true
+    },
+    {
+      "case": "Inferencia real del artefacto sobre casos predefinidos",
+      "cases": 16,
+      "passed": true
+    },
+    {
+      "case": "Consulta en navegador y pantalla móvil sin desborde de página",
+      "passed": true
+    },
+    {
+      "case": "Consultas ML no agregaron créditos ni evaluaciones de fiado",
+      "passed": true
+    }
+  ]
+}

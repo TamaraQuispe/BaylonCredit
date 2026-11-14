@@ -1,0 +1,30 @@
+{
+  "version": "academic-grouped-cv-v3",
+  "scope": "Synthetic research only; not business validation or automatic credit approval",
+  "target": "late_payment",
+  "development_source": "ejecucion-02/synthetic_transactions.json",
+  "development_source_sha256": "6723f15d0310ee2948a0eb376c03ab325334630cb56cbed0774ca4f03be706ce",
+  "development_splits": ["train", "validation"],
+  "excluded_evaluations": ["Original test split already consulted", "Entire published v2 final cohort"],
+  "cv": {"type": "StratifiedGroupKFold", "folds": 5, "shuffle": true, "seed": 20261112, "group": "client_id"},
+  "preprocessing": ["SimpleImputer(strategy=median)", "StandardScaler"],
+  "tree": {"max_depth": [2, 3, 4], "min_samples_leaf": [8, 16], "class_weight": [null, "balanced"], "random_state": 42},
+  "svm": {"kernel": "linear", "C": [0.1, 1.0, 10.0], "class_weight": [null, "balanced"], "probability": false, "random_state": 42},
+  "svm_calibration": {"method": "sigmoid", "folds": 3, "group": "client_id", "ensemble": false, "seed": 20261114, "scope": "Only within the training portion of each outer fold; preprocessing inside each calibrated estimator"},
+  "thresholds": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+  "selection": {
+    "metric": "F2",
+    "beta": 2,
+    "minimum_precision": 0.5,
+    "rationale": "Exploratory technical scenario: prioritize recall with F2 while requiring at least as many correct alerts as false alerts. Not an owner-approved cost ratio, capacity or business success target.",
+    "tie_breakers": ["recall", "f1", "precision", "Earlier candidate in declared grid", "Threshold nearest 0.5"],
+    "family_selection": "Best feasible out-of-fold candidate; if none meets precision floor use best F2 only as explicitly non-feasible comparison",
+    "global_selection": "Best feasible family candidate; if none is feasible retain best F2 as research-only and declare constraint failure, never claim business readiness",
+    "oof_limit": "OOF metrics are used for search and therefore optimistic for the chosen candidate, not an unbiased final estimate"
+  },
+  "baselines": ["DummyClassifier(strategy=most_frequent)", "DummyClassifier(strategy=constant,constant=1)"],
+  "freeze_before_final": ["Candidate per family", "Global candidate", "Thresholds", "Parameters", "Protocol hash", "Development hash"],
+  "final_cohort": {"generator": "Unchanged existing transaction simulator", "seed": 20261117, "clients": 120, "id_prefix": "CV3", "generation": "Only after frozen_selection.json exists", "policy": "One final evaluation of all frozen models on same cohort; no post-result tuning or seed changes"},
+  "export": ["CV search results", "Group-disjoint fold audit", "Train/OOF/final metrics", "Models with preprocessing", "Final error cases", "New illustrative inference", "CSV with origen=simulado", "Source hashes and exact runtime versions"],
+  "limitations": ["Simulator parameters remain uncalibrated to quantitative business evidence", "Final cohort comes from same generator, not external validation", "All records fictional", "Numerical precision floor and F2 are provisional technical assumptions, not business commitments", "An unseen test must be reserved for any later experimental selection"]
+}

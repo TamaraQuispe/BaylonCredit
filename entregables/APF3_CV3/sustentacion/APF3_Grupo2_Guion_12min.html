@@ -1,0 +1,197 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<title>APF3 - Credify - Borrador</title><style>
+@page { size:A4; margin:18mm 18mm 20mm; }
+* { box-sizing:border-box; } body { margin:0; color:#172334; font:10.5pt/1.25 Arial,sans-serif; }
+.page { break-after:page; } .page:last-child { break-after:auto; }
+h1 { font-size:17pt; color:#17375e; margin:0 0 12px; }
+h2 { font-size:11.5pt; color:#17375e; margin:13px 0 7px; }
+p { margin:0 0 9px; text-align:justify; } a { color:#17375e; }
+table { width:100%; border-collapse:collapse; table-layout:fixed; margin:10px 0; font-size:8.7pt; }
+th,td { border:1px solid #c9d4df; padding:5px; vertical-align:top; overflow-wrap:anywhere; }
+th { background:#e8eef5; text-align:left; } tr { break-inside:avoid; }
+img { display:block; max-width:100%; max-height:95mm; object-fit:contain; margin:auto; }
+code { font:8.6pt Consolas,monospace; overflow-wrap:anywhere; }
+pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#f2f5f8; padding:8px; }
+pre code { font-size:8pt; } ol { padding-left:20px; } li { margin-bottom:5px; }
+.page:first-child h1 { margin-top:0; font-size:17pt; }
+.page:first-child p { text-align:left; }
+</style><style>
+body{font:10pt/1.16 Arial,sans-serif}p{margin-bottom:5px}
+h1{font-size:15pt;margin-bottom:8px}h2{font-size:11.5pt;margin:8px 0 5px}
+h3{font-size:10.5pt;margin:7px 0 4px}th,td{padding:4px}
+</style></head><body><section class="page" data-page="0"><h1>Guion de sustentación APF3 · Grupo 2</h1>
+<p><strong>Plan:</strong> 12 minutos, 13 diapositivas. Incluye 50 segundos de operación en vivo. Reparto propuesto; ensayo y revisión humana pendientes.</p>
+<table>
+<thead>
+<tr>
+<th>Diapositiva</th>
+<th>Expositor</th>
+<th>Segundos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Omara</td>
+<td>30</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Omara</td>
+<td>30</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Omara</td>
+<td>75</td>
+</tr>
+<tr>
+<td>4</td>
+<td>César</td>
+<td>75</td>
+</tr>
+<tr>
+<td>5</td>
+<td>César</td>
+<td>75</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Omara</td>
+<td>75</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Tamara</td>
+<td>40</td>
+</tr>
+<tr>
+<td>8</td>
+<td>César</td>
+<td>40</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Tamara</td>
+<td>70</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Pablo</td>
+<td>60</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Tamara</td>
+<td>60</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Pablo</td>
+<td>45</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Pablo</td>
+<td>45</td>
+</tr>
+</tbody>
+</table></section>
+<section class="page" data-page="1"><h2>1. Fiado a un día: continuidad y equipo</h2>
+<p><strong>Tiempo:</strong> 30 s · <strong>Expositor propuesto:</strong> Omara</p>
+<p>Presentamos la comparación CV3 para el fiado a un día en Cervecería Baylón. APF1 identificó el registro en cuaderno y el criterio personal; APF2 propuso Credify para digitalizar clientes, fiados y abonos. Ahora evaluamos una ayuda predictiva académica, no un sistema autorizado para decidir créditos. Nuestro equipo está identificado en pantalla y el reparto de exposición es propuesto.</p>
+<p><strong>Apoyo:</strong> mostrar título, empresa, Grupo 2 y los cuatro nombres completos con sus códigos de la tabla inicial. Dibujar la continuidad APF1 → APF2 → APF3. Mantener visible «CV3 · registros ficticios · apoyo a revisión humana».</p>
+<h2>2. Problema ML e indicador financiero</h2>
+<p><strong>Tiempo:</strong> 30 s · <strong>Expositor propuesto:</strong> Omara</p>
+<p>La pregunta es si un fiado tendrá atraso respecto a su vencimiento contractual, usando información anterior al otorgamiento. Cada fila representa un fiado; uno significa atraso y cero, pago puntual. El cinco por ciento mencionado en antecedentes es una estimación financiera de pérdida mensual sobre ventas, sin corroboración contable específica. No es prevalencia de atraso ni se utilizó para etiquetar.</p>
+<p><strong>Apoyo:</strong> mostrar «Clasificación binaria supervisada · target: late_payment» y, separado, «5 % referencial = pérdida mensual estimada / ventas del mes × 100». No convertir ese indicador en probabilidad, objetivo de accuracy o beneficio conseguido.</p>
+<h2>3. Dataset: origen, exclusiones y trazabilidad</h2>
+<p><strong>Tiempo:</strong> 75 s · <strong>Expositor propuesto:</strong> Omara</p>
+<p>Todos los registros son ficticios, no clientes reales anonimizados. Al cierre documentado de APF2 no había empezado el piloto real; el exportador no produjo fiados elegibles. Eso no demuestra que el negocio careciera de operaciones. La simulación es un cambio de fuente declarado, no el cumplimiento de la captura prevista.</p>
+<p>Desarrollo reúne mil doscientas ochenta y nueve filas etiquetadas de ciento veinticinco clientes: novecientas cuarenta y tres del entrenamiento original y trescientas cuarenta y seis de validación. Se excluyeron trescientas nueve filas del test antiguo y veinticuatro sin desenlace.</p>
+<p>La cohorte final CV3 contiene mil noventa y un fiados de ciento veinte clientes distintos. Solo mil setenta y tres tienen etiqueta: seiscientos noventa y cinco puntuales y trescientos setenta y ocho atrasados. Los dieciocho desconocidos permanecen fuera de las métricas. Hay hashes y semilla predeclarada para rastrear el experimento, pero ambas cohortes proceden del mismo generador: no son validación externa.</p>
+<p><strong>Apoyo:</strong> presentar dos bloques sin sumar cohortes: «Desarrollo: 1289 / 125 clientes» y «Final: 1091 / 120 clientes; 1073 evaluables + 18 desconocidos». Al pie: «Exclusiones fuente: 309 + 24 = 333». Referenciar procedencia y conteos del reporte congelado.</p></section>
+<section class="page" data-page="2"><h2>4. EDA: balance y relaciones de desarrollo</h2>
+<p><strong>Tiempo:</strong> 75 s · <strong>Expositor propuesto:</strong> César</p>
+<p>El análisis exploratorio se limita al conjunto de desarrollo, que funciona como base de entrenamiento y selección. No utiliza el test antiguo ni la cohorte final. Tampoco afirmamos que este EDA documental se hubiera realizado antes de la corrida congelada.</p>
+<p>En desarrollo hay ochocientos setenta y siete casos puntuales y cuatrocientos doce atrasados: aproximadamente sesenta y ocho y treinta y dos por ciento. Predecir siempre puntual consigue una accuracy aparentemente aceptable sin detectar ningún atraso. Por eso necesitamos recall y referencias simples.</p>
+<p>Los gráficos describen historial de pagos y exposición previa. El atraso es 27,10 por ciento cuando hay pagos completos sin atraso y 36,44 con pagos tardíos previos. Por utilización, pasa de 28,56 por ciento en la banda baja a 45,65 en la alta. Cada banda muestra su denominador. Deuda y utilización están vinculadas por el cupo simulado: asociación no significa causalidad. Carecer de historial no demuestra incumplimiento. La calibración comercial sigue pendiente.</p>
+<p><strong>Apoyo:</strong> mostrar las figuras de desarrollo con universo y denominadores. El PPT usa un gráfico preparado desde las mismas 1289 filas, no una nueva selección. Las figuras y conclusiones del informe generado ya tienen valores; cotejarlos antes de exponer. Si falta una figura durante la sustentación, declarar el fallo y usar los conteos guardados, sin inventar una imagen o tendencia.</p>
+<h2>5. Modelos y validación agrupada</h2>
+<p><strong>Tiempo:</strong> 75 s · <strong>Expositor propuesto:</strong> César</p>
+<p>Comparamos árbol de decisión y SVM lineal con dos Dummies: clase mayoritaria y siempre positivo. Ambos modelos reciben las mismas once variables previas y un Pipeline con imputación por mediana y escalado. Las transformaciones se ajustan dentro de cada entrenamiento, nunca sobre todo el conjunto antes de separar pliegues.</p>
+<p>La selección empleó cinco pliegues agrupados por cliente. Así, el cliente de una fila validada no aparece en el entrenamiento de ese pliegue. La SVM usa además calibración sigmoide con tres pliegues internos también agrupados; su Pipeline queda dentro del estimador calibrado.</p>
+<p>Se exploraron dieciocho configuraciones y siete umbrales, ciento veintiséis combinaciones, no ciento veintiséis algoritmos. La calibración interna no equivale a evaluación anidada independiente de hiperparámetros: las predicciones fuera de pliegue también se usaron para escoger. Su resultado ganador puede ser optimista. IDs, escenarios, etiquetas y datos posteriores al otorgamiento no entran como predictores.</p>
+<p><strong>Apoyo:</strong> mostrar diagrama «5 pliegues agrupados → OOF de selección → congelamiento → final común». Dentro de SVM: «3 pliegues agrupados para calibrar». Rotular expresamente «Calibración anidada ≠ evaluación anidada de hiperparámetros».</p>
+<h2>6. Criterio congelado: F2 con piso de precisión</h2>
+<p><strong>Tiempo:</strong> 75 s · <strong>Expositor propuesto:</strong> Omara</p>
+<p>El criterio preestablecido fue maximizar F2 entre candidatos con precisión de atraso de al menos cero coma cincuenta. F2 pondera más la cobertura de atrasos; el piso busca provisionalmente tantas alertas correctas como falsas. Es una hipótesis técnica, no una meta comercial ni un compromiso acordado con los propietarios.</p>
+<p>Ganó el árbol balanceado, profundidad tres, hoja mínima dieciséis y umbral cero coma setenta. Fuera de pliegue obtuvo precisión cero coma quinientos ocho y F2 cero coma doscientos cincuenta y seis. La SVM seleccionada fue lineal, con C de cero coma uno y umbral cero coma cincuenta.</p>
+<p>Después de guardar esa decisión se evaluaron los cuatro modelos congelados sobre la misma cohorte final. No se cambió umbral ni semilla para mejorar sus resultados. El Dummy siempre positivo tenía mayor F2, pero incumplía el piso de precisión. Eso limita la elección; no lo convierte en una referencia derrotada.</p>
+<p><strong>Apoyo:</strong> mostrar <code>F2 = 5TP / (5TP + 4FN + FP)</code> y «P ≥ 0,50, supuesto técnico». Destacar «Árbol: depth=3; leaf=16; balanced; τ=0,70». Añadir OOF exacto: P=0,50811, recall=0,22816, F2=0,25641; no confundirlo con final.</p></section>
+<section class="page" data-page="3"><h2>7. Resultados sobre el mismo final</h2>
+<p><strong>Tiempo:</strong> 40 s · <strong>Expositor propuesto:</strong> Tamara</p>
+<p>Esta tabla utiliza las mismas mil setenta y tres etiquetas finales para todos. El árbol alcanza precisión de cincuenta y seis coma veinticinco por ciento, pero recall de solo once coma noventa y F2 de cero coma ciento cuarenta y uno. SVM y mayoritario no emiten alertas. Siempre positivo obtiene F2 mucho mayor, alertando todo. La diferencia de accuracy frente al mayoritario es pequeña y no tiene significancia estadística demostrada. No presentamos superioridad general ni buen desempeño comercial.</p>
+<p><strong>Apoyo:</strong> mostrar la tabla final transcrita, sin mezclar OOF ni métricas del taller de Doña Rosa.</p>
+<h2>8. Errores y un caso ya guardado</h2>
+<p><strong>Tiempo:</strong> 40 s · <strong>Expositor propuesto:</strong> César</p>
+<p>La matriz del árbol registra seiscientos sesenta verdaderos negativos, treinta y cinco falsas alertas, trescientos treinta y tres atrasos omitidos y cuarenta y cinco detectados. El problema principal es la omisión. Un ejemplo guardado es el préstamo ficticio CV3-L00015: tenía historial previo favorable, obtuvo puntaje cero coma treinta y tres y fue clasificado sin alerta, pero terminó atrasado. Es un falso negativo del caché, no una nueva ejecución ni evidencia de una causa comprobada. No lo usamos para reajustar.</p>
+<p><strong>Apoyo:</strong> mostrar matriz <code>[[660,35],[333,45]]</code>, filas reales y columnas predichas, orden 0/1. En tarjeta separada: <code>CV3-C0002 / CV3-L00015</code>, p=0,33009138676021355, τ=0,70, real=1, predicho=0. Fuente: <code>models.tree.error_cases</code>; no ejecutar ese caso final.</p>
+<h2>9. Inferencia local ilustrativa, no validación</h2>
+<p><strong>Tiempo:</strong> 70 s · <strong>Expositor propuesto:</strong> Tamara</p>
+<p>Ahora intentaremos una inferencia local con un ejemplo ilustrativo sin etiqueta conocida. El resultado previamente verificado es cero coma cuatrocientos cincuenta y seis, bajo el umbral cero coma siete: predicción cero. No prueba acierto, no modifica la matriz final y no autoriza el fiado.</p>
+<p><strong>Apoyo:</strong> dedicar 20 segundos al párrafo anterior y reservar 50 segundos completos para operar y mostrar pantalla. Desde la raíz del paquete, con entorno compatible y sin iniciar servicios, usar exclusivamente este comando de inferencia:</p></section>
+<section class="page" data-page="4"><h2>10. Interpretación de negocio sin beneficio probado</h2>
+<p><strong>Tiempo:</strong> 60 s · <strong>Expositor propuesto:</strong> Pablo</p>
+<p>Traducido a una eventual revisión, el árbol habría señalado ochenta operaciones: cuarenta y cinco atrasadas y treinta y cinco puntuales. De los trescientos setenta y ocho atrasos, omitió trescientos treinta y tres. No está listo para confiarle decisiones de crédito.</p>
+<p>Una alerta podría generar revisión innecesaria; una omisión podría dejar un atraso sin revisar. Son consecuencias hipotéticas, no costos medidos. Además, un atraso recuperado no equivale a pérdida definitiva. No hemos demostrado ahorro, rentabilidad ni reducción del cinco por ciento financiero referencial.</p>
+<p>Antes de evaluar impacto necesitamos finalidad, capacidad de revisión, costos y una meta observable justificada. Puede ser propuesta del equipo; si se atribuye un acuerdo al propietario, debe confirmarse realmente. Una predicción cero no garantiza cobro y una predicción uno no justifica rechazar automáticamente.</p>
+<p><strong>Apoyo:</strong> mostrar «45 detectados / 378 atrasos» junto a «333 omitidos». Separar visualmente «métrica predictiva» de «pérdida mensual estimada / ventas». No incluir porcentajes de ahorro, retorno o aprobación comercial sin evidencia.</p>
+<h2>11. Integración mínima y frontera con el MVP</h2>
+<p><strong>Tiempo:</strong> 60 s · <strong>Expositor propuesto:</strong> Tamara</p>
+<p>La integración disponible de CV3 es local: una función y una CLI cargan el Pipeline guardado, verifican integridad y validan un JSON de once campos en el orden congelado. Devuelven puntaje, umbral y predicción, sin crear créditos ni entrenar durante la consulta.</p>
+<p>Es un contrato que podría conectarse al MVP, no una conexión web ya terminada. El laboratorio web heredado sigue en v2; sus capturas no prueban que CV3 esté desplegado o aceptado. Tampoco consta autorización del negocio para usarlo operativamente.</p>
+<p>Faltan autenticación y pruebas de integración propias, advertencias y revisión humana. No prometemos latencia ni disponibilidad medidas. Los hashes comprueban integridad; no hacen seguro cargar un archivo Joblib de origen desconocido. Debe conservarse la separación académica y operativa.</p>
+<p><strong>Apoyo:</strong> diagrama «JSON de 11 campos → Pipeline local CV3 → JSON de salida», con flecha discontinua hacia «MVP: integración futura». En contraste: «WEB actual: v2, no CV3». No abrir la web como prueba de inferencia CV3 ni atribuirle autorización comercial.</p>
+<h2>12. Normativa y controles pendientes</h2>
+<p><strong>Tiempo:</strong> 45 s · <strong>Expositor propuesto:</strong> Pablo</p>
+<p>El marco es la Ley veintinueve mil setecientos treinta y tres y su Reglamento, Decreto Supremo cero dieciséis de dos mil veinticuatro, JUS. Minimizar a once predictores y excluir nombres o DNI reduce exposición, pero no certifica cumplimiento. La semilla reproduce personas inventadas; no anonimiza clientes reales. Antes de captar información real faltan finalidad y base jurídica, aviso y consentimiento cuando corresponda, accesos, conservación, ARCO y revisión de proveedores. La revisión humana sigue pendiente y no se sustituye con una firma ficticia ni con controles automáticos.</p>
+<p><strong>Apoyo:</strong> mostrar «Ley N.° 29733 · D.S. N.° 016-2024-JUS» y dos columnas: «Control acotado: datos ficticios, minimización, inferencia local, hashes» / «Pendiente real: tratamiento, seguridad operativa, derechos y revisión». No afirmar dictamen jurídico, consentimiento o aceptación completados.</p>
+<h2>13. Riesgos, pendientes y conclusión defendible</h2>
+<p><strong>Tiempo:</strong> 45 s · <strong>Expositor propuesto:</strong> Pablo</p>
+<p>El avance es una comparación metodológicamente corregida y trazable; la utilidad comercial no está demostrada. Persisten simulación no representativa, baja detección, sesgo de selección y riesgo de confundir versiones. Repetir el protocolo fijo comprueba reproducibilidad, no aporta otra validación independiente. Faltan fuentes cuantitativas para calibrar el simulador, una meta justificada, controles de datos y revisión individual. Esta presentación requiere ensayo. Cualquier selección posterior necesita otra prueba no consultada. No cerramos esos pendientes por redactar un guion ni atribuimos aprobaciones inexistentes.</p>
+<p><strong>Apoyo:</strong> cerrar con «Método corregido ≠ utilidad demostrada». Mostrar pendientes con estado «PENDIENTE», sin firmas ni responsables efectivos inventados. Los roles de la portada son propuestas de exposición. No activar reentrenamiento ni prometer promoción automática del modelo.</p></section>
+<section class="page" data-page="5"><h1>Preguntas difíciles · 1/2</h1>
+<p><strong>¿Por qué eligieron un árbol que funciona tan mal?</strong> Ganó únicamente dentro del criterio técnico congelado, no por ser adecuado para producción. Su recall final de 11,90 % evidencia mala cobertura; se conserva el resultado desfavorable y no se recomienda automatizar decisiones.</p>
+<p><strong>¿Por qué no elegir siempre positivo si tiene F2 mayor?</strong> Su F2 final es 0,73114 frente a 0,14133 del árbol, pero su precisión es 0,35228 y no cumple el piso provisional de 0,50. Ese piso es una hipótesis de investigación, no evidencia de utilidad comercial. No afirmamos superar ambas referencias.</p>
+<p><strong>¿Cómo calculan recall y por qué importa?</strong> Es <code>TP/(TP+FN) = 45/378 = 0,11905</code>. Mide la fracción de atrasos detectados: quedaron 333 sin alertar. Una accuracy de 0,65704 no compensa esa omisión.</p>
+<p><strong>¿La CV es anidada y el OOF es una estimación imparcial?</strong> Hay cinco pliegues de selección y tres internos de calibración SVM. La búsqueda de configuración y umbral reutiliza OOF: no es evaluación anidada independiente de hiperparámetros y el OOF ganador puede ser optimista.</p>
+<p><strong>¿Cómo evitan fuga de información?</strong> El diseño separa clientes por pliegue, ajusta imputación y escala dentro del entrenamiento y excluye desenlaces, escenarios e IDs del predictor. La calibración SVM también agrupa clientes. Son controles documentados, no prueba de ausencia de todo sesgo; el generador compartido sigue limitando la evaluación.</p>
+<p><strong>¿La simulación está calibrada porque sus gráficos parecen plausibles?</strong> No. Los controles lógicos y las relaciones visuales no validan frecuencias, montos o probabilidades del negocio. Sigue pendiente una fuente cuantitativa verificable por parámetro, con fecha, unidad y alcance.</p></section>
+<section class="page" data-page="6"><h1>Preguntas difíciles · 2/2</h1>
+<p><strong>¿El 5 % fue la tasa de etiquetas o una mejora conseguida?</strong> Ninguna de las dos. Es pérdida mensual estimada dividida entre ventas, una referencia sin corroboración contable específica. No generó etiquetas ni se ha demostrado su reducción.</p>
+<p><strong>¿0,4559958404 es la probabilidad verdadera y significa que pagará?</strong> Es la salida del modelo para una entrada ficticia, no riesgo real garantizado. Queda bajo 0,70 y produce cero, pero <code>known_label=null</code>: no sabemos si acertó. La calibración sigmoide de SVM tampoco garantiza calibración real, y este ejemplo pertenece al árbol.</p>
+<p><strong>¿De dónde salen los conteos y por qué no evalúan 1091 filas?</strong> El reporte congelado registra 1289 filas de desarrollo en 125 clientes y 1091 finales en otros 120. En final hay 1073 etiquetas resueltas y 18 desconocidas, que no se imputan. La fuente original excluye 309 del test antiguo y 24 sin desenlace: 333, distintos de los 333 falsos negativos finales.</p>
+<p><strong>¿La web o producción ya ejecutan CV3?</strong> No consta despliegue CV3. El laboratorio web heredado sigue en v2 y no demuestra autorización de negocio ni aceptación humana. CV3 dispone de inferencia local independiente; integrar al MVP y verificar controles sigue pendiente.</p>
+<p><strong>¿Reproducir otra vez las mismas métricas es una nueva validación?</strong> No. La reproducción documentada repite el mismo protocolo, semilla y prueba fija para comprobar consistencia técnica. No añade clientes independientes ni validación externa; CV3 ya está consultado y no debe usarse para seleccionar de nuevo.</p>
+<p><strong>¿Qué harán si falla la demo y quién aprobó el material?</strong> Se declara el fallo y se muestra únicamente la última predicción verificable como resultado guardado, o una grabación auténtica identificada como tal, nunca como ejecución en vivo. No consta aprobación individual ni comercial de este guion: los cuatro integrantes deben revisarlo y registrar únicamente lo que realmente comprueben.</p></section>
+<section class="page" data-page="7"><h1>Demo y revisión humana</h1>
+<p><strong>En vivo:</strong> 20 segundos hablados + 50 de operación. Mostrar entrada, ejecutar solo inferencia y explicar salida sin garantía de cobro.</p>
+<pre><code class="language-bash">python codigo/scripts/academic_credit_grouped_cv.py --predict-artifact-dir experimento --input-json experimento/illustrative_input.json --output-json demo_inferencia_nueva.json
+</code></pre>
+<p><strong>Contingencia:</strong> declarar el fallo y mostrar experimento/illustrative_prediction.json como resultado guardado, no como ejecución en vivo. Usar una salida nueva; no borrar evidencia.</p>
+<p><strong>Estado inicial:</strong> ninguna casilla acredita revisión realizada. Cada integrante debe registrar su revisión real con alcance, hallazgo o corrección y fecha en el registro correspondiente; no se incluyen firmas ni conformidades simuladas.</p>
+<ul>
+<li>[ ] Confirmar los cuatro nombres y códigos, y aceptar o corregir el reparto propuesto sin atribuir trabajos previos.</li>
+<li>[ ] Contrastar los conteos, exclusiones y las cuatro filas de métricas con el reporte CV3 congelado.</li>
+<li>[ ] Verificar matriz, orientación de ejes y procedencia del caso de error guardado; no volver a predecir el test.</li>
+<li>[ ] Revisar las figuras de desarrollo y sus denominadores contra los valores materializados en el informe y el PPT.</li>
+<li>[ ] Mantener visibles el origen ficticio, calibración comercial pendiente, bajo recall y F2 superior del Dummy positivo.</li>
+<li>[ ] Comprobar en un ensayo auténtico entorno, entrada y artefactos confiables para inferencia, sin entrenamiento ni reajustes; usar salida nueva y conservar respaldo.</li>
+<li>[ ] Preparar respaldo verificable rotulado como guardado o grabado y declarar cualquier fallo; no fabricar ejecución ni capturas.</li>
+<li>[ ] Confirmar que la presentación no confunde CLI CV3 con web v2 ni afirma autorización, consentimiento o beneficio financiero.</li>
+<li>[ ] Revisar referencias normativas y pendientes de tratamiento, sin equiparar minimización o hashes con cumplimiento integral.</li>
+<li>[ ] Revisar contenido asistido por IA contra las fuentes; no sustituir revisión personal por verificaciones automáticas.</li>
+<li>[ ] Ensayar los 13 relevos dentro de 720 segundos, respetando 20 segundos hablados y 50 de operación en la diapositiva 9.</li>
+<li>[ ] Registrar revisión individual auténtica de Omara, César, Tamara y Pablo; dejar explícitamente pendiente lo que no se haya comprobado.</li>
+</ul></section></body></html>

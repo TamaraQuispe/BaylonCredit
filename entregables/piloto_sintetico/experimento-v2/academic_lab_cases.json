@@ -1,0 +1,325 @@
+{
+  "data_source": "synthetic",
+  "cases": [
+    {
+      "id": "FINAL-L00001",
+      "scenario": "puntual",
+      "requested_amount": "33.49",
+      "due_date": "2026-09-08",
+      "actual_late_payment": 0,
+      "features": {
+        "completed_sales": 2.0,
+        "paid_credits": 0.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.16745,
+        "tenure_days": 79.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00002",
+      "scenario": "puntual",
+      "requested_amount": "64.55",
+      "due_date": "2026-09-12",
+      "actual_late_payment": 0,
+      "features": {
+        "completed_sales": 4.0,
+        "paid_credits": 1.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.32275,
+        "tenure_days": 83.0,
+        "punctuality_rate": 1.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00003",
+      "scenario": "atraso_corto",
+      "requested_amount": "29.90",
+      "due_date": "2026-09-13",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 5.0,
+        "paid_credits": 1.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 1.0,
+        "outstanding": 64.55,
+        "utilization": 0.32275,
+        "requested_ratio": 0.1495,
+        "tenure_days": 84.0,
+        "punctuality_rate": 1.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00010",
+      "scenario": "abonos_puntuales",
+      "requested_amount": "50",
+      "due_date": "2026-09-09",
+      "actual_late_payment": 0,
+      "features": {
+        "completed_sales": 5.0,
+        "paid_credits": 0.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.25,
+        "tenure_days": 71.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00012",
+      "scenario": "abonos_tardios",
+      "requested_amount": "31.82",
+      "due_date": "2026-09-13",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 9.0,
+        "paid_credits": 1.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 1.0,
+        "outstanding": 81.11,
+        "utilization": 0.40555,
+        "requested_ratio": 0.1591,
+        "tenure_days": 75.0,
+        "punctuality_rate": 1.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00020",
+      "scenario": "anticipado",
+      "requested_amount": "29.99",
+      "due_date": "2026-10-07",
+      "actual_late_payment": 0,
+      "features": {
+        "completed_sales": 21.0,
+        "paid_credits": 10.0,
+        "paid_late": 4.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.14995,
+        "tenure_days": 99.0,
+        "punctuality_rate": 0.6,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00022",
+      "scenario": "atraso_corto",
+      "requested_amount": "50",
+      "due_date": "2026-09-14",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 7.0,
+        "paid_credits": 0.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.25,
+        "tenure_days": 39.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00023",
+      "scenario": "abonos_puntuales",
+      "requested_amount": "34.90",
+      "due_date": "2026-09-19",
+      "actual_late_payment": 0,
+      "features": {
+        "completed_sales": 8.0,
+        "paid_credits": 1.0,
+        "paid_late": 1.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.1745,
+        "tenure_days": 44.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00026",
+      "scenario": "atraso_largo",
+      "requested_amount": "35.79",
+      "due_date": "2026-09-24",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 13.0,
+        "paid_credits": 3.0,
+        "paid_late": 1.0,
+        "pending_overdue": 0.0,
+        "pending_current": 1.0,
+        "outstanding": 43.28,
+        "utilization": 0.2164,
+        "requested_ratio": 0.17895,
+        "tenure_days": 49.0,
+        "punctuality_rate": 0.6666666666666666,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00033",
+      "scenario": "abono_incompleto",
+      "requested_amount": "46.14",
+      "due_date": "2026-10-16",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 23.0,
+        "paid_credits": 9.0,
+        "paid_late": 5.0,
+        "pending_overdue": 1.0,
+        "pending_current": 1.0,
+        "outstanding": 67.91,
+        "utilization": 0.33955,
+        "requested_ratio": 0.2307,
+        "tenure_days": 71.0,
+        "punctuality_rate": 0.4444444444444444,
+        "overdue_rate": 0.5
+      }
+    },
+    {
+      "id": "FINAL-L00034",
+      "scenario": "sin_pago",
+      "requested_amount": "25.19",
+      "due_date": "2026-10-18",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 24.0,
+        "paid_credits": 9.0,
+        "paid_late": 5.0,
+        "pending_overdue": 3.0,
+        "pending_current": 0.0,
+        "outstanding": 90.98,
+        "utilization": 0.4549,
+        "requested_ratio": 0.12595,
+        "tenure_days": 73.0,
+        "punctuality_rate": 0.4444444444444444,
+        "overdue_rate": 1.0
+      }
+    },
+    {
+      "id": "FINAL-L00088",
+      "scenario": "abonos_tardios",
+      "requested_amount": "47.53",
+      "due_date": "2026-09-14",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 5.0,
+        "paid_credits": 0.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.23765,
+        "tenure_days": 55.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00089",
+      "scenario": "atraso_largo",
+      "requested_amount": "28.61",
+      "due_date": "2026-09-18",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 6.0,
+        "paid_credits": 0.0,
+        "paid_late": 0.0,
+        "pending_overdue": 1.0,
+        "pending_current": 0.0,
+        "outstanding": 23.77,
+        "utilization": 0.11885,
+        "requested_ratio": 0.14305,
+        "tenure_days": 59.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 1.0
+      }
+    },
+    {
+      "id": "FINAL-L00164",
+      "scenario": "anticipado",
+      "requested_amount": "50",
+      "due_date": "2026-09-06",
+      "actual_late_payment": 0,
+      "features": {
+        "completed_sales": 3.0,
+        "paid_credits": 0.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.25,
+        "tenure_days": 67.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 0.0
+      }
+    },
+    {
+      "id": "FINAL-L00491",
+      "scenario": "abono_incompleto",
+      "requested_amount": "36.51",
+      "due_date": "2026-09-12",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 7.0,
+        "paid_credits": 0.0,
+        "paid_late": 0.0,
+        "pending_overdue": 1.0,
+        "pending_current": 1.0,
+        "outstanding": 100.0,
+        "utilization": 0.5,
+        "requested_ratio": 0.18255,
+        "tenure_days": 62.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 0.5
+      }
+    },
+    {
+      "id": "FINAL-L01050",
+      "scenario": "sin_pago",
+      "requested_amount": "50",
+      "due_date": "2026-09-06",
+      "actual_late_payment": 1,
+      "features": {
+        "completed_sales": 8.0,
+        "paid_credits": 0.0,
+        "paid_late": 0.0,
+        "pending_overdue": 0.0,
+        "pending_current": 0.0,
+        "outstanding": 0.0,
+        "utilization": 0.0,
+        "requested_ratio": 0.25,
+        "tenure_days": 65.0,
+        "punctuality_rate": 0.0,
+        "overdue_rate": 0.0
+      }
+    }
+  ]
+}

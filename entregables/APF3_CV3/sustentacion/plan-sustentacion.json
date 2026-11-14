@@ -1,0 +1,96 @@
+{
+  "slides": 13,
+  "planned_seconds": 720,
+  "live_inference_reserved_seconds": 50,
+  "planned_speaker_seconds": {
+    "Omara": 210,
+    "César": 190,
+    "Tamara": 170,
+    "Pablo": 150
+  },
+  "spoken_words": 1324,
+  "human_rehearsal": "Pending",
+  "roles": "Proposed; not evidence of past contribution",
+  "source_report": "experimento/grouped_cv_report.json",
+  "source_report_sha256": "65f1a7391d31a0f3d5066c8da974cbcb4d84b6ebd177024a1cadaf2da69ef4e7",
+  "slides_data": [
+    {
+      "number": 1,
+      "title": "Fiado a un día: continuidad y equipo",
+      "owner": "Omara",
+      "seconds": 30
+    },
+    {
+      "number": 2,
+      "title": "Problema ML e indicador financiero",
+      "owner": "Omara",
+      "seconds": 30
+    },
+    {
+      "number": 3,
+      "title": "Dataset: origen, exclusiones y trazabilidad",
+      "owner": "Omara",
+      "seconds": 75
+    },
+    {
+      "number": 4,
+      "title": "EDA: balance y relaciones de desarrollo",
+      "owner": "César",
+      "seconds": 75
+    },
+    {
+      "number": 5,
+      "title": "Modelos y validación agrupada",
+      "owner": "César",
+      "seconds": 75
+    },
+    {
+      "number": 6,
+      "title": "Criterio congelado: F2 con piso de precisión",
+      "owner": "Omara",
+      "seconds": 75
+    },
+    {
+      "number": 7,
+      "title": "Resultados sobre el mismo final",
+      "owner": "Tamara",
+      "seconds": 40
+    },
+    {
+      "number": 8,
+      "title": "Errores y un caso ya guardado",
+      "owner": "César",
+      "seconds": 40
+    },
+    {
+      "number": 9,
+      "title": "Inferencia local ilustrativa, no validación",
+      "owner": "Tamara",
+      "seconds": 70
+    },
+    {
+      "number": 10,
+      "title": "Interpretación de negocio sin beneficio probado",
+      "owner": "Pablo",
+      "seconds": 60
+    },
+    {
+      "number": 11,
+      "title": "Integración mínima y frontera con el MVP",
+      "owner": "Tamara",
+      "seconds": 60
+    },
+    {
+      "number": 12,
+      "title": "Normativa y controles pendientes",
+      "owner": "Pablo",
+      "seconds": 45
+    },
+    {
+      "number": 13,
+      "title": "Riesgos, pendientes y conclusión defendible",
+      "owner": "Pablo",
+      "seconds": 45
+    }
+  ]
+}

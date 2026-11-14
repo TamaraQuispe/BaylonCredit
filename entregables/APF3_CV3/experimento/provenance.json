@@ -1,0 +1,37 @@
+{
+  "recorded_utc": "2026-11-12T22:24:57.743208+00:00",
+  "protocol_sha256": "8fcb49d60e3a7705761894a0bf106ca6eac9c507273f1beda8e79e76ad8b0094",
+  "source_sha256": "6723f15d0310ee2948a0eb376c03ab325334630cb56cbed0774ca4f03be706ce",
+  "development_sha256": "f640bd82d284f661f8c52e8e6f9e5cf8565186148e609786aeb6c9bfbc62c3da",
+  "code_sha256": {
+    "runner": "9ad30618093d5e066e8b3f9dcc37344bb44d73bd920c86e460e352840b0a969a",
+    "synthetic": "b1c96b9a0a8135b74bf7d7115d0b08adbbd917e2bf7df01e9382c6ab91d29e78",
+    "features": "ec22f6675b9eab61749a86a0ae613781503fab3905e80da08c73f7b8f568fcc1",
+    "outcomes": "c385d1c91af185f305a7fc0429e0c937f5dc11df3ac5af515d810ce751ba59fc"
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.3",
+    "joblib": "1.6.0",
+    "scipy": "1.18.1"
+  },
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "development_rows": 1289,
+  "development_clients": 125,
+  "excluded_rows": 333,
+  "source_path": "/source.json",
+  "policy": "Original train + validation only, resolved labels; old test excluded"
+}

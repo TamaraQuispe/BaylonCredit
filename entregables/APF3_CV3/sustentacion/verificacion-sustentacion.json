@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "editable_ppt_slides": 13,
+  "presentation_pdf_pages": 13,
+  "planned_seconds": 720,
+  "planned_speaker_seconds": {
+    "Omara": 210,
+    "César": 190,
+    "Tamara": 170,
+    "Pablo": 150
+  },
+  "spoken_words": 1324,
+  "supporting_pdf_pages": {
+    "APF3_Grupo2_Guion_12min": 8,
+    "APF3_Grupo2_Ficha_Calibracion_Meta": 6,
+    "APF3_Ficha_Propietario_Baylon": 3
+  },
+  "all_final_metrics_match_frozen_report": true,
+  "demo_preparation_output_matches_verified_inference": true,
+  "new_final_dataset_predictions": false,
+  "human_rehearsal": "Pending",
+  "native_ppt_visual_review": "Review in presentation editor still required",
+  "pdf_rendering": "Shared slide design rendered offline; not native PPT conversion"
+}

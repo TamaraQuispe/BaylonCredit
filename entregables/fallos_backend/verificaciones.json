@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-03",
+  "checks": [
+    {"name": "Backend: pytest -q", "result": "126 passed, 13 warnings (8.83 s)"},
+    {"name": "Pruebas de fallos incluidas en la suite", "result": "30 passed; no sumar de nuevo a las 126"},
+    {"name": "Ruff: archivos backend de resiliencia", "result": "All checks passed"},
+    {"name": "Ruff: backend completo", "result": "1 E501 preexistente en app/scripts/seed_demo.py:33; sin modificar"},
+    {"name": "Frontend: npm run lint", "result": "Correcto"},
+    {"name": "Frontend: npm run build", "result": "Correcto; TypeScript y Vite"},
+    {"name": "Fallos reales Docker + navegador", "result": "6 comprobaciones: 3 fallos y 3 recuperaciones; ver JSON"}
+  ],
+  "notes": "Resultados observados sobre el arbol de trabajo local sin commit. La suite informa un warning de serializacion decimal de Pydantic y 12 avisos de deprecacion HTTP 422 de Starlette. No se corrigieron cambios ajenos a la tarea. El diagnostico-ejecucion.png corresponde a intentos anteriores fallidos y no es evidencia de la ejecucion final; se conserva para trazabilidad."
+}

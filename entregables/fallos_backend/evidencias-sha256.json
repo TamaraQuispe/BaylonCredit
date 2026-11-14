@@ -1,0 +1,10 @@
+{
+  "fallos-backend-reales.json": "bb18b5f4dec0027970af0dde2ed06cc86710fcdd8ed4637fdf48968fa258db55",
+  "verificaciones.json": "f4a5e5c0add1f07ade099024fbd2709a46cbd51dd4961866f3abbe9b2ff3edec",
+  "01-postgresql-detenido.png": "d5cf17deaaebb5ea1859a0de59dd5879aba585cfcf1325f251df1f002645c510",
+  "postgresql-detenido-recuperado.png": "3c4e289b488e725d1d2d663dd07b3b6163ce7ee588c47661cc959a082667614b",
+  "02-postgresql-timeout.png": "139f13dad74d71581da25bbbf2216567b83d10100238f78662e21e1872b3f2ac",
+  "postgresql-timeout-recuperado.png": "670844cc6ccbad84518658af402dde1f91f0eb3fe7af82fba89788bcf45e1aa7",
+  "03-api-detenida-proxy.png": "e1f97eb8580da2cd343a56d8a8932756ab151631944beb8650b13dad57bd7806",
+  "api-detenida-recuperado.png": "b1574e6c7ac4fa7bd8b8d2578c59775d8b0deda10d244634c66d3e9191eda15f"
+}

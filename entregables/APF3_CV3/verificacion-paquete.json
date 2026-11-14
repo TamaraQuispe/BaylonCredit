@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "cv_outer_folds": 5,
+  "oof_every_row_predicted_once": true,
+  "group_disjoint": true,
+  "final_metrics_verified_from_cached_predictions_only": true,
+  "clean_reproduction_identical": true,
+  "csv_rows": {
+    "desarrollo.csv": 1289,
+    "final.csv": 1091
+  },
+  "pdf_total_pages": 29,
+  "pdf_body_pages": 14,
+  "word_tables": 25,
+  "figures": 3,
+  "new_model_evaluation_during_verification": false,
+  "human_review": "Pending; technical verification only"
+}

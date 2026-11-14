@@ -1,0 +1,46 @@
+{
+  "recorded_utc": "2026-10-29T14:31:09.392094+00:00",
+  "data_source": "synthetic",
+  "training_source_sha256": {
+    "synthetic_credit_dataset.csv": "0adc529735628f20c8b96d38ea71a66bf5967f2eab2ec6fcb1b5676ae0b734cb",
+    "synthetic_transactions.json": "6723f15d0310ee2948a0eb376c03ab325334630cb56cbed0774ca4f03be706ce"
+  },
+  "old_test_policy": "Excluded from selection; previously published, not a fresh final test",
+  "models": [
+    "logistic_C0.1_unweighted",
+    "logistic_C1.0_unweighted",
+    "logistic_C10.0_unweighted",
+    "forest_depth3_unweighted",
+    "forest_depth6_unweighted",
+    "logistic_C0.1_balanced",
+    "logistic_C1.0_balanced",
+    "logistic_C10.0_balanced",
+    "forest_depth3_balanced",
+    "forest_depth6_balanced"
+  ],
+  "thresholds": [
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8
+  ],
+  "selection": "Highest validation accuracy with recall >= 0.30; balanced accuracy/F1 tie breaks",
+  "recall_floor": 0.3,
+  "cost_assumption": "FP and FN equally weighted for accuracy; not business cost estimates",
+  "final_cohort_seed": 20261030,
+  "final_cohort_clients": 120,
+  "generator_changes": "None; same coherent simulator as academic execution-02",
+  "deployment": "Read-only academic demonstration only; no credit decisions or production",
+  "python": "3.12.14",
+  "sklearn": "1.9.1",
+  "generator_sha256": "b1c96b9a0a8135b74bf7d7115d0b08adbbd917e2bf7df01e9382c6ab91d29e78"
+}
