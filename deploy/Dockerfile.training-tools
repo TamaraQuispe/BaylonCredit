@@ -1,0 +1,8 @@
+# Independent read-only export/training tooling; does not replace the live API.
+ARG BASE_IMAGE=bayloncredit-api:latest
+FROM ${BASE_IMAGE}
+COPY backend/app/ml/outcomes.py /app/app/ml/outcomes.py
+COPY backend/app/ml/training.py /app/app/ml/training.py
+COPY backend/scripts/export_real_credit_outcomes.py /app/scripts/export_real_credit_outcomes.py
+COPY backend/scripts/train_real_credit_model.py /app/scripts/train_real_credit_model.py
+ENV PYTHONPATH=/app

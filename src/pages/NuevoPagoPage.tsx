@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatDate } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import {
   creditRepository,
@@ -39,13 +39,10 @@ export default function NuevoPagoPage() {
   const initialSelected = initialClientCredits.some((credit) => credit.id === requestedCredit)
     ? [requestedCredit]
     : initialClientCredits.map((credit) => credit.id)
-  const initialAmount = initialClientCredits
-    .filter((credit) => initialSelected.includes(credit.id))
-    .reduce((sum, credit) => sum + credit.pendingAmount, 0)
 
   const [clientId, setClientId] = useState(initialClientId)
   const [selectedCredits, setSelectedCredits] = useState(initialSelected)
-  const [amount, setAmount] = useState(initialAmount)
+  const [amount, setAmount] = useState(0)
   const [paymentDate, setPaymentDate] = useState(isoDate(new Date()))
   const [method, setMethod] = useState('Transferencia')
   const [reference, setReference] = useState('')
@@ -66,7 +63,7 @@ export default function NuevoPagoPage() {
     const nextSelection = nextCredits.map((credit) => credit.id)
     setClientId(id)
     setSelectedCredits(nextSelection)
-    setAmount(nextCredits.reduce((sum, credit) => sum + credit.pendingAmount, 0))
+    setAmount(0)
     setError('')
   }
 
@@ -81,11 +78,7 @@ export default function NuevoPagoPage() {
       : nextCredits.map((credit) => credit.id)
     setClientId(requestedClient)
     setSelectedCredits(nextSelection)
-    setAmount(
-      nextCredits
-        .filter((credit) => nextSelection.includes(credit.id))
-        .reduce((sum, credit) => sum + credit.pendingAmount, 0),
-    )
+    setAmount(0)
   }, [clientId, clients, credits, requestedClient, requestedCredit])
 
   const toggleCredit = (creditId: string) => {
@@ -93,11 +86,10 @@ export default function NuevoPagoPage() {
       ? selectedCredits.filter((id) => id !== creditId)
       : [...selectedCredits, creditId]
     setSelectedCredits(next)
-    setAmount(
-      clientCredits
+    const nextTotal = clientCredits
         .filter((credit) => next.includes(credit.id))
-        .reduce((sum, credit) => sum + credit.pendingAmount, 0),
-    )
+        .reduce((sum, credit) => sum + credit.pendingAmount, 0)
+    setAmount((previous) => Math.min(previous, nextTotal))
     setError('')
   }
 
@@ -107,7 +99,7 @@ export default function NuevoPagoPage() {
   }
 
   const applyPayment = async () => {
-    if (!client || amount <= 0 || selectedCredits.length === 0) {
+    if (!client || !Number.isFinite(amount) || amount <= 0 || selectedCredits.length === 0) {
       setError('Selecciona al menos un credito e ingresa un monto válido.')
       return
     }
@@ -257,7 +249,7 @@ export default function NuevoPagoPage() {
                   </div>
 
                   <h4 className="font-body-lg text-body-lg font-semibold text-on-surface mb-3 flex items-center gap-2">
-                    <Icon name="receipt_long" size="20px" className="text-primary" /> CrÃ©ditos Pendientes
+                    <Icon name="receipt_long" size="20px" className="text-primary" /> Créditos pendientes
                   </h4>
                   <div className="border border-outline-variant rounded-lg overflow-hidden bg-surface-bright">
                     <div className="overflow-x-auto">
@@ -276,7 +268,7 @@ export default function NuevoPagoPage() {
                               <td className="p-3 text-center">
                                 <input type="checkbox" checked={selectedCredits.includes(credit.id)} onChange={() => toggleCredit(credit.id)} className="rounded border-outline-variant text-primary focus:ring-primary" />
                               </td>
-                              <td className="p-3">{credit.createdAt}</td>
+                              <td className="p-3">{formatDate(credit.createdAt)}</td>
                               <td className="p-3"><Link to={`/creditos/${credit.id}`} className="text-primary hover:underline">{credit.code}</Link></td>
                               <td className="p-3 font-semibold text-right">{formatCurrency(credit.pendingAmount)}</td>
                             </tr>
@@ -300,11 +292,12 @@ export default function NuevoPagoPage() {
               <label className="block font-label-sm text-label-sm text-on-surface-variant mb-2" htmlFor="payment-amount">Monto a Pagar</label>
               <div className="relative flex items-center mb-2">
                 <span className="absolute left-4 font-h2-headline text-h2-headline text-on-surface-variant">S/</span>
-                <input id="payment-amount" disabled={!client || selectedCredits.length === 0} value={amount || ''} onChange={(event) => setAmount(Math.min(Number(event.target.value), selectedTotal))} type="number" min="0.01" step="0.01" max={selectedTotal} className="w-full pl-12 pr-4 py-4 text-right bg-surface-bright border-2 border-outline-variant rounded-lg font-h1-display text-h1-display focus:border-primary outline-none disabled:opacity-50" placeholder="0.00" />
+                <input id="payment-amount" disabled={!client || selectedCredits.length === 0} value={amount || ''} onChange={(event) => setAmount(Number(event.target.value))} type="number" min="0.01" step="0.01" max={selectedTotal} className="w-full pl-12 pr-4 py-4 text-right bg-surface-bright border-2 border-outline-variant rounded-lg font-h1-display text-h1-display focus:border-primary outline-none disabled:opacity-50" placeholder="0.00" />
               </div>
+              <p className="text-label-sm text-on-surface-variant mb-3">Ingresa el importe del abono. No se carga toda la deuda automáticamente.</p>
               <div className="flex gap-2 mb-5">
-                <button type="button" disabled={!client} onClick={selectAll} className="px-3 py-1 bg-surface-container rounded font-label-sm text-label-sm text-primary disabled:opacity-50">Deuda total</button>
-                <button type="button" disabled={!client || selectedCredits.length === 0} onClick={() => setAmount(selectedTotal)} className="px-3 py-1 border border-outline-variant rounded font-label-sm text-label-sm text-on-surface-variant disabled:opacity-50">Selección</button>
+                <button type="button" disabled={!client} onClick={selectAll} className="px-3 py-1 bg-surface-container rounded font-label-sm text-label-sm text-primary disabled:opacity-50">Pagar deuda total</button>
+                <button type="button" disabled={!client || selectedCredits.length === 0} onClick={() => setAmount(selectedTotal)} className="px-3 py-1 border border-outline-variant rounded font-label-sm text-label-sm text-on-surface-variant disabled:opacity-50">Pagar selección</button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">

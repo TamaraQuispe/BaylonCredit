@@ -1,7 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
-import { formatCurrency } from '@/utils/format'
+import { daysUntil, formatCurrency, formatDate, formatDateTime, formatDays } from '@/utils/format'
 import { useCreditState } from '@/services/creditRepository'
 
 const statusLabels = {
@@ -11,21 +11,13 @@ const statusLabels = {
   pagado: 'Pagado',
 }
 
-function daysUntil(date: string) {
-  const [day, month, year] = date.split('/').map(Number)
-  if (!day || !month || !year) return null
-  const target = new Date(year, month - 1, day)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return Math.ceil((target.getTime() - today.getTime()) / 86_400_000)
-}
-
 export default function DetalleCreditoPage() {
   const { id } = useParams()
-  const { credits, loading } = useCreditState()
+  const { credits, loading, loaded, error } = useCreditState()
   const detail = credits.find((credit) => credit.id === id)
 
-  if (loading) return <div className="py-16 text-center text-on-surface-variant">Cargando credito...</div>
+  if (error) return <div className="py-16 text-center text-error" role="alert">{error}</div>
+  if (loading || !loaded) return <div className="py-16 text-center text-on-surface-variant">Cargando crédito...</div>
   if (!detail) return <Navigate to="/creditos" replace />
 
   const daysLeft = daysUntil(detail.dueAt)
@@ -39,7 +31,7 @@ export default function DetalleCreditoPage() {
             className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-label-sm text-label-sm"
           >
             <Icon name="arrow_back" size="18px" />
-            Volver al listado de CrÃ©ditos
+            Volver al listado de créditos
           </Link>
           <div className="flex items-center gap-4">
             <h1 className="font-h1-display text-h1-display text-on-surface">Detalle del Credito</h1>
@@ -162,7 +154,7 @@ export default function DetalleCreditoPage() {
                   <span className="font-body-md text-body-md">Fecha de registro</span>
                 </div>
                 <span className="font-body-md text-body-md text-on-surface font-medium">
-                  {detail.createdAt}
+                  {formatDate(detail.createdAt)}
                 </span>
               </div>
               <div className="flex justify-between items-center bg-surface-container-low p-2 rounded-lg -mx-2">
@@ -171,16 +163,16 @@ export default function DetalleCreditoPage() {
                   <span className="font-body-md text-body-md">Fecha de vencimiento</span>
                 </div>
                 <span className="font-body-md text-body-md text-on-surface font-medium">
-                  {detail.dueAt}
+                  {formatDate(detail.dueAt)}
                 </span>
               </div>
               {daysLeft !== null && (
                 <p className={`font-label-sm text-label-sm text-right ${daysLeft < 0 ? 'text-error' : 'text-on-surface-variant'}`}>
                   {daysLeft < 0
-                    ? `Venció hace ${Math.abs(daysLeft)} días`
+                    ? `Venció hace ${formatDays(Math.abs(daysLeft))}`
                     : daysLeft === 0
                       ? 'Vence hoy'
-                      : `Faltan ${daysLeft} días`}
+                      : `${daysLeft === 1 ? 'Falta' : 'Faltan'} ${formatDays(daysLeft)}`}
                 </p>
               )}
             </div>
@@ -248,7 +240,7 @@ export default function DetalleCreditoPage() {
                           {payment.amount < 0 ? `- ${formatCurrency(Math.abs(payment.amount))}` : formatCurrency(payment.amount)}
                         </span>
                         <span className="block font-label-sm text-label-sm text-on-surface-variant">
-                          {payment.date}
+                          {formatDateTime(payment.date)}
                         </span>
                       </div>
                     </div>

@@ -11,6 +11,7 @@ services:
   migrate:
     environment: &prod-environment
       ENVIRONMENT: ${ENVIRONMENT:-production}
+      REQUIRE_PAID_CREDIT_HISTORY: ${REQUIRE_PAID_CREDIT_HISTORY:-true}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
       CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}

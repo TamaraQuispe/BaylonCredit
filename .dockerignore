@@ -1,6 +1,8 @@
 .git
 .github
 .vite
+.env*
+**/._*
 backend/.env
 backend/.pytest_cache
 backend/.ruff_cache
@@ -9,3 +11,5 @@ backend/**/__pycache__
 dist
 node_modules
 *.log
+entregables
+academic

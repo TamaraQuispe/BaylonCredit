@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import { clientProfile } from '@/data/clientes'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
 
@@ -224,7 +224,7 @@ export default function DetalleClientePage() {
               <tbody className="font-body-md text-body-md">
                 {displayedHistory.map((entry) => (
                   <tr key={`${entry.date}-${entry.description}`} className="border-b border-surface-container-high hover:bg-surface-container-low transition-colors h-[56px] last:border-0">
-                    <td className="py-3 px-6 text-on-background">{entry.date}</td>
+                    <td className="py-3 px-6 text-on-background">{activeTab === 'pagos' ? formatDateTime(entry.date) : formatDate(entry.date)}</td>
                     <td className="py-3 px-6 text-on-background">{entry.description}</td>
                     <td className="py-3 px-6 text-on-background font-medium text-right">
                       {formatCurrency(entry.amount)}

@@ -4,11 +4,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
 from app.api.routes.health import router as health_router
 from app.core.config import get_settings
 from app.core.http_logging import RequestLoggingMiddleware
+from app.db.session import SERVICE_UNAVAILABLE_MESSAGE, DatabaseUnavailable
 from app.services.whatsapp import reminder_loop
 
 settings = get_settings()
@@ -39,5 +41,16 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 app.add_middleware(RequestLoggingMiddleware)
+
+
+@app.exception_handler(DatabaseUnavailable)
+async def database_unavailable_handler(_request, _error):
+    return JSONResponse(
+        status_code=503,
+        content={"detail": SERVICE_UNAVAILABLE_MESSAGE, "code": "database_unavailable"},
+        headers={"Retry-After": "5"},
+    )
+
+
 app.include_router(health_router)
 app.include_router(api_router, prefix=settings.api_v1_prefix)

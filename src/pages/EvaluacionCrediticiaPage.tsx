@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
 import { useClientState } from '@/services/clientRepository'
@@ -11,7 +11,7 @@ import {
 } from '@/services/scoringService'
 import { useSettingsState } from '@/services/settingsRepository'
 import type { RiskLevel } from '@/types'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatDateTime, formatDays } from '@/utils/format'
 
 const riskLabel: Record<RiskLevel, string> = {
   'muy-bajo': 'Muy bajo',
@@ -40,6 +40,26 @@ interface DecisionPresentation {
 }
 
 function getDecision(result: CreditEvaluation): DecisionPresentation {
+  if (result.requiresManualReview) {
+    return {
+      tone: 'warning',
+      icon: 'person_search',
+      eyebrow: 'Historial insuficiente',
+      title: 'Revisión del propietario requerida',
+      description: result.recommendation,
+    }
+  }
+  const limitedHistory = result.factors?.some((factor) => factor.key === 'volume' && factor.contribution === 0)
+    && result.factors?.some((factor) => factor.key === 'tenure' && factor.contribution === 0)
+  if (result.approved && limitedHistory) {
+    return {
+      tone: 'warning',
+      icon: 'history',
+      eyebrow: 'Historial limitado',
+      title: 'Revisa antes de otorgar fiado',
+      description: 'No hay ventas registradas y la antigüedad disponible es limitada. El resultado por reglas es orientativo, no confianza demostrada con pagos reales.',
+    }
+  }
   if (result.approved && ['muy-bajo', 'bajo'].includes(result.risk)) {
     return {
       tone: 'positive',
@@ -77,10 +97,7 @@ function getDecision(result: CreditEvaluation): DecisionPresentation {
 }
 
 function formatDate(value: string) {
-  const date = new Date(value)
-  return Number.isNaN(date.getTime())
-    ? value
-    : new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+  return formatDateTime(value)
 }
 
 function errorMessage(error: unknown, fallback: string) {
@@ -104,6 +121,7 @@ export default function EvaluacionCrediticiaPage() {
   const selectedClient = clients.find((client) => client.id === clientId) ?? clients[0]
   const selectedClientId = selectedClient?.id
   const numericAmount = Number(amount)
+  const decision = result ? getDecision(result) : undefined
   const hasPendingRecalculation = Boolean(
     result && Number.isFinite(numericAmount) && numericAmount > 0 && numericAmount !== resultAmount,
   )
@@ -175,9 +193,11 @@ export default function EvaluacionCrediticiaPage() {
       `Documento: ${selectedClient.document}`,
       `Monto solicitado: ${formatCurrency(resultAmount)}`,
       `Puntaje: ${result.score}`,
-      `Riesgo: ${riskLabel[result.risk]}`,
-      `Probabilidad de impago: ${result.defaultProbability}%`,
-      `Límite recomendado: ${formatCurrency(result.recommendedLimit)}`,
+      `Riesgo: ${result.requiresManualReview ? 'Sin historial suficiente' : riskLabel[result.risk]}`,
+      result.requiresManualReview ? 'Probabilidad de impago: no disponible sin historial suficiente' : result.modelVersion === 'rules-v1'
+        ? `Indicador por reglas (no calibrado): ${result.defaultProbability}/100`
+        : `Probabilidad estimada de impago: ${result.defaultProbability}%`,
+      `Límite recomendado: ${result.requiresManualReview ? 'A definir por el propietario; sin asignación automática' : formatCurrency(result.recommendedLimit)}`,
       `Decisión: ${result.approved ? 'Recomendado' : 'No recomendado'}`,
       `Recomendación: ${result.recommendation}`,
       ...(result.aiExplanation ? [`Explicación IA: ${result.aiExplanation}`] : []),
@@ -221,9 +241,16 @@ export default function EvaluacionCrediticiaPage() {
             Evalúa el monto, entiende los factores y toma una decisión con evidencia registrada.
           </p>
         </div>
-        <Button variant="outline" onClick={downloadReport} disabled={!result}>
-          <Icon name="download" size="18px" /> Descargar resumen
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          {import.meta.env.VITE_ACADEMIC_ML_LAB === 'true' && (
+            <Link to="/laboratorio-academico" className="inline-flex items-center gap-2 text-primary font-label-sm text-label-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <Icon name="science" size="18px" /> Laboratorio ML
+            </Link>
+          )}
+          <Button variant="outline" onClick={downloadReport} disabled={!result}>
+            <Icon name="download" size="18px" /> Descargar resumen
+          </Button>
+        </div>
       </div>
 
       <form onSubmit={runEvaluation} className="bg-surface-container-lowest rounded-xl shadow-card border border-outline-variant p-5 md:p-6 mb-6">
@@ -284,7 +311,7 @@ export default function EvaluacionCrediticiaPage() {
             </div>
             {result && (
               <div className="flex flex-wrap gap-2" aria-label="Montos rápidos">
-                {[0.5, 1, 1.2].map((ratio) => {
+                {!result.requiresManualReview && [0.5, 1, 1.2].map((ratio) => {
                   const quickAmount = Math.max(1, Math.round(result.recommendedLimit * ratio))
                   return (
                     <button
@@ -334,17 +361,17 @@ export default function EvaluacionCrediticiaPage() {
         <div className="fixed md:left-[260px] left-0 right-0 bottom-0 z-30 px-4 md:px-container-padding pb-3 pointer-events-none">
           <div className="max-w-7xl mx-auto bg-surface-container-lowest/95 backdrop-blur border border-outline-variant shadow-[0_-8px_30px_rgba(11,28,48,0.12)] rounded-xl p-3 md:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 pointer-events-auto">
             <div className="flex items-center gap-3 min-w-0">
-              <span className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${result.approved ? 'bg-green-50 text-green-700' : 'bg-error-container text-on-error-container'}`}>
-                <Icon name={result.approved ? 'verified' : 'warning'} size="22px" />
+              <span className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${decision?.tone === 'positive' ? 'bg-green-50 text-green-700' : decision?.tone === 'negative' ? 'bg-error-container text-on-error-container' : 'bg-secondary-fixed text-on-secondary-fixed-variant'}`}>
+                <Icon name={decision?.tone === 'positive' ? 'verified' : 'warning'} size="22px" />
               </span>
               <div className="min-w-0">
-                <p className="font-semibold text-on-surface truncate">{result.approved ? 'Evaluación favorable' : 'Evaluación fuera de política'}</p>
+                <p className="font-semibold text-on-surface truncate">{decision?.title}</p>
                 <p className="font-label-sm text-label-sm text-on-surface-variant truncate">
-                  {formatCurrency(resultAmount)} evaluados · límite {formatCurrency(result.recommendedLimit)} · riesgo {riskLabel[result.risk].toLowerCase()}
+                  {result.requiresManualReview ? `${formatCurrency(resultAmount)} solicitados · sin límite automático` : `${formatCurrency(resultAmount)} evaluados · límite ${formatCurrency(result.recommendedLimit)} · riesgo ${riskLabel[result.risk].toLowerCase()}`}
                 </p>
               </div>
             </div>
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
               <Button variant="outline" onClick={downloadReport} className="flex-1 md:flex-none">
                 <Icon name="download" size="18px" /> Resumen
               </Button>
@@ -397,9 +424,9 @@ function EvaluationResult({ result, resultAmount, termDays }: { result: CreditEv
           </div>
 
           <div className="grid grid-cols-3 gap-2 mt-7">
-            <DecisionStat label="Score" value={`${result.score}/100`} />
-            <DecisionStat label="Riesgo" value={riskLabel[result.risk]} />
-            <DecisionStat label="Impago est." value={`${result.defaultProbability}%`} />
+            <DecisionStat label="Score orientativo" value={result.requiresManualReview ? 'No concluyente' : `${result.score}/100`} />
+            <DecisionStat label="Riesgo" value={result.requiresManualReview ? 'Sin historial' : riskLabel[result.risk]} />
+            <DecisionStat label={result.modelVersion === 'rules-v1' ? 'Indicador por reglas' : 'Impago est.'} value={result.requiresManualReview ? 'No disponible' : result.modelVersion === 'rules-v1' ? `${result.defaultProbability}/100` : `${result.defaultProbability}%`} />
           </div>
 
           <div className="mt-5 pt-4 border-t border-on-surface/10 flex items-start gap-2 text-on-surface-variant">
@@ -414,8 +441,8 @@ function EvaluationResult({ result, resultAmount, termDays }: { result: CreditEv
               <Icon name="auto_awesome" className="text-primary" size="22px" />
               <h2 className="font-h3-title text-h3-title text-on-surface">Explicación de la evaluación</h2>
             </div>
-            <span className={`px-3 py-1 rounded-full border font-label-sm text-label-sm font-semibold ${riskTone[result.risk]}`}>
-              Riesgo {riskLabel[result.risk].toLowerCase()}
+            <span className={`px-3 py-1 rounded-full border font-label-sm text-label-sm font-semibold ${result.requiresManualReview ? riskTone.medio : riskTone[result.risk]}`}>
+              {result.requiresManualReview ? 'Revisión manual' : `Riesgo ${riskLabel[result.risk].toLowerCase()}`}
             </span>
           </div>
           <AiExplanation result={result} />
@@ -441,14 +468,14 @@ function EvaluationResult({ result, resultAmount, termDays }: { result: CreditEv
           <MetricCard
             icon="account_balance_wallet"
             label="Límite recomendado"
-            value={formatCurrency(result.recommendedLimit)}
-            detail={resultAmount <= result.recommendedLimit ? 'No superar este monto' : `Exceso de ${formatCurrency(resultAmount - result.recommendedLimit)}`}
+            value={result.requiresManualReview ? 'Sin asignar' : formatCurrency(result.recommendedLimit)}
+            detail={result.requiresManualReview ? 'Primer monto a definir por el propietario' : resultAmount <= result.recommendedLimit ? 'No superar este monto' : `Exceso de ${formatCurrency(resultAmount - result.recommendedLimit)}`}
             tone="primary"
           />
           <MetricCard
             icon="calendar_month"
             label="Plazo configurado"
-            value={`${termDays} días`}
+            value={formatDays(termDays)}
             detail="Según política del negocio"
             tone="neutral"
           />
@@ -470,6 +497,9 @@ function EvaluationResult({ result, resultAmount, termDays }: { result: CreditEv
 }
 
 function AiExplanation({ result }: { result: CreditEvaluation }) {
+  if (result.requiresManualReview) {
+    return <div><p className="font-body-lg text-body-lg text-on-surface leading-relaxed">{result.recommendation}</p><p className="mt-4 text-on-surface-variant">Registrar más evaluaciones no crea historial de pago. El primer fiado requiere autorización explícita de un administrador y un motivo registrado.</p></div>
+  }
   if (result.aiStatus === 'pending') {
     return <EmptyState icon="progress_activity" title="Generando explicación" message="La decisión ya fue calculada. Estamos preparando el resumen en lenguaje sencillo." compact spin />
   }
@@ -598,8 +628,8 @@ function HistorySection({ history, loading, error }: { history: StoredCreditEval
                   <td className="py-3 px-2 font-semibold text-primary">{entry.score}</td>
                   <td className="py-3 px-2">{formatCurrency(entry.requestedAmount)}</td>
                   <td className="py-3 px-2">{formatCurrency(entry.recommendedLimit)}</td>
-                  <td className="py-3 px-2"><span className={`inline-flex px-2 py-1 rounded border text-xs font-semibold ${riskTone[entry.risk]}`}>{riskLabel[entry.risk]}</span></td>
-                  <td className="py-3 px-2"><span className={`inline-flex px-2 py-1 rounded text-xs font-semibold ${entry.approved ? 'bg-green-50 text-green-700' : 'bg-error-container text-on-error-container'}`}>{entry.approved ? 'Recomendado' : 'No recomendado'}</span></td>
+                  <td className="py-3 px-2"><span className={`inline-flex px-2 py-1 rounded border text-xs font-semibold ${entry.requiresManualReview ? riskTone.medio : riskTone[entry.risk]}`}>{entry.requiresManualReview ? 'Sin historial' : riskLabel[entry.risk]}</span></td>
+                  <td className="py-3 px-2"><span className={`inline-flex px-2 py-1 rounded text-xs font-semibold ${entry.approved ? 'bg-green-50 text-green-700' : 'bg-error-container text-on-error-container'}`}>{entry.requiresManualReview ? 'Revisión del propietario' : entry.approved ? 'Recomendado' : 'No recomendado'}</span></td>
                 </tr>
               ))}</tbody>
             </table>

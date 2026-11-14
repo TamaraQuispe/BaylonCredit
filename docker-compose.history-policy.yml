@@ -1,0 +1,11 @@
+# Apply AFTER docker-compose.yml and docker-compose.prod.yml, never to demo.
+services:
+  api:
+    image: credify-api-history-policy:v1
+    environment:
+      REQUIRE_PAID_CREDIT_HISTORY: "true"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+  frontend:
+    image: credify-frontend-history-policy:v1

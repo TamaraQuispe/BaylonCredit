@@ -28,6 +28,7 @@ class CreditEvaluationRead(BaseModel):
     default_probability: int
     recommended_limit: Decimal
     approved: bool
+    requires_manual_review: bool = False
     recommendation: str
     confidence: int
     factors: list[ScoreFactorRead]

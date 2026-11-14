@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
 import { useCreditState } from '@/services/creditRepository'
 
 export default function PagosPage() {
@@ -69,10 +69,10 @@ export default function PagosPage() {
                   <td className="py-3 px-6">
                     <div className="flex flex-col">
                       <span>{payment.creditCode}</span>
-                      <span className="font-label-sm text-label-sm text-on-surface-variant">{payment.creditDate}</span>
+                      <span className="font-label-sm text-label-sm text-on-surface-variant">{payment.creditDate.split(', ').map(formatDate).join(', ')}</span>
                     </div>
                   </td>
-                  <td className="py-3 px-6">{payment.paidAt}</td>
+                  <td className="py-3 px-6">{formatDateTime(payment.paidAt)}</td>
                   <td className="py-3 px-6 text-right text-on-surface-variant">{formatCurrency(payment.remainingBalance)}</td>
                   <td className="py-3 px-6">
                     <div className="flex items-center gap-2">

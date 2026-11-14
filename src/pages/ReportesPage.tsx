@@ -163,7 +163,7 @@ export default function ReportesPage() {
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[560px]">
-              <thead><tr className="border-b border-surface-container-high"><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2">CLIENTE</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">DEUDA</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">VENCIDO</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">CrÃ©ditos</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">MORA</th></tr></thead>
+              <thead><tr className="border-b border-surface-container-high"><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2">CLIENTE</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">DEUDA</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-right">VENCIDO</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">Créditos</th><th className="font-table-header text-table-header text-on-surface-variant py-3 px-2 text-center">MORA</th></tr></thead>
               <tbody>
                 {portfolio?.clients.map((client) => (
                   <tr key={client.clientId} className="border-b border-surface-container-high last:border-0 hover:bg-surface-container-low h-[56px]">

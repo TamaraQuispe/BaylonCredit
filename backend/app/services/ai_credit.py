@@ -39,6 +39,9 @@ def _request_payload(evaluation: CreditEvaluation) -> dict:
         for factor in evaluation.factors
     ]
     data = {
+        "requires_owner_review": any(
+            factor.get("key") == "payment_history_review" for factor in evaluation.factors
+        ),
         "requested_amount_pen": str(evaluation.requested_amount),
         "score": evaluation.score,
         "risk": evaluation.risk.value,

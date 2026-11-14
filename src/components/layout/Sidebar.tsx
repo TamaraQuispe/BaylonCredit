@@ -3,11 +3,12 @@ import type { AuthUser } from '@/services/apiClient'
 import { endSession, getSession } from '@/utils/session'
 import { logout } from '@/services/apiClient'
 import Icon from '@/components/ui/Icon'
+import logo from '@/assets/credify-logo.svg'
 
 const navItems = [
   { to: '/inicio', label: 'Inicio', icon: 'dashboard' },
   { to: '/ventas', label: 'Ventas', icon: 'point_of_sale' },
-  { to: '/creditos', label: 'CrÃ©ditos', icon: 'receipt_long' },
+  { to: '/creditos', label: 'Créditos', icon: 'receipt_long' },
   { to: '/clientes', label: 'Clientes', icon: 'group' },
   { to: '/productos', label: 'Productos', icon: 'inventory_2' },
   { to: '/inventario', label: 'Inventario', icon: 'inventory' },
@@ -74,9 +75,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       >
         <div className="flex flex-col h-full">
           <div className="px-6 mb-8 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
-              <span className="material-symbols-outlined text-[22px]">psychology</span>
-            </div>
+            <img src={logo} alt="Credify" className="w-10 h-10 rounded-lg shrink-0" />
             <div>
               <h1 className="font-h3-title text-h3-title font-bold text-primary tracking-tight">
                 Credify

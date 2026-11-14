@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    academic_ml,
     auth,
     clients,
     credits,
@@ -15,6 +16,7 @@ from app.api.routes import (
 )
 
 api_router = APIRouter()
+api_router.include_router(academic_ml.router)
 api_router.include_router(auth.router)
 api_router.include_router(webauthn.router)
 api_router.include_router(users.router)

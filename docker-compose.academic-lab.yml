@@ -1,0 +1,16 @@
+# Apply only with docker-compose.demo.yml and the private .env.demo.
+services:
+  api:
+    image: credify-demo-academic-api:v2
+    environment:
+      ACADEMIC_ML_LAB_ENABLED: "true"
+      ACADEMIC_ML_LAB_DIR: /app/academic
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    volumes:
+      - ./academic:/app/academic:ro
+  frontend:
+    image: credify-demo-academic-frontend:v2
+    build:
+      args:
+        VITE_ACADEMIC_ML_LAB: "true"

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import RiskBadge from '@/components/ui/RiskBadge'
+import { getSession } from '@/utils/session'
 import { formatCurrency } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import { creditRepository } from '@/services/creditRepository'
@@ -37,6 +38,9 @@ export default function NuevoCreditoPage() {
   const dueDateEdited = useRef(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [exceptionReason, setExceptionReason] = useState('')
+  const [overrideConfirmed, setOverrideConfirmed] = useState(false)
+  const isAdmin = getSession()?.rol === 'admin'
 
   const client = clients.find((item) => item.id === clientId)
   const numericAmount = Number(amount)
@@ -57,6 +61,8 @@ export default function NuevoCreditoPage() {
   const invalidateEvaluation = () => {
     setEvaluation(null)
     setError('')
+    setExceptionReason('')
+    setOverrideConfirmed(false)
   }
 
   const evaluate = async (event: FormEvent) => {
@@ -72,6 +78,8 @@ export default function NuevoCreditoPage() {
 
     setLoading(true)
     setError('')
+    setExceptionReason('')
+    setOverrideConfirmed(false)
     try {
       const result = await localScoringService.evaluate(client, numericAmount)
       setEvaluation(result)
@@ -84,6 +92,14 @@ export default function NuevoCreditoPage() {
 
   const confirmCredit = async () => {
     if (!client || !evaluation) return
+    if (!evaluation.approved && (!overrideConfirmed || exceptionReason.trim().length < 10)) {
+      setError('Confirma la autorización manual y registra un motivo de al menos 10 caracteres.')
+      return
+    }
+    if (evaluation.requiresManualReview && !isAdmin) {
+      setError('Este primer fiado debe autorizarlo un administrador.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
@@ -93,6 +109,7 @@ export default function NuevoCreditoPage() {
         creditDate,
         dueDate,
         evaluation,
+        exceptionReason: evaluation.approved ? undefined : exceptionReason.trim(),
       })
       navigate(`/creditos/${credit.id}`, { replace: true })
     } catch (creditError) {
@@ -265,19 +282,19 @@ export default function NuevoCreditoPage() {
               <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-primary-fixed mb-5">
                 <div>
                   <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Score Credifycredit</p>
-                  <p className="font-h1-display text-h1-display text-primary">{evaluation.score}</p>
+                  <p className="font-h1-display text-h1-display text-primary">{evaluation.requiresManualReview ? 'Sin historial' : evaluation.score}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">Nivel de riesgo</p>
-                  <RiskBadge level={evaluation.risk} />
+                  {evaluation.requiresManualReview ? <span className="text-secondary font-semibold">Revisión manual</span> : <RiskBadge level={evaluation.risk} />}
                 </div>
               </div>
 
               <div className="space-y-3 mb-5">
                 <SummaryRow label="Monto solicitado" value={formatCurrency(numericAmount)} />
-                <SummaryRow label="Límite recomendado" value={formatCurrency(evaluation.recommendedLimit)} strong />
-                <SummaryRow label="Probabilidad de impago" value={`${evaluation.defaultProbability}%`} />
-                <SummaryRow label="Confianza del modelo" value={evaluation.confidence !== undefined ? `${evaluation.confidence}%` : '—'} />
+                <SummaryRow label="Límite recomendado" value={evaluation.requiresManualReview ? 'Sin asignación automática' : formatCurrency(evaluation.recommendedLimit)} strong />
+                <SummaryRow label="Probabilidad de impago" value={evaluation.requiresManualReview ? 'No disponible' : `${evaluation.defaultProbability}%`} />
+                <SummaryRow label="Confianza del modelo" value={evaluation.requiresManualReview ? 'Historial insuficiente' : evaluation.confidence !== undefined ? `${evaluation.confidence}%` : '—'} />
                 <SummaryRow label="Tiempo de respuesta" value={`${evaluation.responseTimeMs} ms`} />
               </div>
 
@@ -325,7 +342,7 @@ export default function NuevoCreditoPage() {
               >
                 <p className="font-medium flex items-center gap-2 mb-1">
                   <Icon name={evaluation.approved ? 'check_circle' : 'warning'} size="20px" />
-                  {evaluation.approved ? 'Recomendación favorable' : 'Requiere decisión manual'}
+                  {evaluation.requiresManualReview ? 'Historial insuficiente: revisión del propietario' : evaluation.approved ? 'Recomendación favorable' : 'Requiere decisión manual'}
                 </p>
                 <p className="font-body-md text-body-md">{evaluation.recommendation}</p>
               </div>
@@ -334,13 +351,32 @@ export default function NuevoCreditoPage() {
                 La recomendación apoya la decisión. El responsable del negocio conserva la decisión final.
               </p>
 
+              {!evaluation.approved && (
+                <div className="mb-5 p-4 rounded-lg bg-secondary-fixed/40 border border-secondary-fixed-dim space-y-3">
+                  {evaluation.requiresManualReview && !isAdmin ? (
+                    <p>Solo un administrador puede autorizar el primer fiado sin historial. No se registrará deuda sin esa autorización.</p>
+                  ) : (
+                    <>
+                      <p className="text-sm">Elige un primer monto conservador. La excepción quedará auditada; no implica que el cliente ya sea confiable.</p>
+                      <label className="block text-sm">Motivo de la autorización
+                        <textarea value={exceptionReason} onChange={(event) => setExceptionReason(event.target.value)} minLength={10} maxLength={300} rows={3} className="mt-2 w-full rounded-lg border border-outline-variant bg-white p-3" placeholder="Explica por qué autorizas este monto y cómo acordaste el pago." />
+                      </label>
+                      <label className="flex gap-2 items-start text-sm">
+                        <input type="checkbox" checked={overrideConfirmed} onChange={(event) => setOverrideConfirmed(event.target.checked)} className="mt-1" />
+                        <span>Autorizo expresamente {formatCurrency(numericAmount)} para este cliente y acepto registrar el motivo.</span>
+                      </label>
+                    </>
+                  )}
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={confirmCredit}
-                disabled={loading}
+                disabled={loading || (!evaluation.approved && (!overrideConfirmed || exceptionReason.trim().length < 10)) || (evaluation.requiresManualReview && !isAdmin)}
                 className="mt-auto w-full h-12 bg-primary text-on-primary rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-primary-container"
               >
-                <Icon name="check_circle" /> Confirmar y registrar credito
+                <Icon name="check_circle" /> {evaluation.approved ? 'Confirmar y registrar credito' : 'Autorizar excepción y registrar crédito'}
               </button>
             </div>
           )}

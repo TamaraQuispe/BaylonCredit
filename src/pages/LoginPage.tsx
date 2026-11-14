@@ -8,9 +8,7 @@ import {
 } from '@/services/apiClient'
 import { base64UrlToBuffer, bufferToBase64Url } from '@/utils/base64url'
 import Icon from '@/components/ui/Icon'
-
-const LOGO =
-  'https://lh3.googleusercontent.com/aida/AEtjO1UxLP1I1dimD3MckhOYQJf9cPSVRJtIPwkBFB6KVAkoj5Oy_QKoRSj4nZNFmef63FNZS-iOWSvn8k5SsG_Ra75_DdXtfYhmOyiQo_Wckl_8_1jaxYhXRubg0PPDE9tXem8Vy7ahwSCS4_tNTmU0GbYc0CZRIcY-dNseMIPWDH1I_PhFEyyDC8GnGYsO90xiryUVf83SL68T3Bb-FkYwF1-1dnbDhxxrdcfh4sooKZfRJl3rivUQhGhfO3E'
+import LOGO from '@/assets/credify-logo.svg'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -128,7 +126,7 @@ export default function LoginPage() {
           </div>
           <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300 backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Motor IA Activo v2.4
+            Gestión crediticia
           </span>
         </div>
 
@@ -150,31 +148,31 @@ export default function LoginPage() {
             para Cervecería Baylón
           </h1>
           <p className="text-slate-300 text-base sm:text-lg leading-relaxed font-normal mb-8 max-w-lg">
-            Control de créditos comerciales, evaluación de riesgo en tiempo real impulsada por IA y digitalización integral
-            del credito cervecero sin pérdidas de stock ni cobranzas manuales.
+            Control de créditos, evaluación orientativa del historial y registro digital
+            de fiados y pagos para apoyar las decisiones del negocio.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90 backdrop-blur-md">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[#38bdf8] mb-1">
                 <Icon name="auto_awesome" size="16px" />
-                99.4% Precisión
+                Evaluación explicable
               </div>
-              <p className="text-[11px] text-slate-400 leading-snug">Evaluación algorítmica de mora y comportamiento cervecero</p>
+              <p className="text-[11px] text-slate-400 leading-snug">Factores registrados para comprender cada recomendación</p>
             </div>
             <div className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90 backdrop-blur-md">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 mb-1">
                 <Icon name="payments" size="16px" />
-                S/ 48,500+
+                Créditos y abonos
               </div>
-              <p className="text-[11px] text-slate-400 leading-snug">CrÃ©ditos gestionados y recuperados puntualmente</p>
+              <p className="text-[11px] text-slate-400 leading-snug">Consulta montos, vencimientos y saldos pendientes</p>
             </div>
             <div className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90 backdrop-blur-md">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 mb-1">
                 <Icon name="cloud_done" size="16px" />
-                100% Cero Papel
+                Registro digital
               </div>
-              <p className="text-[11px] text-slate-400 leading-snug">Libreta física obsoleta: sincronización en la nube</p>
+              <p className="text-[11px] text-slate-400 leading-snug">Fiados y pagos disponibles en un historial compartido</p>
             </div>
           </div>
         </div>
@@ -182,9 +180,9 @@ export default function LoginPage() {
         <div className="relative z-10 pt-6 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex items-center gap-2">
             <Icon name="shield_lock" size="16px" className="text-amber-400" />
-            <span>Cifrado bancario TLS 1.3 de punto a punto</span>
+            <span>Acceso protegido por HTTPS</span>
           </div>
-          <span className="text-[11px] text-slate-500 font-mono">B-CREDIT//2024</span>
+          <span className="text-[11px] text-slate-500 font-mono">CREDIFY//MVP</span>
         </div>
       </section>
 

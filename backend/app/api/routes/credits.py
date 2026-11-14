@@ -114,6 +114,9 @@ def serialize_evaluation(evaluation: CreditEvaluation) -> CreditEvaluationRead:
         default_probability=evaluation.default_probability,
         recommended_limit=evaluation.recommended_limit,
         approved=evaluation.approved,
+        requires_manual_review=any(
+            factor.get("key") == "payment_history_review" for factor in evaluation.factors
+        ),
         recommendation=evaluation.recommendation,
         confidence=evaluation.confidence,
         factors=[ScoreFactorRead.model_validate(factor) for factor in evaluation.factors],
@@ -294,6 +297,26 @@ async def create_credit(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=evaluation.recommendation,
             )
+        requires_review = any(
+            factor.get("key") == "payment_history_review" for factor in evaluation.factors
+        )
+        if requires_review:
+            if current_user.role != UserRole.ADMIN:
+                await db.commit()
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=(
+                        "Solo un administrador puede autorizar el primer fiado "
+                        "sin historial de pagos."
+                    ),
+                )
+            policy = await get_settings_record(db)
+            if payload.amount > policy.max_credit_amount:
+                await db.commit()
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="El primer fiado no puede superar el máximo configurado del negocio.",
+                )
         reason = (payload.exception_reason or "").strip()
         if len(reason) < 10:
             await db.commit()
@@ -324,6 +347,7 @@ async def create_credit(
     )
     db.add(credit)
     if overridden:
+        await db.flush()
         add_audit_log(
             db,
             "credit_overridden",

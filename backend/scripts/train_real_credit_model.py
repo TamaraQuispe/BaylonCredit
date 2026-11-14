@@ -1,8 +1,9 @@
 """Train only from observed credit outcomes exported from production.
 
 The input CSV must contain the 11 feature columns in ``FEATURE_NAMES`` plus
-``defaulted`` (0: paid on time; 1: overdue/default). Synthetic rows are never
-accepted by this command.
+``late_payment`` (0: fully paid on time; 1: late at the contractual due date).
+The caller must document real-data provenance; CSV validation alone cannot
+distinguish synthetic records from real observations.
 """
 
 from __future__ import annotations
@@ -20,11 +21,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from app.ml.features import FEATURE_NAMES
+from app.ml.outcomes import TARGET_DEFINITION, TARGET_NAME
 from app.ml.training import load_real_dataset
 
 MODEL_FILENAME = "credit_ensemble_v1.joblib"
 META_FILENAME = "credit_ensemble_v1_meta.json"
-MODEL_VERSION = "ml-real-v1"
+MODEL_VERSION = "ml-real-late-v1"
 
 
 def main() -> None:
@@ -47,7 +49,7 @@ def main() -> None:
         "accuracy": float(accuracy_score(y_test, prediction)),
         "roc_auc": float(roc_auc_score(y_test, probability)),
         "n_rows": int(len(y)),
-        "default_rate": float(np.mean(y)),
+        "late_payment_rate": float(np.mean(y)),
     }
     args.output_dir.mkdir(parents=True, exist_ok=True)
     joblib.dump(pipeline, args.output_dir / MODEL_FILENAME, compress=3)
@@ -56,6 +58,9 @@ def main() -> None:
             {
                 "version": MODEL_VERSION,
                 "data_source": "real",
+                "target": TARGET_NAME,
+                "target_definition": TARGET_DEFINITION,
+                "grace_days": 0,
                 "kind": "logistic_regression",
                 "feature_names": FEATURE_NAMES,
                 "metrics": metrics,

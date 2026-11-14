@@ -96,6 +96,9 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
 }
 
 async function toApiError(response: Response): Promise<ApiError> {
+  if ([502, 503, 504].includes(response.status)) {
+    return new ApiError('Sistema no disponible temporalmente. Inténtalo más tarde.', response.status)
+  }
   const payload = (await response.json().catch(() => ({}))) as ApiErrorPayload
   const detail = Array.isArray(payload.detail)
     ? payload.detail.map((item) => item.msg).filter(Boolean).join(' ')

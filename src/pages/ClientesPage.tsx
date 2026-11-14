@@ -8,8 +8,8 @@ import { useCreditState } from '@/services/creditRepository'
 
 type FilterKey = 'todos' | 'sin-deuda' | 'con-deuda' | 'vencido' | 'riesgo-alto'
 
-const filters: { key: FilterKey; label: string; count?: number }[] = [
-  { key: 'todos', label: 'Todos los clientes', count: 245 },
+const filters: { key: FilterKey; label: string }[] = [
+  { key: 'todos', label: 'Todos los clientes' },
   { key: 'sin-deuda', label: 'Sin deuda' },
   { key: 'con-deuda', label: 'Con deuda' },
   { key: 'vencido', label: 'Deuda vencida' },
@@ -48,6 +48,11 @@ export default function ClientesPage() {
   const [filter, setFilter] = useState<FilterKey>('todos')
   const { clients } = useClientState()
   const { credits } = useCreditState()
+  const nameCounts = new Map<string, number>()
+  for (const client of clients) {
+    const name = client.business.trim().toLocaleLowerCase('es-PE')
+    nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1)
+  }
 
   const displayedClients = clients.map((client) => {
     const clientCredits = credits.filter((credit) => credit.clientId === client.id)
@@ -144,9 +149,9 @@ export default function ClientesPage() {
               }`}
             >
               {item.label}
-              {item.count && (
+              {item.key === 'todos' && (
                 <span className="bg-primary text-on-primary text-[10px] px-1.5 py-0.5 rounded-full">
-                  {item.count}
+                  {displayedClients.length}
                 </span>
               )}
             </button>
@@ -192,6 +197,9 @@ export default function ClientesPage() {
                           <span className="font-label-sm text-label-sm text-on-surface-variant">
                             {client.name}
                           </span>
+                          {(nameCounts.get(client.business.trim().toLocaleLowerCase('es-PE')) ?? 0) > 1 && (
+                            <span className="text-xs text-secondary">Nombre compartido: identifica por DNI/RUC</span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -210,7 +218,6 @@ export default function ClientesPage() {
                     <td className="px-4 align-middle">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-[11px] font-medium ${status.className}`}>
                         {status.label}
-                        {client.status === 'vencido' ? ' (15d)' : ''}
                       </span>
                     </td>
                     <td className="px-4 align-middle">
@@ -234,18 +241,21 @@ export default function ClientesPage() {
                       )}
                     </td>
                     <td className="px-4 align-middle text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-1">
                         <Link
                           to={`/clientes/${client.id}`}
                           className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-bright transition-colors"
                           title="Ver detalle"
+                          aria-label={`Ver detalle de ${client.business}`}
                         >
                           <Icon name="visibility" size="20px" />
                         </Link>
                         <button
                           type="button"
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-bright transition-colors"
-                          title="Editar"
+                          disabled
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-outline opacity-50 cursor-not-allowed"
+                          title="Edición no disponible en este MVP"
+                          aria-label="Editar: no disponible en este MVP"
                         >
                           <Icon name="edit" size="20px" />
                         </button>

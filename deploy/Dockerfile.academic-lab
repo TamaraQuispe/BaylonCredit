@@ -1,0 +1,7 @@
+# Extend only the existing demo API. Never use this image for production.
+ARG BASE_IMAGE=credify-demo-api:before-academic-lab
+FROM ${BASE_IMAGE}
+COPY backend/app/core/config.py /app/app/core/config.py
+COPY backend/app/api/router.py /app/app/api/router.py
+COPY backend/app/api/routes/academic_ml.py /app/app/api/routes/academic_ml.py
+ENV PYTHONPATH=/app

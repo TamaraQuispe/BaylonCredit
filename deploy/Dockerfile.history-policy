@@ -1,0 +1,11 @@
+# Small release layer on the currently deployed API; no dependency upgrades.
+ARG BASE_IMAGE=bayloncredit-api:history-policy-base
+FROM ${BASE_IMAGE}
+COPY backend/app/core/config.py /app/app/core/config.py
+COPY backend/app/services/credit_scoring.py /app/app/services/credit_scoring.py
+COPY backend/app/services/ai_credit.py /app/app/services/ai_credit.py
+COPY backend/app/schemas/finance.py /app/app/schemas/finance.py
+COPY backend/app/api/routes/credits.py /app/app/api/routes/credits.py
+COPY deploy/verify-history-policy.py /app/scripts/verify-history-policy.py
+ENV REQUIRE_PAID_CREDIT_HISTORY=true
+ENV PYTHONPATH=/app

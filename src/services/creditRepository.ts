@@ -3,6 +3,7 @@ import type { Credito } from '@/data/creditos'
 import type { Cliente } from '@/data/clientes'
 import type { PaymentRecord } from '@/data/pagos'
 import type { RiskLevel } from '@/types'
+import { formatDate, formatDateTime } from '@/utils/format'
 import { apiRequest } from './apiClient'
 import type { CreditEvaluation } from './scoringService'
 
@@ -44,6 +45,7 @@ export interface CreateCreditInput {
   creditDate: string
   dueDate: string
   evaluation: CreditEvaluation
+  exceptionReason?: string
 }
 
 export interface ApplyPaymentInput {
@@ -110,17 +112,6 @@ function emit(nextState: CreditState) {
   listeners.forEach((listener) => listener())
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-PE').format(new Date(`${value}T12:00:00`))
-}
-
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('es-PE', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(new Date(value))
-}
-
 function mapCredit(credit: ApiCredit): StoredCredit {
   const originalAmount = Number(credit.original_amount)
   const pendingAmount = Number(credit.pending_amount)
@@ -156,6 +147,7 @@ function mapCredit(credit: ApiCredit): StoredCredit {
       defaultProbability: Math.max(2, 100 - credit.score),
       recommendedLimit: Number(credit.recommended_limit),
       approved: originalAmount <= Number(credit.recommended_limit),
+      requiresManualReview: false,
       recommendation: `Límite recomendado: ${Number(credit.recommended_limit).toLocaleString('es-PE', { style: 'currency', currency: 'PEN' })}.`,
       calculatedAt: credit.created_at,
       responseTimeMs: 0,
@@ -248,7 +240,8 @@ export const creditRepository = {
         amount: input.amount,
         credit_date: input.creditDate,
         due_date: input.dueDate,
-        manual_override: !input.evaluation.approved,
+        manual_override: !input.evaluation.approved && Boolean(input.exceptionReason?.trim()),
+        exception_reason: input.exceptionReason?.trim() || undefined,
       }),
     }))
     emit({ ...state, credits: [credit, ...state.credits], loaded: true })

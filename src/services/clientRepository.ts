@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import type { Cliente } from '@/data/clientes'
+import { formatDate } from '@/utils/format'
 import { apiRequest } from './apiClient'
 
 export interface StoredClient extends Cliente {
@@ -54,7 +55,7 @@ function mapClient(client: ApiClient): StoredClient {
     document: client.document,
     phone: client.phone,
     address: client.address,
-    registeredAt: new Intl.DateTimeFormat('es-PE').format(new Date(client.created_at)),
+    registeredAt: formatDate(client.created_at),
     purchases: 0,
     debt: 0,
     status: 'sin-deuda',

@@ -14,3 +14,14 @@
     # SPA: servicios internos del proyecto
     reverse_proxy http://frontend:8080
 }
+
+# Isolated APF2 demo; port 8081 is bound only to the Docker host gateway.
+demo-credify.168-75-71-113.sslip.io {
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "no-referrer"
+        X-Robots-Tag "noindex, nofollow"
+    }
+    reverse_proxy http://172.18.0.1:8081
+}

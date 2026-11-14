@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
-import { formatCurrency } from '@/utils/format'
+import { daysUntil, formatCurrency, formatDate, formatDays } from '@/utils/format'
 import { useCreditState } from '@/services/creditRepository'
 import type { RiskLevel, CreditoStatus } from '@/types'
 
@@ -240,7 +240,10 @@ export default function CreditosPage() {
             <tbody className="font-body-md text-body-md text-on-surface divide-y divide-outline-variant">
               {filtered.map((row) => {
                 const st = statusBadge[row.status]
-                const overduedays = row.status === 'vencido' ? 15 : row.status === 'proximo-a-vencer' ? 4 : null
+                const daysLeft = daysUntil(row.dueAt)
+                const deadline = daysLeft === null ? null : daysLeft < 0
+                  ? `Venció hace ${formatDays(Math.abs(daysLeft))}`
+                  : daysLeft === 0 ? 'Vence hoy' : `Vence en ${formatDays(daysLeft)}`
                 const pagado = row.status === 'pagado'
                 return (
                   <tr
@@ -266,9 +269,9 @@ export default function CreditosPage() {
                     <td className={`py-2 px-4 text-right font-medium ${row.status === 'vencido' ? 'text-error' : pagado ? 'text-on-surface-variant' : ''}`}>
                       {formatCurrency(row.pendingAmount)}
                     </td>
-                    <td className="py-2 px-4 text-on-surface-variant">{row.createdAt}</td>
+                    <td className="py-2 px-4 text-on-surface-variant">{formatDate(row.createdAt)}</td>
                     <td className={`py-2 px-4 ${row.status === 'vencido' ? 'text-error font-medium' : row.status === 'proximo-a-vencer' ? 'text-secondary font-medium' : 'text-on-surface-variant'}`}>
-                      {row.dueAt}
+                      {formatDate(row.dueAt)}
                     </td>
                     <td className="py-2 px-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-label-sm ${st.className}`}>
@@ -277,7 +280,7 @@ export default function CreditosPage() {
                         ) : (
                           <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
                         )}
-                        {overduedays !== null ? `${st.label} (${overduedays > 0 ? overduedays + 'd' : ''})` : st.label}
+                        {deadline && ['vencido', 'proximo-a-vencer'].includes(row.status) ? `${st.label} (${deadline})` : st.label}
                       </span>
                     </td>
                     <td className="py-2 px-4 text-center">

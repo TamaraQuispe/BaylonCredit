@@ -46,7 +46,7 @@ export default function AppLayout() {
           navigate(`/creditos/${id}`)
         }}
       />
-      <main className="w-full md:ml-[260px] pt-16 md:pt-20 px-4 md:px-container-padding pb-12">
+      <main className="w-full md:w-[calc(100%-260px)] md:ml-[260px] pt-16 md:pt-20 px-4 md:px-container-padding pb-12">
         <Outlet />
       </main>
     </div>

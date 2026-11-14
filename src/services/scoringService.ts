@@ -17,6 +17,7 @@ export interface CreditEvaluation {
   defaultProbability: number
   recommendedLimit: number
   approved: boolean
+  requiresManualReview: boolean
   recommendation: string
   confidence?: number
   factors?: ScoreFactor[]
@@ -59,6 +60,7 @@ interface ApiEvaluation {
   default_probability: number
   recommended_limit: string | number
   approved: boolean
+  requires_manual_review?: boolean
   recommendation: string
   confidence?: number
   factors?: ScoreFactor[]
@@ -96,6 +98,7 @@ function mapEvaluation(evaluation: ApiEvaluation): CreditEvaluation {
     defaultProbability: evaluation.default_probability,
     recommendedLimit: Number(evaluation.recommended_limit),
     approved: evaluation.approved,
+    requiresManualReview: evaluation.requires_manual_review ?? false,
     recommendation: evaluation.recommendation,
     confidence: evaluation.confidence,
     factors: evaluation.factors,

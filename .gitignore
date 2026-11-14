@@ -16,3 +16,17 @@ __pycache__
 .pytest_cache
 .ruff_cache
 .coverage
+
+# Private credentials, backups and owner/customer evidence are never public deliverables.
+*.key
+*.pem
+*.p12
+*.pfx
+*.dump
+*.pgpass
+credentials*.csv
+*_credentials.csv
+*_accessKeys.csv
+private/
+academic/
+entregables/**/__pycache__/

@@ -15,6 +15,7 @@ import InventarioPage from '@/pages/InventarioPage'
 import PagosPage from '@/pages/PagosPage'
 import NuevoPagoPage from '@/pages/NuevoPagoPage'
 import EvaluacionCrediticiaPage from '@/pages/EvaluacionCrediticiaPage'
+import LaboratorioAcademicoPage from '@/pages/LaboratorioAcademicoPage'
 import ReportesPage from '@/pages/ReportesPage'
 import UsuariosPage from '@/pages/UsuariosPage'
 import ConfiguracionPage from '@/pages/ConfiguracionPage'
@@ -45,6 +46,9 @@ export default function App() {
           <Route path="/pagos" element={<PagosPage />} />
           <Route path="/pagos/nuevo" element={<NuevoPagoPage />} />
           <Route path="/evaluacion-crediticia" element={<EvaluacionCrediticiaPage />} />
+          {import.meta.env.VITE_ACADEMIC_ML_LAB === 'true' && (
+            <Route path="/laboratorio-academico" element={<LaboratorioAcademicoPage />} />
+          )}
           <Route path="/reportes" element={<ReportesPage />} />
           <Route element={<ProtectedRoute adminOnly />}>
             <Route path="/usuarios" element={<UsuariosPage />} />

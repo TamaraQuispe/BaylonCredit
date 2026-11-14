@@ -1,0 +1,84 @@
+name: credify-resilience
+
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: credify_resilience
+      POSTGRES_USER: resilience
+      POSTGRES_PASSWORD: isolated-test-database
+    volumes:
+      - fault_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resilience -d credify_resilience"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  migrate:
+    image: bayloncredit-api-training-test:latest
+    command: ["alembic", "upgrade", "head"]
+    environment: &fault-environment
+      ENVIRONMENT: test
+      DATABASE_URL: postgresql+asyncpg://resilience:isolated-test-database@database:5432/credify_resilience
+      JWT_SECRET_KEY: isolated-resilience-tests-not-a-production-secret
+      CORS_ORIGINS: http://127.0.0.1:8093
+      CREDIT_ML_ENABLED: "false"
+      REQUIRE_PAID_CREDIT_HISTORY: "false"
+      OPENROUTER_ENABLED: "false"
+      WHATSAPP_ENABLED: "false"
+      ACADEMIC_ML_LAB_ENABLED: "false"
+      DATABASE_CONNECT_TIMEOUT_SECONDS: "2"
+      DATABASE_COMMAND_TIMEOUT_SECONDS: "2"
+      DATABASE_POOL_TIMEOUT_SECONDS: "2"
+      PYTHONPATH: /app
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    volumes: &fault-code
+      - ./backend/app:/app/app:ro
+      - ./backend/alembic:/app/alembic:ro
+      - ./deploy/resilience-seed.py:/test-tools/seed.py:ro
+    depends_on:
+      database:
+        condition: service_healthy
+
+  seed:
+    image: bayloncredit-api-training-test:latest
+    environment: *fault-environment
+    volumes: *fault-code
+    command: ["python", "/test-tools/seed.py"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  api:
+    image: bayloncredit-api-training-test:latest
+    environment: *fault-environment
+    volumes: *fault-code
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  frontend:
+    image: credify-resilience-frontend:local
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    build:
+      context: .
+      args:
+        VITE_API_URL: /api/v1
+        VITE_ACADEMIC_ML_LAB: "false"
+    ports:
+      - "127.0.0.1:8093:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  fault_test_data:

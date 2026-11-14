@@ -203,6 +203,16 @@ async def evaluate_credit(
                 "de la línea de crédito."
             )
 
+    requires_review = get_settings().require_paid_credit_history and features.paid_credits == 0
+    if requires_review:
+        recommended_limit = Decimal("0")
+        confidence = 0
+        blocked_reason = blocked_reason or (
+            "Historial insuficiente: este cliente aún no tiene fiados completamente pagados "
+            "registrados. No se aprueba automáticamente ni se recomienda un límite inicial. "
+            "El propietario debe revisar el caso y definir un primer monto conservador."
+        )
+
     approved = (
         score >= min_approved
         and amount <= recommended_limit
@@ -257,6 +267,18 @@ async def evaluate_credit(
             category="riesgo" if tenure < 10 else "positivo",
         ),
     ]
+    if requires_review:
+        factors.append(ScoreFactor(
+            key="payment_history_review",
+            label="Historial de pagos insuficiente",
+            weight=0,
+            contribution=0,
+            description=(
+                "Sin fiados completamente pagados registrados. El score es orientativo; "
+                "no acredita buen comportamiento de pago ni habilita aprobación automática."
+            ),
+            category="riesgo",
+        ))
 
     return EvaluationResult(
         score=score,

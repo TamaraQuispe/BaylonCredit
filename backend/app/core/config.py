@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEVELOPMENT_JWT_SECRET = "development-only-secret-change-before-production"
@@ -10,8 +10,15 @@ DEVELOPMENT_JWT_SECRET = "development-only-secret-change-before-production"
 class Settings(BaseSettings):
     app_name: str = "Credify API"
     environment: Literal["development", "test", "staging", "production"] = "development"
+    credit_ml_enabled: bool = True
+    require_paid_credit_history: bool = False
+    academic_ml_lab_enabled: bool = False
+    academic_ml_lab_dir: str = "/app/academic"
     api_v1_prefix: str = "/api/v1"
     database_url: str = "postgresql+asyncpg://credify:credify@localhost:5432/credify"
+    database_connect_timeout_seconds: float = Field(default=5, gt=0)
+    database_command_timeout_seconds: float = Field(default=10, gt=0)
+    database_pool_timeout_seconds: float = Field(default=5, gt=0)
     jwt_secret_key: str = DEVELOPMENT_JWT_SECRET
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
@@ -60,6 +67,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production_secrets(self) -> "Settings":
+        if self.academic_ml_lab_enabled and self.environment != "staging":
+            raise ValueError("Academic synthetic laboratory is restricted to staging")
         unsafe_production_secret = (
             self.environment in {"staging", "production"}
             and self.jwt_secret_key == DEVELOPMENT_JWT_SECRET

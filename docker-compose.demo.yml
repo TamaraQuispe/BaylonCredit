@@ -1,0 +1,76 @@
+name: credify-demo
+
+services:
+  database:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: credify_demo
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:-demo-local-database}
+    mem_limit: 128m
+    volumes:
+      - demo_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo -d credify_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: ./backend
+    command: ["alembic", "upgrade", "head"]
+    volumes:
+      - ./backend/alembic:/app/alembic:ro
+    environment: &demo-environment
+      ENVIRONMENT: staging
+      DATABASE_URL: postgresql+asyncpg://demo:${DEMO_DB_PASSWORD:-demo-local-database}@database:5432/credify_demo
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Run bash deploy/start-demo.sh}
+      CORS_ORIGINS: ${DEMO_ORIGIN:-http://localhost:8081}
+      DEMO_MODE: "true"
+      CREDIT_ML_ENABLED: "false"
+      OPENROUTER_ENABLED: "false"
+      WHATSAPP_ENABLED: "false"
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-DemoAPF2-2026!}
+    depends_on:
+      database:
+        condition: service_healthy
+
+  seed:
+    build: ./backend
+    command: ["python", "-m", "app.scripts.seed_demo"]
+    environment: *demo-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  api:
+    build: ./backend
+    mem_limit: 256m
+    restart: unless-stopped
+    environment: *demo-environment
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    mem_limit: 32m
+    restart: unless-stopped
+    build:
+      context: .
+      args:
+        VITE_API_URL: /api/v1
+        VITE_DEMO_MODE: "true"
+    ports:
+      - "${DEMO_BIND_IP:-127.0.0.1}:8081:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  demo_data:

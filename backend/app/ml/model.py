@@ -5,6 +5,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 
+from app.core.config import get_settings
 from app.ml.features import FEATURE_NAMES, CreditFeatures
 
 MODEL_DIR = Path(__file__).resolve().parent / "artifacts"
@@ -52,7 +53,7 @@ def is_ml_available() -> bool:
 
 
 def predict_default_probability(features: CreditFeatures) -> ModelResult:
-    loaded = _load()
+    loaded = _load() if get_settings().credit_ml_enabled else None
     if loaded is None:
         return ModelResult(
             default_probability=0.0,

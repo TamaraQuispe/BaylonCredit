@@ -12,7 +12,7 @@ from sqlalchemy import func, select
 
 from app.db.session import SessionFactory
 from app.ml.features import FEATURE_NAMES
-from app.ml.outcomes import classify_credit_outcome
+from app.ml.outcomes import TARGET_NAME, classify_credit_outcome
 from app.models.commerce import Credit, CreditEvaluation, Payment, PaymentAllocation
 
 
@@ -49,7 +49,7 @@ async def export_dataset(output: Path) -> tuple[int, int]:
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow([*FEATURE_NAMES, "defaulted"])
+        writer.writerow([*FEATURE_NAMES, TARGET_NAME])
         writer.writerows(exported)
     return len(exported), unresolved
 
