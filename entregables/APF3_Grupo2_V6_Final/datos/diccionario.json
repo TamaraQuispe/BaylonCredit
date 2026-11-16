@@ -1,0 +1,164 @@
+{
+  "columns": [
+    {
+      "description": "Identificador ficticio del fiado; no predictor.",
+      "name": "loan_id",
+      "predictor": false
+    },
+    {
+      "description": "Cliente ficticio; solo agrupacion sin fuga, no predictor.",
+      "name": "client_id",
+      "predictor": false
+    },
+    {
+      "description": "Historia alternativa simulada; no sucursal ni predictor.",
+      "name": "replica_id",
+      "predictor": false
+    },
+    {
+      "description": "Siempre simulado; no predictor.",
+      "name": "origen",
+      "predictor": false
+    },
+    {
+      "description": "warmup aporta historial; study delimita el estudio; no predictor.",
+      "name": "phase",
+      "predictor": false
+    },
+    {
+      "description": "Fecha/hora de solicitud; solo eventos anteriores forman features.",
+      "name": "evaluated_at",
+      "predictor": false
+    },
+    {
+      "description": "Vencimiento contractual; no predictor.",
+      "name": "due_date",
+      "predictor": false
+    },
+    {
+      "description": "Fecha de corte de observacion; no predictor.",
+      "name": "observed_on",
+      "predictor": false
+    },
+    {
+      "description": "Monto solicitado en PEN; no entrada directa del modelo.",
+      "name": "requested_amount",
+      "predictor": false
+    },
+    {
+      "description": "Cupo de referencia en PEN; no entrada directa del modelo.",
+      "name": "credit_cap",
+      "predictor": false
+    },
+    {
+      "description": "Saldo futuro al corte: prohibido para prediccion o elegibilidad.",
+      "name": "pending_at_cutoff",
+      "predictor": false
+    },
+    {
+      "description": "Escenario del simulador; prohibido como predictor.",
+      "name": "scenario",
+      "predictor": false
+    },
+    {
+      "description": "Ventas al credito anteriores; coincide con paid_credits en elegibles.",
+      "name": "completed_sales",
+      "predictor": true
+    },
+    {
+      "description": "Fiados completamente pagados antes de evaluar; debe ser positivo para ML.",
+      "name": "paid_credits",
+      "predictor": true
+    },
+    {
+      "description": "Fiados anteriores pagados con atraso.",
+      "name": "paid_late",
+      "predictor": true
+    },
+    {
+      "description": "Fiados anteriores vencidos pendientes; debe ser cero para ML.",
+      "name": "pending_overdue",
+      "predictor": true
+    },
+    {
+      "description": "Fiados anteriores vigentes pendientes; debe ser cero para ML.",
+      "name": "pending_current",
+      "predictor": true
+    },
+    {
+      "description": "Saldo anterior pendiente en PEN; debe ser cero para ML.",
+      "name": "outstanding",
+      "predictor": true
+    },
+    {
+      "description": "Proporcion de cupo utilizado [0,1]; cero para ML.",
+      "name": "utilization",
+      "predictor": true
+    },
+    {
+      "description": "Monto solicitado / cupo de referencia [0,1].",
+      "name": "requested_ratio",
+      "predictor": true
+    },
+    {
+      "description": "Antiguedad observada del cliente en dias.",
+      "name": "tenure_days",
+      "predictor": true
+    },
+    {
+      "description": "Proporcion de fiados pagados puntualmente [0,1].",
+      "name": "punctuality_rate",
+      "predictor": true
+    },
+    {
+      "description": "Proporcion de fiados vencidos pendientes [0,1]; cero para ML.",
+      "name": "overdue_rate",
+      "predictor": true
+    },
+    {
+      "description": "Objetivo: 1 atraso, 0 puntual, vacio desconocido; nunca predictor.",
+      "name": "late_payment",
+      "predictor": false
+    }
+  ],
+  "display_name": "V6 Final",
+  "files": {
+    "desarrollo.csv": {
+      "known_labels": 534,
+      "rows": 541,
+      "sha256": "33d21dcc4d4b55fc7d313491dc5314f26f79e0a0b5e1da87da15ccb589286e88",
+      "source": "development/development_eligible.csv",
+      "unknown_labels": 7
+    },
+    "desarrollo_etiquetado.csv": {
+      "known_labels": 534,
+      "rows": 534,
+      "sha256": "4099ddba545eea26681e133c84cbb705488cfe1922c7085ca4ac71ceefafc544",
+      "source": "development/development_known.csv",
+      "unknown_labels": 0
+    },
+    "final.csv": {
+      "known_labels": 275,
+      "rows": 277,
+      "sha256": "f768e670e6a5b6ac814457d1b42a921dfd91d777525074953f03568090cfa76d",
+      "source": "experiment/final_eligible.csv",
+      "unknown_labels": 2
+    },
+    "historial_desarrollo.csv": {
+      "known_labels": 624,
+      "rows": 631,
+      "sha256": "ba68753e2b27987cee01e50ad7c40c50c7effa20bd3f0b8582d51327ae82dedb",
+      "source": "development/development_raw.csv",
+      "unknown_labels": 7
+    },
+    "historial_final.csv": {
+      "known_labels": 320,
+      "rows": 322,
+      "sha256": "4541e21fde100270848d15ec9040584a2ebb4317902a254e3e837a52f0a7b5e0",
+      "source": "experiment/final_raw.csv",
+      "unknown_labels": 2
+    }
+  },
+  "origen": "simulado",
+  "revision_id": "v6-final-r1"
+}

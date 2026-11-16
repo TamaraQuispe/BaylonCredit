@@ -117,6 +117,8 @@ def tree(root):
         for name in dirs + names:
             safe(Path(directory, name))
         for name in sorted(names):
+            if name == '.DS_Store':
+                continue
             path = Path(directory, name)
             key = relative(path.relative_to(root).as_posix())
             result[key] = read(path)
@@ -624,8 +626,89 @@ def refresh_support(root, files):
     publish_support(root, writes, replacements)
 
 
+def data_files(root):
+    """Expose exact frozen CSV copies with an explicit study/label dictionary."""
+    mapping = {
+        'desarrollo.csv': 'development/development_eligible.csv',
+        'desarrollo_etiquetado.csv': 'development/development_known.csv',
+        'final.csv': 'experiment/final_eligible.csv',
+        'historial_desarrollo.csv': 'development/development_raw.csv',
+        'historial_final.csv': 'experiment/final_raw.csv',
+    }
+    files, records = {}, {}
+    for name, source in mapping.items():
+        content = read(root / source)
+        rows = list(csv.DictReader(io.StringIO(content.decode('utf-8'))))
+        require(bool(rows), f'Empty data source: {source}')
+        files['datos/' + name] = content
+        records[name] = dict(source=source, sha256=sha(content), rows=len(rows),
+                             known_labels=sum(r['late_payment'] != '' for r in rows),
+                             unknown_labels=sum(r['late_payment'] == '' for r in rows))
+    descriptions = {
+        'loan_id': 'Identificador ficticio del fiado; no predictor.',
+        'client_id': 'Cliente ficticio; solo agrupacion sin fuga, no predictor.',
+        'replica_id': 'Historia alternativa simulada; no sucursal ni predictor.',
+        'origen': 'Siempre simulado; no predictor.',
+        'phase': 'warmup aporta historial; study delimita el estudio; no predictor.',
+        'evaluated_at': 'Fecha/hora de solicitud; solo eventos anteriores forman features.',
+        'due_date': 'Vencimiento contractual; no predictor.',
+        'observed_on': 'Fecha de corte de observacion; no predictor.',
+        'requested_amount': 'Monto solicitado en PEN; no entrada directa del modelo.',
+        'credit_cap': 'Cupo de referencia en PEN; no entrada directa del modelo.',
+        'pending_at_cutoff': 'Saldo futuro al corte: prohibido para prediccion o elegibilidad.',
+        'scenario': 'Escenario del simulador; prohibido como predictor.',
+        'completed_sales': 'Ventas al credito anteriores; coincide con paid_credits en elegibles.',
+        'paid_credits': 'Fiados completamente pagados antes de evaluar; debe ser positivo para ML.',
+        'paid_late': 'Fiados anteriores pagados con atraso.',
+        'pending_overdue': 'Fiados anteriores vencidos pendientes; debe ser cero para ML.',
+        'pending_current': 'Fiados anteriores vigentes pendientes; debe ser cero para ML.',
+        'outstanding': 'Saldo anterior pendiente en PEN; debe ser cero para ML.',
+        'utilization': 'Proporcion de cupo utilizado [0,1]; cero para ML.',
+        'requested_ratio': 'Monto solicitado / cupo de referencia [0,1].',
+        'tenure_days': 'Antiguedad observada del cliente en dias.',
+        'punctuality_rate': 'Proporcion de fiados pagados puntualmente [0,1].',
+        'overdue_rate': 'Proporcion de fiados vencidos pendientes [0,1]; cero para ML.',
+        'late_payment': 'Objetivo: 1 atraso, 0 puntual, vacio desconocido; nunca predictor.',
+    }
+    features = {'completed_sales', 'paid_credits', 'paid_late', 'pending_overdue',
+                'pending_current', 'outstanding', 'utilization', 'requested_ratio',
+                'tenure_days', 'punctuality_rate', 'overdue_rate'}
+    header = next(csv.reader(io.StringIO(files['datos/desarrollo.csv'].decode('utf-8'))))
+    require(set(header) == set(descriptions) and len(header) == 24, 'Data dictionary schema')
+    files['datos/diccionario.json'] = encoded(dict(
+        display_name='V6 Final', revision_id='v6-final-r1', origen='simulado',
+        files=records, columns=[dict(name=name, predictor=name in features,
+                                    description=descriptions[name]) for name in header]))
+    lines = [
+        '# Datos De V6 Final', '',
+        'Copias exactas de los CSV congelados. Datos 100 % simulados, no clientes reales.',
+        'No se genero ni entreno nada al organizar esta carpeta.', '',
+        '| Archivo | Filas | Etiquetas conocidas | Desconocidas | Fuente original |',
+        '| --- | ---: | ---: | ---: | --- |',
+    ]
+    for name, record in records.items():
+        lines.append(f"| {name} | {record['rows']} | {record['known_labels']} | "
+                     f"{record['unknown_labels']} | {record['source']} |")
+    lines += ['',
+        '`desarrollo.csv` y `final.csv` contienen solo fiados elegibles de study: deuda cero',
+        'e historial pagado. `desarrollo_etiquetado.csv` es la parte conocida usada para ajustar.',
+        'FINAL no se usa para entrenar ni elegir modelos. Etiquetas vacias no se convierten en cero;',
+        'compiten por capacidad si son elegibles, pero no entran en metricas supervisadas.', '',
+        'Los historiales completos incluyen warmup: NO son datasets listos para entrenamiento.',
+        'Las solicitudes bloqueadas no son fiados otorgados ni aparecen como clase cero en estos CSV.',
+        'Sus registros estan en development/development_routing_ledger.json y',
+        'experiment/final_routing_ledger.json. Ningun bloqueo o revision humana es un acierto ML.', '',
+        'Diccionario de las 24 columnas, once predictores, conteos, fuentes y hashes:',
+        '`diccionario.json`. No usar IDs, fechas, scenario o pending_at_cutoff como predictores.',
+        'Los originales se conservan sin cambios en development/ y experiment/.',
+    ]
+    files['datos/README.md'] = ('\n'.join(lines) + '\n').encode('utf-8')
+    return files
+
+
 def support_files(result, root, repo, code):
     files = {'verificacion-v6-final.json': encoded(result)}
+    files.update(data_files(root))
     for name, data in tree(code).items():
         files['codigo-base/' + name] = data
     for original, local in result['source_paths'].items():
@@ -746,6 +829,10 @@ def package(root, destination, result):
     require(not destination.exists() and destination.parent.is_dir(), 'Archive must be new; parent must exist')
     require(not destination.is_relative_to(root), 'Archive cannot be inside delivery')
     files = tree(root)
+    if any(name.startswith('datos/') for name in files):
+        expected_data = data_files(root)
+        require({n: d for n, d in files.items() if n.startswith('datos/')} == expected_data,
+                'Data copies/dictionary differ from frozen sources')
     if 'support/manifest-support.json' in files:
         check_hashes(files, load(files['support/manifest-support.json'])['files'])
     if 'verificacion-v6-final.json' in files:
@@ -790,6 +877,7 @@ def main():
     p.add_argument('--write-support', action='store_true')
     p.add_argument('--refresh-support', action='store_true', help='Hash-checked generated-only refresh with history')
     p.add_argument('--package', action='store_true')
+    p.add_argument('--archive-path', type=Path, help='New ZIP path; never overwrite an archive')
     args = p.parse_args()
     try:
         result = verify(args.root)
@@ -799,7 +887,7 @@ def main():
         elif args.write_support:
             publish_support(args.root, support_files(result, args.root, REPO, CODE))
         if args.package:
-            result['archive'] = package(args.root, args.root.with_suffix('.zip'), result)
+            result['archive'] = package(args.root, args.archive_path or args.root.with_suffix('.zip'), result)
         print(json.dumps({k: v for k, v in result.items() if k not in
                          ('sha256', 'codepack_sha256', 'historical_sha256', 'source_paths', 'gate_cases')}, indent=2))
         if not result['passed']:

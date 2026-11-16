@@ -14,6 +14,37 @@ spec.loader.exec_module(f)
 
 
 class FinalizerTests(unittest.TestCase):
+    def test_finder_metadata_is_excluded_not_deleted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            (root / '.DS_Store').write_bytes(b'Finder metadata')
+            (root / 'data.csv').write_bytes(b'a\n1\n')
+            self.assertEqual(f.tree(root), {'data.csv': b'a\n1\n'})
+            self.assertTrue((root / '.DS_Store').exists())
+
+    def test_data_copies_dictionary_and_counts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            (root / 'development').mkdir()
+            (root / 'experiment').mkdir()
+            header = ('loan_id,client_id,replica_id,origen,phase,evaluated_at,due_date,observed_on,'
+                      'requested_amount,credit_cap,pending_at_cutoff,scenario,completed_sales,'
+                      'paid_credits,paid_late,pending_overdue,pending_current,outstanding,utilization,'
+                      'requested_ratio,tenure_days,punctuality_rate,overdue_rate,late_payment\n')
+            content = (header + ',' * 23 + '1\n' + ',' * 23 + '\n').encode()
+            for source in ('development/development_eligible.csv', 'development/development_known.csv',
+                           'development/development_raw.csv', 'experiment/final_eligible.csv',
+                           'experiment/final_raw.csv'):
+                (root / source).write_bytes(content)
+            files = f.data_files(root)
+            self.assertEqual(files['datos/final.csv'], content)
+            dictionary = f.load(files['datos/diccionario.json'])
+            self.assertEqual(len(dictionary['columns']), 24)
+            self.assertEqual(sum(c['predictor'] for c in dictionary['columns']), 11)
+            record = dictionary['files']['final.csv']
+            self.assertEqual((record['rows'], record['known_labels'], record['unknown_labels']), (2, 1, 1))
+            self.assertEqual(record['sha256'], f.sha(content))
+
     def test_corrupt_manifest_and_unsafe_member(self):
         f.check_hashes({'a': b'a'}, {'a': f.sha(b'a')}, True)
         with self.assertRaisesRegex(ValueError, 'SHA256'):
