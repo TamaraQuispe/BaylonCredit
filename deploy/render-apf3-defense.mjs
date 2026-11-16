@@ -26,7 +26,9 @@ try {
   for (let index = 0; index < 13; index++) {
     await page.locator('.slide').nth(index).screenshot({ path: path.join(output, 'vistas', `${String(index + 1).padStart(2, '0')}.png`) })
   }
-  for (const document of ['APF3_Grupo2_Guion_12min', 'APF3_Grupo2_Ficha_Calibracion_Meta', 'APF3_Ficha_Propietario_Baylon']) {
+  const documents = process.argv.slice(3)
+  if (documents.length === 0) documents.push('APF3_Grupo2_Guion_12min', 'APF3_Grupo2_Ficha_Calibracion_Meta', 'APF3_Ficha_Propietario_Baylon')
+  for (const document of documents) {
     await page.setContent(await readFile(path.join(output, document + '.html'), 'utf8'))
     await page.evaluate(() => document.fonts.ready)
     await page.pdf({
@@ -36,7 +38,7 @@ try {
       footerTemplate: '<div style="font:9px Arial;color:#64748b;width:100%;text-align:center"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
     })
   }
-  console.log(JSON.stringify({ slides: 13, text_overflows: 0, documents: 3 }))
+  console.log(JSON.stringify({ slides: 13, text_overflows: 0, documents: documents.length }))
 } finally {
   await browser.close()
 }

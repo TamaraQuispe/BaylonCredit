@@ -1,0 +1,31 @@
+{
+  "version": "owner-settlement-clarification-1",
+  "source_status": "owner_response_relayed_by_user_in_current_conversation",
+  "base_source_docx_sha256": "45bc22a10ad5dccf323708b8aeabb780d8de4629ff5087cca2582c7dd055819f",
+  "declared_consultation_date": null,
+  "user_messages_verbatim": [
+    "que pague en el momento y hasta que pague no se vuelve a fiar, eso ha dicho",
+    "los 30 completos dice"
+  ],
+  "scenario": {
+    "initial_debt_pen": 40,
+    "prior_payment_pen": 10,
+    "overdue_remaining_pen": 30,
+    "required_payment_before_new_credit_pen": 30
+  },
+  "rule": {
+    "applies_to": "overdue debt at the time of evaluating a new credit request",
+    "new_credit_while_overdue_balance_positive": false,
+    "partial_payment_restores_eligibility": false,
+    "payment_agreement_alone_restores_eligibility": false,
+    "required_condition": "All overdue remaining principal must be fully settled and the payment observed before a subsequent credit evaluation",
+    "after_settlement": "The overdue-debt block is removed; other limits and owner review still apply, never automatic approval",
+    "not_yet_due_debt": "Not resolved by this overdue scenario; do not extend this clarification to all current debt",
+    "target_and_grace": "No change to contractual next-day lateness labels or separate commercial grace"
+  },
+  "precedence": "For overdue eligibility, this later clarification supersedes the earlier abono-or-agreement alternative. Preserve the original declaration and frozen V4 bytes as historical evidence.",
+  "not_business_model_approval": true,
+  "not_customer_consent": true,
+  "not_a_training_dataset": true,
+  "privacy": "Aggregate fictional example and user-relayed rule only; no owner form, signatures or customer identities"
+}

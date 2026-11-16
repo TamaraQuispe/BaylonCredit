@@ -31,6 +31,7 @@ services:
       CREDIT_ML_ENABLED: "false"
       OPENROUTER_ENABLED: "false"
       WHATSAPP_ENABLED: "false"
+      REQUIRE_PAID_CREDIT_HISTORY: "true"
       DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-DemoAPF2-2026!}
     depends_on:
       database:

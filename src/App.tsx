@@ -16,6 +16,8 @@ import PagosPage from '@/pages/PagosPage'
 import NuevoPagoPage from '@/pages/NuevoPagoPage'
 import EvaluacionCrediticiaPage from '@/pages/EvaluacionCrediticiaPage'
 import LaboratorioAcademicoPage from '@/pages/LaboratorioAcademicoPage'
+import LaboratorioAlineadoV4Page from '@/pages/LaboratorioAlineadoV4Page'
+import LaboratorioAlineadoV6Page from '@/pages/LaboratorioAlineadoV6Page'
 import ReportesPage from '@/pages/ReportesPage'
 import UsuariosPage from '@/pages/UsuariosPage'
 import ConfiguracionPage from '@/pages/ConfiguracionPage'
@@ -48,6 +50,12 @@ export default function App() {
           <Route path="/evaluacion-crediticia" element={<EvaluacionCrediticiaPage />} />
           {import.meta.env.VITE_ACADEMIC_ML_LAB === 'true' && (
             <Route path="/laboratorio-academico" element={<LaboratorioAcademicoPage />} />
+          )}
+          {import.meta.env.VITE_ACADEMIC_ML_V4 === 'true' && (
+            <Route path="/laboratorio-academico/v4" element={<LaboratorioAlineadoV4Page />} />
+          )}
+          {import.meta.env.VITE_ACADEMIC_ML_V6 === 'true' && (
+            <Route path="/laboratorio-academico/v6" element={<LaboratorioAlineadoV6Page />} />
           )}
           <Route path="/reportes" element={<ReportesPage />} />
           <Route element={<ProtectedRoute adminOnly />}>

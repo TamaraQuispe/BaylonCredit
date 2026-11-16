@@ -1,0 +1,314 @@
+{
+  "status": "deployed_and_publicly_verified",
+  "display_name": "V6 Final",
+  "revision_id": "v6-final-r1",
+  "version": "academic-owner-pending-v6",
+  "started_utc": "2026-11-16T16:19:47.265516Z",
+  "preflight_finished_utc": "2026-11-16T16:23:11.290090Z",
+  "url": "https://demo-credify.168-75-71-113.sslip.io/laboratorio-academico/v6",
+  "public_demo_updated": true,
+  "reason": "Promoted after explicit authorization of abs_tol=1e-12, rel_tol=0 for illustrative probability only; exact artifact, feature, class, threshold, revision and metric checks preserved.",
+  "initial_preflight_status": "blocked_before_live_replacement",
+  "initial_preflight_reason": "Strict illustrative probability equality failed locally and on the target CPU. Stopped before live image retag, bundle replacement or Compose recreation.",
+  "initial_numeric_blocker": {
+    "frozen_illustrative_probability": 0.15310676521820216,
+    "new_api_local_probability": 0.15310676521820044,
+    "new_api_target_cpu_probability": 0.15310676521820044,
+    "approximate_absolute_difference": 1.72e-15,
+    "exact_match": false,
+    "threshold": 0.1,
+    "predicted_class_expected_and_observed": 1,
+    "classification_unchanged_by_difference": true,
+    "cause": "Not established. Runtime package versions and artifact hashes match; local execution with and without thread limits and target CPU execution reproduce the discrepancy.",
+    "acceptance_tolerance_substituted": false,
+    "application_or_frozen_output_patched": false,
+    "required_resolution": "Resolve exact reproducibility in application/runtime, or explicitly authorize a numerical tolerance before live deployment. No tolerance was silently substituted."
+  },
+  "experiment": {
+    "source": "/Users/tamaraalison/Downloads/APF3_Grupo2_V6_Final/experiment",
+    "final_manifest_sha256": "471e5bd3849e8ee8f2d79254823eb4dcfd7a679d67b49efc6257d467224a06cf",
+    "freeze_before_final_sha256": "2faccb7cf2248a4eed21753b6b6dc336f82aaea5e1b19a589a912974d5837f7d",
+    "manifest_files_validated_before_and_after": 41,
+    "all_file_hashes_match_pinned_manifest_after_checks": true,
+    "source_or_development_mutated": false,
+    "new_training_or_final_cohort_prediction_during_deployment": false
+  },
+  "source_sha256": {
+    "backend/app/services/academic_lab_v6.py": "e5a573ccff9a54d3cbb9456946e5c3df6c50d7f7c0317752d9bacf42224ff6fe",
+    "backend/app/services/academic_v6_policy.py": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+    "backend/app/api/routes/academic_ml_v6.py": "c6c2c6b7279f3eb35e0a87cd707b20514992a2289972c96e884fca585ad96f2f",
+    "src/pages/LaboratorioAlineadoV6Page.tsx": "d537e9b7dc59f12d26344eb163261eb7f6fea40480e32857f7177e5c99bd3929",
+    "deploy/prepare-v6-final-lab.py": "faccd8317cb6247fca1787e11bc00566008575e9c59a74aa6424febd914bd862"
+  },
+  "preparer": {
+    "command": "python3 deploy/prepare-v6-final-lab.py --source /Users/tamaraalison/Downloads/APF3_Grupo2_V6_Final/experiment --destination /private/var/folders/sx/_6ljw37n2_j9hk2f_vtqplj40000gn/T/opencode/v6-final-r1-deploy-bundle",
+    "passed": true,
+    "model_loading_or_inference": false,
+    "path_safety_note": "First invocation refused macOS /var symlink before writing output; succeeded with canonical /private/var path."
+  },
+  "staged_bundle": {
+    "local": "/private/var/folders/sx/_6ljw37n2_j9hk2f_vtqplj40000gn/T/opencode/v6-final-r1-deploy-bundle",
+    "initial_remote": "/home/ubuntu/credify-demo/v6-final-r1-staged",
+    "live_remote_after_promotion": "/home/ubuntu/credify-demo/academic/v6",
+    "initially_outside_live_mount_source": true,
+    "all_local_remote_hashes_match": true,
+    "files_sha256": {
+      "pending_v6_report.json": "a7fc458d051bc199da83868ac78016d946dcce8fd7f23fad2f9085cb4daba045",
+      "frozen_selection.json": "b1d86ca331dd231ee06e9447b3bbdb73c1f42d6d749e923939d60dd415e28990",
+      "selected_model.joblib": "05cf8e219f92fe2f77d7211a3384cb05c59faa8b46a662064e9ab7b905fa834e",
+      "illustrative_input.json": "b5a97b5e5677c63829aa07bbfef5019d3e58c3a96da7cf42eabf9f1e64d0f039",
+      "provenance.json": "c4cdc508632e6e0a5e2303fbfde3163b1308dee0a9b637216c25b4c8e3494f58",
+      "web_manifest.json": "816363e543b0a3abb4bc6cf78d8e45840bc157acec60397d2601189c49cce913"
+    }
+  },
+  "built_and_loaded_images": {
+    "api": {
+      "tag": "credify-demo-academic-api:v6-final-r1",
+      "image_id": "sha256:d5b9d8691ccdb05f53c7d7ed8779f7f8859656e52b6d3db8a110833aa18ab6b3",
+      "base_image_id": "sha256:06f4e4f3c2e66525defab05e8d946b3075c6f646764e7f6ad460e02743639888",
+      "one_copy_layer_only": "backend/app/services/academic_lab_v6.py -> /app/app/services/academic_lab_v6.py",
+      "base_layers_and_runtime_config_preserved": true,
+      "policy_and_route_unchanged_from_baseline": true
+    },
+    "frontend": {
+      "tag": "credify-demo-academic-frontend:v6-final-r1",
+      "image_id": "sha256:f55ff56c1db5546ce54b541a8a4c2bd25a156787a6f5f5fe4d1b34cf1f1184f2",
+      "typescript_and_vite_build_passed": true,
+      "build_args": {
+        "VITE_API_URL": "/api/v1",
+        "VITE_DEMO_MODE": "true",
+        "VITE_ACADEMIC_ML_LAB": "true",
+        "VITE_ACADEMIC_ML_V4": "true",
+        "VITE_ACADEMIC_ML_V6": "true"
+      }
+    },
+    "platform": "linux/amd64",
+    "built_off_server": true,
+    "loaded_ids_match_local": true,
+    "live_v6_tags_initially_unchanged_then_promoted": true
+  },
+  "image_archive": {
+    "local": "/var/folders/sx/_6ljw37n2_j9hk2f_vtqplj40000gn/T/opencode/v6-final-r1-images.tar",
+    "remote": "/home/ubuntu/credify-demo/v6-final-r1-images.tar",
+    "sha256": "87d68aab8370d573d840e8913ad5e571af166374fa0bc8caf68cf9f8a5e301e1",
+    "local_remote_checksum_match_before_load": true
+  },
+  "offline_target_checks": {
+    "execution": "Temporary non-server Python process; no network, read-only filesystem and staged bundle, cap-drop ALL, 256 MiB memory/no swap, 0.5 CPU; removed after exit",
+    "api_server_or_database_access": false,
+    "display_name": "V6 Final",
+    "revision_id": "v6-final-r1",
+    "selected_model": "svm",
+    "threshold": 0.1,
+    "training_scope": "eligible_known_only",
+    "final_eligible_rows": 277,
+    "final_labeled_rows": 275,
+    "final_unknown": 2,
+    "svm_final_raw_f2": 0.6060606060606061,
+    "cases": {
+      "pending-balance-v6": {"decision": "blocked_pending_balance", "model_called": false, "probability": null, "prediction": null, "threshold": null},
+      "no-history-v6": {"decision": "requires_owner_review", "model_called": false, "probability": null, "prediction": null, "threshold": null},
+      "illustrative-v6": {"decision": "model_review_candidate", "model_called": true, "probability": 0.15310676521820044, "prediction": 1, "threshold": 0.1}
+    },
+    "guards_passed": true,
+    "exact_frozen_probability_check_passed": false
+  },
+  "initial_preflight_live_state": {
+    "all_container_ids_images_start_finish_times_identical_before_after": true,
+    "demo_api": {"id": "ee20b543f278d3a4dbe205696920571064eaff3d74a10c0fe63561f63eaa07d5", "image": "sha256:06f4e4f3c2e66525defab05e8d946b3075c6f646764e7f6ad460e02743639888", "started": "2026-11-16T15:22:04.850745328Z"},
+    "demo_frontend": {"id": "dee84be561befc7ab6dda62c22323eb3bc96e68128790dcb41e7b0946f61e714", "image": "sha256:4338f1e40b9a8691ec783b837f208223519304abe74a9a24483a91f79f62239f", "started": "2026-11-16T14:48:09.365771862Z"},
+    "demo_database": {"id": "cb4996ae41c0b39b053dae3669cdba5a37bca5783a6ce0717662eaf6d42c3ea8", "started": "2026-11-16T13:42:51.763540638Z"},
+    "production": {
+      "api": {"id": "710f66310d60f640b0fd0420b47246760c9546350e6adb74981bfb0f728804e9", "started": "2026-10-28T21:31:19.175391721Z"},
+      "frontend": {"id": "440593958e29df8b8b4cc81009a33bb7458ff0a2c382ab0693d35a7be812be5a", "started": "2026-10-28T21:24:27.54858718Z"},
+      "proxy": {"id": "f912dcca9ffb54d98ae00aaa1272a34d78dd4c8ff7754a2d6cec664591af166a", "started": "2026-09-22T16:28:34.144890007Z"},
+      "database": {"id": "9d6705410b3ae9565913b53a089767b7657374334af606cc5315f8f78ad2de5b", "started": "2026-09-22T15:34:33.562551834Z"}
+    },
+    "demo_and_production_ready_before_and_after": true,
+    "migrate_and_seed_remain_exited_no_new_invocations": true,
+    "all_live_academic_files_and_config_hashes_unchanged": true,
+    "v2_bundles_preserved": true,
+    "v4_disabled_configuration_preserved": true,
+    "localhost_public_v6_final_api_and_browser_verification": "Not run: revision was not promoted to live"
+  },
+  "business_fingerprints": {
+    "method": "Read-only transaction; count and MD5 of deterministic ordered JSONB aggregate of all row values",
+    "all_identical_before_after": true,
+    "before_and_after": {
+      "clients": {"rows": 50, "md5": "25ebff9da362c09eb414e5d298d38efc"},
+      "credits": {"rows": 54, "md5": "c907714838eef3104c8aaab20c6f3072"},
+      "payments": {"rows": 42, "md5": "6b24e65de3cb98cf8d5bda275bd4fc8e"},
+      "credit_evaluations": {"rows": 1, "md5": "d0f885463e7bd2c7f243e0433966700e"},
+      "business_settings": {"rows": 1, "md5": "699b8fffd7b113d69cc87f52c436cf7e"},
+      "sales": {"rows": 90, "md5": "90284e3ef7b4c3c7b9eaa59239805dc6"},
+      "products": {"rows": 10, "md5": "d58ff1fc0b75beceffe3dc0ef5384bc3"},
+      "inventory_movements": {"rows": 113, "md5": "bb7adbbcb075d6561d98cd00974cf882"},
+      "organizations": {"rows": 1, "md5": "bf288396d94d4f0a3e1c55a927f00cdf"},
+      "whatsapp_notifications": {"rows": 0, "md5": "d751713988987e9331980363e24189ce"},
+      "alembic_version": {"rows": 1, "md5": "c6d399da7da12739c35ab494c71a7dee"}
+    }
+  },
+  "initial_preflight_rollback": {
+    "needed_or_performed": false,
+    "new_v6_final_r1_rollback_tags_or_bundle_backup_created": false,
+    "reason": "Stopped before live replacement; live baseline and its existing rollback references remain intact",
+    "existing_rollback_tags_untouched": ["credify-demo-academic-api:v6-rollback-20261116", "credify-demo-academic-frontend:v6-rollback-20261116"],
+    "on_future_promotion": "Create new :rollback-v6-final-r1 tags from then-current running demo images and back up current academic/v6 directory before replacement; never overwrite original rollback references"
+  },
+  "initial_preflight_side_effects": {
+    "server_disk_artifacts": ["New release image tags loaded", "Checksummed image archive retained", "Six-file trusted bundle staged outside live mount source"],
+    "normal_demo_logins": 0,
+    "business_writes": false,
+    "production_mutations": false,
+    "compose_up_start_down_invocations": false,
+    "migrations_or_seed": false,
+    "training_or_final_cohort_prediction": false,
+    "server_builds": false,
+    "live_service_recreation": false,
+    "application_source_edits": false,
+    "prior_records_modified": false
+  },
+  "initial_preflight_incidents": ["Pre-deployment exact-score acceptance failure; no live promotion performed"],
+  "credentials_or_tokens_recorded": false,
+  "promotion": {
+    "started_utc": "2026-11-16T16:28:17.463058Z",
+    "api_verified_utc": "2026-11-16T16:33:07.486560Z",
+    "post_browser_audit_utc": "2026-11-16T16:37:20.431777Z",
+    "status": "passed",
+    "scope": "Public synthetic academic demo only; no production or operational credit-policy deployment",
+    "reused_verified_staged_images_and_bundle": true,
+    "application_source_or_frozen_experiment_edits": false,
+    "commands": [
+      "docker compose --project-directory /home/ubuntu/credify-demo --env-file /home/ubuntu/credify-demo/.env.demo -p credify-demo -f /home/ubuntu/credify-demo/docker-compose.demo.yml -f /home/ubuntu/credify-demo/docker-compose.academic-lab.yml -f /home/ubuntu/credify-demo/docker-compose.academic-v6.yml up -d --no-deps --no-build --pull never --force-recreate api",
+      "docker compose --project-directory /home/ubuntu/credify-demo --env-file /home/ubuntu/credify-demo/.env.demo -p credify-demo -f /home/ubuntu/credify-demo/docker-compose.demo.yml -f /home/ubuntu/credify-demo/docker-compose.academic-lab.yml -f /home/ubuntu/credify-demo/docker-compose.academic-v6.yml up -d --no-deps --no-build --pull never --force-recreate frontend"
+    ],
+    "sequence": "Preserve rollback tags and old bundle; replace only V6 bundle directory; retag demo images; recreate api only; wait for localhost readiness; recreate frontend only; verify public API and browser",
+    "localhost_and_public_summary_and_all_cases_identical": true,
+    "all_three_cases_bodyless_post": true,
+    "model_bytes_features_threshold_class_revision_metrics_exact": true,
+    "all_four_families_raw_and_policy_metrics_exact_against_frozen_report": true,
+    "live_backend_source_hashes_match_source_sha256": true,
+    "final_summary": {
+      "display_name": "V6 Final",
+      "revision_id": "v6-final-r1",
+      "selected_model": "svm",
+      "threshold": 0.1,
+      "training_scope": "eligible_known_only",
+      "development_eligible_rows": 541,
+      "development_unknown": 7,
+      "development_clients": 24,
+      "development_oof_policy_f2": 0.5523672883787661,
+      "final_study_attempts": 292,
+      "final_blocked_pending_balance": 15,
+      "final_model_eligible": 277,
+      "final_labeled_rows": 275,
+      "final_unknown": 2,
+      "final_clients": 12,
+      "svm_final_raw_f2": 0.6060606060606061
+    },
+    "cases": {
+      "pending-balance-v6": {"decision": "blocked_pending_balance", "model_called": false, "probability": null, "prediction": null, "threshold": null},
+      "no-history-v6": {"decision": "requires_owner_review", "model_called": false, "probability": null, "prediction": null, "threshold": null},
+      "illustrative-v6": {"decision": "model_review_candidate", "model_called": true, "probability": 0.15310676521820044, "prediction": 1, "threshold": 0.1}
+    }
+  },
+  "illustrative_probability_comparison": {
+    "authorization": "Explicit follow-up authorization: abs_tol=1e-12, rel_tol=0, illustrative probability only",
+    "frozen": 0.15310676521820216,
+    "api_localhost_public_and_browser": 0.15310676521820044,
+    "frozen_hex": "0x1.39900a2b44aaap-3",
+    "api_hex": "0x1.39900a2b44a6cp-3",
+    "absolute_delta": 1.7208456881689926e-15,
+    "abs_tol": 1e-12,
+    "rel_tol": 0,
+    "within_tolerance": true,
+    "exact_numeric_match": false,
+    "threshold_exact": 0.1,
+    "predicted_class_exact": 1,
+    "frozen_output_or_trained_model_rewritten": false,
+    "limitation": "Illustrative inference differs at floating-point roundoff scale across execution kernels; it is numerically equivalent under the authorized tolerance, not byte-exact numeric inference. No tolerance applies to model bytes, features, labels, routes, threshold, revision, metrics or hashes."
+  },
+  "public_browser_checks": {
+    "passed": true,
+    "live_api_not_mocked": true,
+    "account": "Existing classroom operator account; credentials not recorded",
+    "viewports": [{"width": 1440, "height": 1000}, {"width": 390, "height": 844}],
+    "dynamic_v6_final_svm_heading_and_revision_visible": true,
+    "known_275_unknown_2_eligible_277_and_f2_verified": true,
+    "all_three_cases_passed_at_both_viewports": true,
+    "guarded_cases_hide_probability_and_show_model_not_executed": true,
+    "eligible_case_shows_probability_and_correct_class_and_threshold": true,
+    "no_page_horizontal_overflow": true,
+    "javascript_page_errors_final_run": [],
+    "unexpected_mutating_api_requests_final_run": [],
+    "v2_v4_v6_frontend_links_preserved": true,
+    "other_roles": "Prior mocked role/viewport tests reported passed by handoff; live checks used the classroom operator account only"
+  },
+  "live_state": {
+    "demo_api": {
+      "id": "2f7bf0b04c8a5b654fdbc1c9603bc3c54ce2eb0543f08337820351106eb915f7",
+      "image": "sha256:d5b9d8691ccdb05f53c7d7ed8779f7f8859656e52b6d3db8a110833aa18ab6b3",
+      "started": "2026-11-16T16:30:16.445610836Z"
+    },
+    "demo_frontend": {
+      "id": "465009f7b9efc9e25eea6796cda4fa5ff63f3cf914969306ac69dd6daa3abf6d",
+      "image": "sha256:f55ff56c1db5546ce54b541a8a4c2bd25a156787a6f5f5fe4d1b34cf1f1184f2",
+      "started": "2026-11-16T16:32:09.46334439Z"
+    },
+    "demo_database_id_image_start_finish_times_unchanged": true,
+    "all_production_ids_images_start_finish_times_unchanged": true,
+    "migrate_seed_ids_images_start_finish_times_unchanged": true,
+    "demo_and_production_readiness": "ready",
+    "business_and_schema_fingerprints_match_before_after_and_after_browser": true,
+    "v2_bundles_and_authenticated_summary_unchanged": true,
+    "v4_backend_still_disabled_authenticated_summary_404": true,
+    "live_v6_bundle_hashes_match_staged_bundle_and_frozen_manifest": true,
+    "env_and_compose_hashes_unchanged": true,
+    "runtime": {"environment": "staging", "academic_ml_lab_enabled": true, "academic_ml_v4_enabled": false, "academic_ml_v6_enabled": true}
+  },
+  "rollback": {
+    "performed": false,
+    "api": {
+      "tag": "credify-demo-academic-api:rollback-v6-final-r1",
+      "image_id": "sha256:06f4e4f3c2e66525defab05e8d946b3075c6f646764e7f6ad460e02743639888"
+    },
+    "frontend": {
+      "tag": "credify-demo-academic-frontend:rollback-v6-final-r1",
+      "image_id": "sha256:4338f1e40b9a8691ec783b837f208223519304abe74a9a24483a91f79f62239f"
+    },
+    "old_v6_bundle": "/home/ubuntu/credify-demo/academic-v6-rollback-v6-final-r1",
+    "backup_hashes_verified_before_and_after_browser": {
+      "frozen_selection.json": "9be950fb52693c146279ec2b18048007f9ad030db960d9f465e23b145fd1dfc5",
+      "illustrative_input.json": "b5a97b5e5677c63829aa07bbfef5019d3e58c3a96da7cf42eabf9f1e64d0f039",
+      "pending_v6_report.json": "739e2f8a27c13e5f04a4b412d0a62831137c6fac2101fe2afe272bb38a9da0f4",
+      "provenance.json": "d89f040989acc8f2f5f178017b9a7f132718cceb243a3e643c1f359146db6b17",
+      "selected_model.joblib": "545222c5f50e37130e4a6cce09fff146bd3067373f070dba90ccd66819cec421",
+      "web_manifest.json": "21d853232d26d7257e5b6b24c146f68a0c1f02eff96b8fe1afaa5a4e4916a3e7"
+    },
+    "original_20261116_rollback_tags_unchanged": true,
+    "instructions": "If explicitly authorized: preserve the new live bundle separately, restore the saved old V6 directory to academic/v6, retag the two :rollback-v6-final-r1 images to their respective :v6 tags, then use the same explicit demo Compose files/env/project with up -d --no-deps --no-build --pull never --force-recreate api and frontend. Never compose start/down or invoke dependencies. Image rollback does not revert authentication metadata."
+  },
+  "side_effects": {
+    "normal_demo_logins_during_promotion_and_browser_checks": 3,
+    "writes": "Only normal demo login session/audit/last-login metadata",
+    "business_writes": false,
+    "production_mutations": false,
+    "migrate_seed_training_or_final_cohort_prediction": false,
+    "compose_start_down_or_dependency_invocations": false,
+    "server_builds": false,
+    "live_services_recreated": ["credify-demo api", "credify-demo frontend"],
+    "original_experiment_and_41_manifest_files_unchanged": true,
+    "application_source_edits": false
+  },
+  "observations": [
+    "Initial exact-score preflight failure retained above; resolved only by explicit authorization of an illustrative-probability tolerance, not by changing model, frozen output or application source.",
+    "First public browser attempt received transient HTTP 503 responses for lab summary/cases and business GET requests. A subsequent run that waited for navigation requests to settle passed without service restart or configuration changes. Cause not established; this is a limited technical verification, not a sustained-availability guarantee."
+  ],
+  "scope_violations_during_this_v6_final_promotion": [],
+  "earlier_evidence_preserved": {
+    "path": "deploy/review-pending-v6-policy-deployment.json",
+    "sha256_before_and_after": "8efb231d14c7049ef84770bcaeac12060469df97293786911d40729db881ac25",
+    "original_incident_and_evidence_unchanged": true,
+    "initial_blocked_v6_final_preflight": "Original observations retained in initial_* fields of this record"
+  }
+}

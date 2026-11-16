@@ -14,10 +14,10 @@ from pypdf import PdfReader
 NAME = "APF3_TD_Grupo2_ML_Innovacion"
 
 
-def verify(root: Path):
+def verify(root: Path, *, evidence_root=None):
     output = root / "sustentacion"
     plan = json.loads((output / "plan-sustentacion.json").read_text())
-    report_path = root / "experimento/grouped_cv_report.json"
+    report_path = (evidence_root or root) / "experimento/grouped_cv_report.json"
     report = json.loads(report_path.read_text())
     assert (
         hashlib.sha256(report_path.read_bytes()).hexdigest()
@@ -112,4 +112,6 @@ def verify(root: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
-    verify(parser.parse_args().root)
+    parser.add_argument("--evidence-root", type=Path)
+    args = parser.parse_args()
+    verify(args.root, evidence_root=args.evidence_root)

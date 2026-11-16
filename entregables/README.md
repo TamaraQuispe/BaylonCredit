@@ -4,7 +4,9 @@ Material del grupo, revisado para publicación. Los datasets de experimentos y
 pruebas son ficticios. No son historial real, aceptación humana ni una demostración
 de reducción de pérdidas.
 
-- [APF3 CV3: informe, presentación, código y modelos](APF3_CV3/README.md).
+- [APF3 V6 Final: paquete de entrega](APF3_Grupo2_V6_Final.zip).
+- [APF3 V6 Final: resultados y alcance](../docs/APF3_RESULTADOS_V6_FINAL.md).
+- [APF3 CV3: informe, presentación, código y modelos históricos](APF3_CV3/README.md).
 - [Taller S14 para Google Colab](taller_s14/README.md).
 - [Piloto sintético y experimento v2](piloto_sintetico/README.md).
 - [Pruebas aisladas de fallos del backend](fallos_backend/README.md).

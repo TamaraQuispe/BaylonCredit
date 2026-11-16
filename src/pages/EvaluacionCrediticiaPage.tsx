@@ -247,6 +247,16 @@ export default function EvaluacionCrediticiaPage() {
               <Icon name="science" size="18px" /> Laboratorio ML
             </Link>
           )}
+          {import.meta.env.VITE_ACADEMIC_ML_V4 === 'true' && (
+            <Link to="/laboratorio-academico/v4" className="inline-flex items-center gap-2 text-primary font-label-sm text-label-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <Icon name="science" size="18px" /> Laboratorio ML V4
+            </Link>
+          )}
+          {import.meta.env.VITE_ACADEMIC_ML_V6 === 'true' && (
+            <Link to="/laboratorio-academico/v6" className="inline-flex items-center gap-2 text-primary font-label-sm text-label-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <Icon name="science" size="18px" /> Laboratorio ML V6 - investigaci&oacute;n
+            </Link>
+          )}
           <Button variant="outline" onClick={downloadReport} disabled={!result}>
             <Icon name="download" size="18px" /> Descargar resumen
           </Button>

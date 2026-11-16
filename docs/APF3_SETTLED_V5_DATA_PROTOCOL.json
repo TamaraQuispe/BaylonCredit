@@ -1,0 +1,41 @@
+{
+  "version": "academic-owner-settled-v5-data",
+  "stage": "data_revision_only_no_models_or_final_test_authorized_by_this_protocol",
+  "base_anchors": "APF3_OWNER_ANCHORS_V4.json, preserved byte-for-byte",
+  "clarification": "APF3_OWNER_SETTLEMENT_CLARIFICATION.json",
+  "base_simulation": "APF3_ALIGNED_V4_PROTOCOL.json:simulation, all unchanged assumptions except overdue_policy",
+  "overdue_policy": "Reject new credit whenever any overdue principal remains; prior partial payments or agreements do not authorize another grant. Resume evaluation only after full settlement is observed. Never accelerate or invent payments to increase grants.",
+  "source_units": {
+    "weekly_loans": "Approximately 12 granted credits, not 12 requests",
+    "weekly_clients": "Approximately 9 distinct recipients of granted credits",
+    "return_days": "Return to request credit, not elapsed time between granted credits",
+    "scheduled_opportunities": "The inherited schedule is an explicit scenario assumption, not a measurement of request volume"
+  },
+  "development_candidates": [
+    {"seed": 2026111501, "prefix": "SET5-D1"},
+    {"seed": 2026111502, "prefix": "SET5-D2"}
+  ],
+  "audit_before_any_model": [
+    "No granted credit has overdue balance at evaluation",
+    "Partial payment never bypasses the overdue block",
+    "Snapshots use observed events only; no future plans or scores",
+    "Amounts 5..50 PEN and exposure including the request at most 80 PEN",
+    "Next-day maturity; separate grace does not relabel late credits",
+    "Report requests and actual grants separately, including mean grants and distinct recipients by complete week",
+    "Report request-return intervals separately from granted-credit intervals",
+    "Report both development candidates even if scale or class adequacy is unfavorable",
+    "Do not reseed, force labels, force approvals, or reschedule payment to improve scale or model scores"
+  ],
+  "scale_acceptance": "Pending source-coherence review. The V4 team tolerance is a descriptive inherited flag, not an owner-confirmed margin or sufficient acceptance for V5.",
+  "selection_protocol": null,
+  "final_seed": null,
+  "final_dataset": null,
+  "unchanged_unknowns": [
+    "Total customer population and latent heterogeneity",
+    "Distributions and their dispersions",
+    "Cold-start amount beyond general bounds",
+    "Cash-sale volume",
+    "Real predictive performance and permanent loss rate"
+  ],
+  "publication": "Local data revision only; no replacement of V4 artifacts, no production changes, no public deployment"
+}

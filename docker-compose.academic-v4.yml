@@ -1,0 +1,24 @@
+# Override only: docker-compose.demo.yml + this file. Never production.
+services:
+  api:
+    image: credify-demo-academic-api:v4
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.academic-v4
+    environment:
+      ACADEMIC_ML_V4_ENABLED: "true"
+      ACADEMIC_ML_V4_DIR: /app/academic-v4
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    volumes:
+      - type: bind
+        source: ./academic/v4
+        target: /app/academic-v4
+        read_only: true
+        bind:
+          create_host_path: false
+  frontend:
+    image: credify-demo-academic-frontend:v4
+    build:
+      args:
+        VITE_ACADEMIC_ML_V4: "true"

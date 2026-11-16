@@ -76,15 +76,20 @@ def parse_notes(text):
     return slides
 
 
-def generate(root: Path):
-    output = root / "sustentacion"
+def generate(root: Path, *, output_root=None, notes_source=None, owner_context=None):
+    output = (output_root or root) / "sustentacion"
     for folder in (output, output / "figuras", output / "evidencias"):
         folder.mkdir(parents=True, exist_ok=True)
     for stale in ("Heading 2.docx", "Heading 2.html"):
         (output / stale).unlink(missing_ok=True)
     report = json.loads((root / "experimento/grouped_cv_report.json").read_text())
     rows = json.loads((root / "experimento/development_rows.json").read_text())
-    source = (REPO / "docs/APF3_Guion_Sustentacion_CV3.md").read_text()
+    source = (notes_source or REPO / "docs/APF3_Guion_Sustentacion_CV3.md").read_text()
+    owner = json.loads(owner_context.read_text()) if owner_context else None
+    if owner:
+        assert owner["source_status"] == "owner_declared_confirmed_by_user"
+        assert owner["reviewed"] - owner["unknown_included"] == owner["evaluable"]
+        assert not owner["used_to_fit_cv3"]
     notes = parse_notes(source)
     tree = report["models"]["tree"]["final"]
     assert tree["confusion_matrix"] == [[660, 35], [333, 45]]
@@ -274,7 +279,11 @@ def generate(root: Path):
         18,
     )
 
-    item = slide("Datos trazables, pero todos ficticios")
+    item = slide(
+        "Datos del modelo: todos ficticios"
+        if owner
+        else "Datos trazables, pero todos ficticios"
+    )
     text(item, "DESARROLLO", 0.75, 1.65, 5, 0.35, 16, color=TEAL, bold=True)
     text(item, "1289", 0.7, 2.15, 5.1, 1, 60, bold=True)
     text(item, "fiados etiquetados · 125 clientes", 0.75, 3.4, 5.6, 0.5, 21)
@@ -304,12 +313,27 @@ def generate(root: Path):
         item,
         "Exclusiones de la fuente: 309 del test antiguo + 24 sin etiqueta = 333",
         0.75,
-        6.0,
+        5.65 if owner else 6.0,
         11.9,
-        0.65,
-        19,
+        0.4 if owner else 0.65,
+        16 if owner else 19,
         color=COPPER,
     )
+    if owner:
+        rate = f"{100 * owner['late'] / owner['evaluable']:.2f}".replace(".", ",")
+        text(
+            item,
+            f"Fuente declarada · septiembre: {owner['reviewed']} revisados → "
+            f"{owner['evaluable']} evaluables → {owner['late']} atrasos ({rate} %). "
+            "No son filas del modelo.",
+            0.75,
+            6.2,
+            11.9,
+            0.65,
+            17,
+            color=TEAL,
+            bold=True,
+        )
 
     item = slide("EDA de desarrollo: señal, no causalidad")
     text(
@@ -559,11 +583,24 @@ def generate(root: Path):
         item,
         "No demuestra ahorro, recuperación\nni reducción del 5 % referencial.",
         0.75,
-        5.0,
+        4.7 if owner else 5.0,
         6,
-        1.0,
+        0.8 if owner else 1.0,
         21,
     )
+    if owner:
+        text(
+            item,
+            f"Máximo declarado S/ {owner['loan_amount_range_pen'][1]} · "
+            f"cupo S/ {owner['client_cap_pen']}.\n"
+            "CV3 usó S/ 200: escenario aún no ajustado.",
+            0.75,
+            5.8,
+            6,
+            0.9,
+            18,
+            color=COPPER,
+        )
     rect(item, 7.1, 1.95, 0.025, 4.3, "C9D3D4")
     text(
         item,
@@ -578,8 +615,16 @@ def generate(root: Path):
     )
     text(
         item,
-        "Acción humana: por definir\nCapacidad K: por verificar\n"
-        "Costos FP/FN: por justificar\nMeta: propuesta pendiente",
+        (
+            f"Revisión antes de aprobar\nK = {owner['daily_review_capacity_estimate']} "
+            f"casos/día, estimado\n{owner['minutes_per_case_estimate']} min/caso, por probar\n"
+            "Meta numérica: por justificar"
+        )
+        if owner
+        else (
+            "Acción humana: por definir\nCapacidad K: por verificar\n"
+            "Costos FP/FN: por justificar\nMeta: propuesta pendiente"
+        ),
         7.65,
         2.9,
         4.9,
@@ -668,7 +713,13 @@ def generate(root: Path):
 
     item = slide("Método corregido. Utilidad por demostrar.", dark=True)
     for x, title, body in (
-        (0.75, "Representatividad", "Calibrar parámetros con\nfuente verificable."),
+        (
+            0.75,
+            "Representatividad",
+            ("Fuente parcial disponible.\nFalta ajustar el escenario.")
+            if owner
+            else "Calibrar parámetros con\nfuente verificable.",
+        ),
         (
             4.95,
             "Baja detección",
@@ -892,15 +943,15 @@ body{margin:0;font-family:Arial,sans-serif}
         "source_report_sha256": hashlib.sha256(
             (root / "experimento/grouped_cv_report.json").read_bytes()
         ).hexdigest(),
+        "owner_context_sha256": hashlib.sha256(owner_context.read_bytes()).hexdigest()
+        if owner_context
+        else None,
+        "owner_context_used_to_fit_cv3": False,
         "slides_data": [
             {key: item[key] for key in ("number", "title", "owner", "seconds")}
             for item in notes
         ],
     }
-    (output / "plan-sustentacion.json").write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2) + "\n"
-    )
-
     spec = importlib.util.spec_from_file_location(
         "layout", REPO / "deploy/generate-apf3-report.py"
     )
@@ -928,11 +979,16 @@ body{margin:0;font-family:Arial,sans-serif}
         "# Lista de revisión humana pendiente", 1
     )[0]
     items = re.findall(r"(?m)^\*\*¿.*?(?=\n\n\*\*¿|\Z)", questions.strip(), flags=re.S)
-    assert len(items) == 12
+    assert items
+    metadata["question_count"] = len(items)
+    question_pages = (len(items) + 5) // 6
+    for index in range(question_pages):
+        compact.append(
+            f"# Preguntas difíciles · {index + 1}/{question_pages}\n\n"
+            + "\n\n".join(items[index * 6 : (index + 1) * 6])
+        )
     compact.extend(
         [
-            "# Preguntas difíciles · 1/2\n\n" + "\n\n".join(items[:6]),
-            "# Preguntas difíciles · 2/2\n\n" + "\n\n".join(items[6:]),
             "# Demo y revisión humana\n\n**En vivo:** 20 segundos hablados + 50 de operación. "
             "Mostrar entrada, ejecutar solo inferencia y explicar salida sin garantía de cobro.\n\n"
             "```bash\npython codigo/scripts/academic_credit_grouped_cv.py "
@@ -971,8 +1027,11 @@ h3{font-size:10.5pt;margin:7px 0 4px}th,td{padding:4px}
         editable.styles["Normal"].paragraph_format.space_after = WordPt(4)
         editable.save(output / (filename + ".docx"))
     shutil.copyfile(
-        REPO / "docs/APF3_Guion_Sustentacion_CV3.md",
+        notes_source or REPO / "docs/APF3_Guion_Sustentacion_CV3.md",
         output / "Guion_completo_con_indicaciones.md",
+    )
+    (output / "plan-sustentacion.json").write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2) + "\n"
     )
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
 
@@ -980,4 +1039,13 @@ h3{font-size:10.5pt;margin:7px 0 4px}th,td{padding:4px}
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
-    generate(parser.parse_args().root)
+    parser.add_argument("--output-root", type=Path)
+    parser.add_argument("--notes-source", type=Path)
+    parser.add_argument("--owner-context", type=Path)
+    args = parser.parse_args()
+    generate(
+        args.root,
+        output_root=args.output_root,
+        notes_source=args.notes_source,
+        owner_context=args.owner_context,
+    )

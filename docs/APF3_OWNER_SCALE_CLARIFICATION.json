@@ -1,0 +1,26 @@
+{
+  "version": "owner-weekly-scale-clarification-1",
+  "source_status": "owner_response_relayed_by_user_in_current_conversation",
+  "declared_consultation_date": null,
+  "question_verbatim": "Rildo, nos dijiste que normalmente das unos 12 fiados por semana a nueve clientes. ¿También hay semanas en las que das solo 10 u 11 fiados a ocho o nueve clientes, porque algunos todavía deben y no les vuelves a fiar hasta que paguen todo?",
+  "user_response_verbatim": "a la primera pregunta dice que si",
+  "confirmed_yes": true,
+  "confirmed_scope": {
+    "usual_approximate_granted_loans_per_week": 12,
+    "usual_approximate_distinct_grant_recipients_per_week": 9,
+    "lower_activity_examples_granted_loans_per_week": [10, 11],
+    "lower_activity_examples_distinct_grant_recipients_per_week": [8, 9],
+    "reason_in_question": "Some customers still owe overdue debt and are not granted new credit until full settlement"
+  },
+  "not_confirmed": [
+    "Absolute weekly minimum or maximum",
+    "Frequency of each weekly count or joint distribution",
+    "Every synthetic week or every simulator assumption",
+    "The old team tolerance of 25 percent or two clients",
+    "Model quality, business benefit, or permission for deployment"
+  ],
+  "timing": "Received after preparing the two V5 development candidates; record as later source clarification, not a predeclared numerical acceptance threshold",
+  "effect_on_existing_data": "Review only. Do not regenerate, remove weeks, reseed, force approvals, or change payments to make counts fit.",
+  "not_customer_data": true,
+  "not_business_model_approval": true
+}

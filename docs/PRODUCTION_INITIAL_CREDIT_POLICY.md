@@ -1,6 +1,6 @@
 # Production: first-credit review policy
 
-Production enables `REQUIRE_PAID_CREDIT_HISTORY=true`. Staging/demo defaults to false unless explicitly enabled. No schema migration or training is required.
+Production enables `REQUIRE_PAID_CREDIT_HISTORY=true`. The public demo now also explicitly enables it in `docker-compose.demo.yml`. No schema migration or training is required.
 
 When a client has no fully repaid credit, every evaluation is persisted with `payment_history_review` in factors, `approved=false`, zero automatic limit and zero confidence. The response exposes `requires_manual_review=true`. Buying for cash, aging the account or repeating evaluations does not unlock approval. A fully repaid credit permits normal risk/policy evaluation; it does not guarantee approval or prove future repayment.
 

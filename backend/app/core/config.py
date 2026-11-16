@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     require_paid_credit_history: bool = False
     academic_ml_lab_enabled: bool = False
     academic_ml_lab_dir: str = "/app/academic"
+    academic_ml_v4_enabled: bool = False
+    academic_ml_v4_dir: str = "/app/academic-v4"
+    academic_ml_v6_enabled: bool = False
+    academic_ml_v6_dir: str = "/app/academic-v6"
     api_v1_prefix: str = "/api/v1"
     database_url: str = "postgresql+asyncpg://credify:credify@localhost:5432/credify"
     database_connect_timeout_seconds: float = Field(default=5, gt=0)
@@ -69,6 +73,10 @@ class Settings(BaseSettings):
     def validate_production_secrets(self) -> "Settings":
         if self.academic_ml_lab_enabled and self.environment != "staging":
             raise ValueError("Academic synthetic laboratory is restricted to staging")
+        if self.academic_ml_v4_enabled and self.environment != "staging":
+            raise ValueError("Academic V4 laboratory is restricted to staging")
+        if self.academic_ml_v6_enabled and self.environment != "staging":
+            raise ValueError("Academic V6 laboratory is restricted to staging")
         unsafe_production_secret = (
             self.environment in {"staging", "production"}
             and self.jwt_secret_key == DEVELOPMENT_JWT_SECRET

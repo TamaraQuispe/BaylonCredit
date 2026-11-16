@@ -1,0 +1,278 @@
+{
+  "recorded_utc": "2026-11-16T14:53:07Z",
+  "last_updated_utc": "2026-11-16T15:23:34.388318Z",
+  "status": "deployed_and_verified_with_scope_violation",
+  "url": "https://demo-credify.168-75-71-113.sslip.io/laboratorio-academico/v6",
+  "scope": "Public synthetic academic demo only; not production or business-policy deployment",
+  "project": "credify-demo",
+  "server_directory": "/home/ubuntu/credify-demo",
+  "compose_files": [
+    "docker-compose.demo.yml",
+    "docker-compose.academic-lab.yml",
+    "docker-compose.academic-v6.yml"
+  ],
+  "platform": "linux/amd64",
+  "images": {
+    "api": {
+      "tag": "credify-demo-academic-api:v6",
+      "release_tag": "credify-demo-academic-api:v6-policy-format-20261116",
+      "image_id": "sha256:06f4e4f3c2e66525defab05e8d946b3075c6f646764e7f6ad460e02743639888",
+      "rollback_tag": "credify-demo-academic-api:v6-rollback-20261116",
+      "rollback_image_id": "sha256:1d3ac169951837cf6e0484c2385d99d8a89586962916294b3916bf0ff9b6e78e",
+      "build": "Off-server; original three-file deployment plus one formatting-only policy COPY layer from the pre-followup running API image",
+      "baseline_runtime_config_and_layers_preserved": true,
+      "container_before": "4ce25f1a1527675600ea0c66492d8e3c3785a9b0d2ea36b7035c8a9a9d7c6ea3",
+      "container_after": "ee20b543f278d3a4dbe205696920571064eaff3d74a10c0fe63561f63eaa07d5",
+      "started_after": "2026-11-16T15:22:04.850745328Z",
+      "health": "healthy"
+    },
+    "frontend": {
+      "tag": "credify-demo-academic-frontend:v6",
+      "release_tag": "credify-demo-academic-frontend:v6-policy-20261116",
+      "image_id": "sha256:4338f1e40b9a8691ec783b837f208223519304abe74a9a24483a91f79f62239f",
+      "rollback_tag": "credify-demo-academic-frontend:v6-rollback-20261116",
+      "rollback_image_id": "sha256:bd9340ad69da449494979ac7a646277c61cb2436a5d4a038e9867370de1fafa5",
+      "build": "Off-server TypeScript/Vite build from existing worktree; no source reverts",
+      "container_before": "aa9302608e0941aa50da9e033ae149c81543b6257bd9091acd3335c238bbe736",
+      "container_after": "dee84be561befc7ab6dda62c22323eb3bc96e68128790dcb41e7b0946f61e714",
+      "started_after": "2026-11-16T14:48:09.365771862Z",
+      "build_args": {
+        "VITE_API_URL": "/api/v1",
+        "VITE_DEMO_MODE": "true",
+        "VITE_ACADEMIC_ML_LAB": "true",
+        "VITE_ACADEMIC_ML_V4": "true",
+        "VITE_ACADEMIC_ML_V6": "true"
+      }
+    }
+  },
+  "source_sha256": {
+    "backend/app/services/academic_lab_v6.py": "67218703dc575738f89a7134913c2970264bec8d7617a0cf9a63a8c4518b8d32",
+    "backend/app/services/academic_v6_policy.py": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+    "backend/app/api/routes/academic_ml_v6.py": "c6c2c6b7279f3eb35e0a87cd707b20514992a2289972c96e884fca585ad96f2f",
+    "src/pages/LaboratorioAlineadoV6Page.tsx": "554341fa871fc18982916a69dab7a0a57b752aedbec854c3f51018dcbee4646a"
+  },
+  "running_backend_file_hashes_match_source": true,
+  "archive": {
+    "local": "/var/folders/sx/_6ljw37n2_j9hk2f_vtqplj40000gn/T/opencode/v6-policy-20261116.tar",
+    "remote": "/home/ubuntu/credify-demo/v6-policy-20261116.tar",
+    "sha256": "e5b904491c18ecab40155a88618388820844a324795aa99ef046e0e1cb61c101",
+    "local_remote_checksum_match_before_load": true,
+    "loaded_image_ids_match_local": true,
+    "rollback_tags_preserved_before_load_and_retag": true
+  },
+  "integrity": {
+    "bundle_files": 9,
+    "aggregate_method": "SHA256 of newline-joined sorted relative-path:SHA256(file-bytes) entries under academic/",
+    "bundle_sha256_before": "fef81603afb788950a69b232e57c90e4d16a6809ef3e85643b6326e8b14b09f6",
+    "bundle_sha256_after": "fef81603afb788950a69b232e57c90e4d16a6809ef3e85643b6326e8b14b09f6",
+    "config_sha256_before_and_after": {
+      ".env.demo": "7378341e4693128e583ca51884ff57573091d64bea421555643adedb97266217",
+      "docker-compose.demo.yml": "17439f4046236322c3101330a8549267ec825071e77820e45b564559a5a39d78",
+      "docker-compose.academic-lab.yml": "a168bb5e683491ad6824fffc95ba072d58b22f8d3f69d99541b28deca8220b64",
+      "docker-compose.academic-v6.yml": "76f862a0312d7290314bd477e4a12ccef0be125a4a4445d21cc92d867dae03ac"
+    },
+    "env_bundles_compose_untouched": true,
+    "proxy_untouched": true
+  },
+  "api_checks": {
+    "public_demo_ready": true,
+    "authenticated_get_cases_returns_exactly_three": true,
+    "each_case_evaluated_with_bodyless_post": true,
+    "cases": {
+      "pending-balance-v6": {
+        "decision": "blocked_pending_balance",
+        "model_called": false,
+        "estimated_late_probability": null,
+        "predicted_late_payment": null,
+        "threshold": null
+      },
+      "no-history-v6": {
+        "decision": "requires_owner_review",
+        "model_called": false,
+        "requires_manual_review": true,
+        "estimated_late_probability": null,
+        "predicted_late_payment": null,
+        "threshold": null
+      },
+      "illustrative-v6": {
+        "decision": "model_review_candidate",
+        "model_called": true,
+        "estimated_late_probability": 0.7171978005286032,
+        "predicted_late_payment": 1,
+        "threshold": 0.2,
+        "score_matches_baseline_exactly": true,
+        "baseline_rechecked": "Original API image, local read-only bundle, network disabled, illustrative case only"
+      }
+    },
+    "all_results_research_only_and_not_business_approval": true,
+    "v6_summary_available": true,
+    "v2_summary_available_before_and_after": true,
+    "v4_summary_authenticated_404_before_and_after": true,
+    "v4_runtime_enabled_before_and_after": false,
+    "nonempty_body_rejected_422": true,
+    "query_parameters_rejected_422": true
+  },
+  "browser_checks": {
+    "live_public_demo_not_mocked": true,
+    "account_role": "existing classroom operator",
+    "viewports": [1440, 390],
+    "all_three_cases_passed_at_both_viewports": true,
+    "guarded_cases_show_model_not_executed": true,
+    "guarded_cases_hide_probability": true,
+    "eligible_case_shows_probability": true,
+    "no_page_horizontal_overflow": true,
+    "javascript_page_errors": [],
+    "v2_v4_v6_ui_links_present": true,
+    "other_roles": "Prior local role/viewport tests reported passed by handoff; not rerun against public demo"
+  },
+  "unchanged_containers": {
+    "credify-demo-database-1": {
+      "id": "cb4996ae41c0b39b053dae3669cdba5a37bca5783a6ce0717662eaf6d42c3ea8",
+      "started": "2026-11-16T13:42:51.763540638Z"
+    },
+    "bayloncredit-api-1": {
+      "id": "710f66310d60f640b0fd0420b47246760c9546350e6adb74981bfb0f728804e9",
+      "image": "sha256:1bfb6ab731d0c219d93dd8f5fe455b39800b68b60dcf012eb7830c7a9d5c81d8",
+      "started": "2026-10-28T21:31:19.175391721Z"
+    },
+    "bayloncredit-frontend-1": {
+      "id": "440593958e29df8b8b4cc81009a33bb7458ff0a2c382ab0693d35a7be812be5a",
+      "image": "sha256:2c7a5eeb6161c8165a3c83166e5c6227d9a931b8d0880a8e40a10247b3a111ff",
+      "started": "2026-10-28T21:24:27.54858718Z"
+    },
+    "bayloncredit-caddy-1": {
+      "id": "f912dcca9ffb54d98ae00aaa1272a34d78dd4c8ff7754a2d6cec664591af166a",
+      "image": "sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648",
+      "started": "2026-09-22T16:28:34.144890007Z"
+    },
+    "bayloncredit-database-1": {
+      "id": "9d6705410b3ae9565913b53a089767b7657374334af606cc5315f8f78ad2de5b",
+      "image": "sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73",
+      "started": "2026-09-22T15:34:33.562551834Z"
+    }
+  },
+  "production_readiness_before_and_after": "ready",
+  "side_effects": {
+    "normal_demo_logins": 3,
+    "permitted_login_metadata": ["session", "audit", "last-login"],
+    "training": false,
+    "final_cohort_prediction": false,
+    "global_prune": false,
+    "server_builds": false,
+    "parallel_temporary_server_api": false,
+    "production_mutations": false,
+    "scope_violation": {
+      "cause": "Initial no-deps recreate timed out waiting for API startup. Recovery used compose start frontend without a dependency exclusion; Compose followed dependencies and reran existing demo migrate and seed containers.",
+      "migrate_started": "2026-11-16T14:47:10.755190227Z",
+      "migrate_finished": "2026-11-16T14:47:45.761919355Z",
+      "seed_started": "2026-11-16T14:47:51.243073976Z",
+      "seed_finished": "2026-11-16T14:48:07.47924498Z",
+      "both_exit_codes": 0,
+      "migration_log": "No upgrade/revision application messages; only PostgreSQL context/transactional DDL messages",
+      "schema_revision_after": "20260916_0015",
+      "actual_seed_code_inspected_read_only": true,
+      "actual_seed_behavior": "Ensure classroom user and three fictional clients exist; ensure settings exist, otherwise assign demo business name and one-day term; commit. No credit/payment/evaluation insert paths.",
+      "read_only_post_recovery_timestamp_check": {
+        "since_utc": "2026-11-16T14:47:00Z",
+        "clients": {"total": 50, "created_since": 0, "updated_since": 0},
+        "credits": {"total": 54, "created_since": 0, "updated_since": 0},
+        "payments": {"total": 42, "created_since": 0, "updated_since": 0},
+        "credit_evaluations": {"total": 1, "created_since": 0, "updated_since": 0},
+        "business_settings": {"total": 1, "created_since": 0, "updated_since": 0}
+      },
+      "limitation": "No pre-deployment business-table snapshot was taken. Timestamp inspection and idempotent seed code show no observed row changes, but are not a full before/after proof. The migrate/seed invocation violated the requested scope regardless.",
+      "database_restoration_attempted": false
+    }
+  },
+  "rollback": {
+    "performed": false,
+    "instructions": "In /home/ubuntu/credify-demo, retag both v6-rollback-20261116 images to their respective :v6 tags, then run the same --env-file .env.demo -p credify-demo and three Compose files with up -d --no-deps --no-build --pull never --force-recreate api frontend. Allow sufficient time for API startup. Do not use compose start without excluding dependencies. Image rollback does not undo database metadata or any database effects.",
+    "database_rollback": "Not performed or authorized"
+  },
+  "repository_changes_this_deployment": ["deploy/review-pending-v6-policy-deployment.json"],
+  "credentials_or_tokens_recorded": false,
+  "followups": [
+    {
+      "kind": "formatting_only_policy_source_sync",
+      "status": "deployed_and_verified_no_new_scope_violation",
+      "verification_started_utc": "2026-11-16T15:20:45.545943Z",
+      "finished_utc": "2026-11-16T15:23:34.388318Z",
+      "scope": "Only backend/app/services/academic_v6_policy.py; no frontend rebuild or recreation",
+      "original_evidence_preserved": {
+        "api_release_tag": "credify-demo-academic-api:v6-policy-20261116",
+        "api_image_id": "sha256:36e27d825574d77561a429fab217d7d5cfc35066916a706067e028d1ef403799",
+        "api_build": "Off-server; exact running baseline image plus three COPY layers only",
+        "api_container": "31208b1473302964735e5bda91d649fe18ab8db2712e7c20fe274374d06469d4",
+        "api_started": "2026-11-16T14:45:42.961109814Z",
+        "policy_sha256": "d62839403904518e4c2622ead4ed1471a2ab87cec9d58626741dccdc0153aa80",
+        "archive": "Top-level archive object remains the original deployment archive",
+        "incident": "Top-level side_effects.scope_violation and original verification evidence remain unchanged"
+      },
+      "image": {
+        "base_image_id": "sha256:36e27d825574d77561a429fab217d7d5cfc35066916a706067e028d1ef403799",
+        "release_tag": "credify-demo-academic-api:v6-policy-format-20261116",
+        "image_id": "sha256:06f4e4f3c2e66525defab05e8d946b3075c6f646764e7f6ad460e02743639888",
+        "platform": "linux/amd64",
+        "build_location": "local/off-server",
+        "one_additional_copy_layer_only": true,
+        "base_layers_and_runtime_config_identical": true,
+        "original_rollback_tag_untouched": "credify-demo-academic-api:v6-rollback-20261116",
+        "original_rollback_image_id": "sha256:1d3ac169951837cf6e0484c2385d99d8a89586962916294b3916bf0ff9b6e78e"
+      },
+      "archive": {
+        "local": "/var/folders/sx/_6ljw37n2_j9hk2f_vtqplj40000gn/T/opencode/v6-policy-format-20261116.tar",
+        "remote": "/home/ubuntu/credify-demo/v6-policy-format-20261116.tar",
+        "sha256": "b7c75b73933e5119b9720c5d002c58780b9be533116468944b1d87c7b9eb9380",
+        "local_remote_checksum_match": true,
+        "loaded_image_id_matches_local": true
+      },
+      "deployment_command": "docker compose --project-directory /home/ubuntu/credify-demo --env-file /home/ubuntu/credify-demo/.env.demo -p credify-demo -f /home/ubuntu/credify-demo/docker-compose.demo.yml -f /home/ubuntu/credify-demo/docker-compose.academic-lab.yml -f /home/ubuntu/credify-demo/docker-compose.academic-v6.yml up -d --no-deps --no-build --pull never --force-recreate api",
+      "execution_note": "First orchestration timed out after image load and before retag/recreate; inspection confirmed original API still running. Resumed with archive/image verification, new baseline snapshots and explicit API-only up command. No compose start was used.",
+      "checks": {
+        "policy_ast_identical_to_pre_followup": true,
+        "policy_source_and_running_sha256": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+        "all_three_full_v6_responses_identical_before_after": true,
+        "pending_balance": {"decision": "blocked_pending_balance", "model_called": false, "probability": null, "prediction": null},
+        "no_history": {"decision": "requires_owner_review", "model_called": false, "probability": null, "prediction": null},
+        "eligible": {"decision": "model_review_candidate", "model_called": true, "probability": 0.7171978005286032, "prediction": 1, "threshold": 0.2},
+        "demo_api_health": "healthy",
+        "demo_and_production_ready_before_after": true,
+        "frontend_and_database_ids_images_timestamps_unchanged": true,
+        "all_production_ids_images_timestamps_unchanged": true,
+        "migrate_and_seed_ids_images_start_finish_times_unchanged": true,
+        "bundle_env_compose_hashes_unchanged": true,
+        "v2_available": true,
+        "v4_still_disabled_authenticated_404": true,
+        "browser_tests": "Not rerun; frontend image/container unchanged"
+      },
+      "business_table_fingerprints": {
+        "method": "Read-only transaction; MD5 of deterministic ordered JSONB aggregate of all row values, plus row count, compared before and after API replacement",
+        "all_identical_before_after": true,
+        "before_and_after": {
+          "clients": {"rows": 50, "md5": "25ebff9da362c09eb414e5d298d38efc"},
+          "credits": {"rows": 54, "md5": "c907714838eef3104c8aaab20c6f3072"},
+          "payments": {"rows": 42, "md5": "6b24e65de3cb98cf8d5bda275bd4fc8e"},
+          "credit_evaluations": {"rows": 1, "md5": "d0f885463e7bd2c7f243e0433966700e"},
+          "business_settings": {"rows": 1, "md5": "699b8fffd7b113d69cc87f52c436cf7e"},
+          "sales": {"rows": 90, "md5": "90284e3ef7b4c3c7b9eaa59239805dc6"},
+          "products": {"rows": 10, "md5": "d58ff1fc0b75beceffe3dc0ef5384bc3"},
+          "inventory_movements": {"rows": 113, "md5": "bb7adbbcb075d6561d98cd00974cf882"},
+          "organizations": {"rows": 1, "md5": "bf288396d94d4f0a3e1c55a927f00cdf"},
+          "whatsapp_notifications": {"rows": 0, "md5": "d751713988987e9331980363e24189ce"},
+          "alembic_version": {"rows": 1, "md5": "c6d399da7da12739c35ab494c71a7dee"}
+        }
+      },
+      "side_effects": {
+        "normal_demo_logins_this_followup": 2,
+        "normal_demo_logins_original_plus_followup": 5,
+        "writes": "Only normal demo login session/audit/last-login metadata",
+        "business_writes": false,
+        "migrate_or_seed_invocations": false,
+        "training_or_final_prediction": false,
+        "production_mutations": false,
+        "frontend_build_or_recreation": false
+      },
+      "isolated_api_rollback": "Retag retained credify-demo-academic-api:v6-policy-20261116 to :v6 and run the exact API-only no-deps deployment command above. Original pre-guards rollback tag remains untouched. No rollback performed."
+    }
+  ]
+}
