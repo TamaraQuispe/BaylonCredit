@@ -1,0 +1,15 @@
+{
+  "features": {
+    "completed_sales": 6,
+    "outstanding": 30,
+    "overdue_rate": 0,
+    "paid_credits": 6,
+    "paid_late": 1,
+    "pending_current": 1,
+    "pending_overdue": 0,
+    "punctuality_rate": 0.8333333333333334,
+    "requested_ratio": 0.25,
+    "tenure_days": 60,
+    "utilization": 0
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "status": "nueva ejecucion complementaria; no restaura evidencia historica ausente",
+  "started_at_utc": "2026-11-16T22:56:10.554005+00:00",
+  "finished_at_utc": "2026-11-16T22:56:10.561163+00:00",
+  "source": "revision/policy.py",
+  "source_sha256": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+  "tested_function": "pre_model_decision",
+  "checks": [
+    {
+      "case": "deuda_vigente",
+      "features": {
+        "completed_sales": 3,
+        "paid_credits": 3,
+        "paid_late": 1,
+        "pending_overdue": 0,
+        "pending_current": 1,
+        "outstanding": 20,
+        "utilization": 0.25,
+        "requested_ratio": 0.25,
+        "tenure_days": 60,
+        "punctuality_rate": 0.6666666666666666,
+        "overdue_rate": 0
+      },
+      "expected": "blocked_pending_balance",
+      "result": {
+        "decision": "blocked_pending_balance",
+        "reason": "Existe saldo pendiente actual o vencido, incluso parcial; no se evalua un nuevo credito.",
+        "requires_manual_review": false
+      },
+      "passed": true
+    },
+    {
+      "case": "deuda_vencida",
+      "features": {
+        "completed_sales": 3,
+        "paid_credits": 3,
+        "paid_late": 1,
+        "pending_overdue": 1,
+        "pending_current": 0,
+        "outstanding": 20,
+        "utilization": 0.25,
+        "requested_ratio": 0.25,
+        "tenure_days": 60,
+        "punctuality_rate": 0.6666666666666666,
+        "overdue_rate": 0.25
+      },
+      "expected": "blocked_pending_balance",
+      "result": {
+        "decision": "blocked_pending_balance",
+        "reason": "Existe saldo pendiente actual o vencido, incluso parcial; no se evalua un nuevo credito.",
+        "requires_manual_review": false
+      },
+      "passed": true
+    },
+    {
+      "case": "saldo_parcial",
+      "features": {
+        "completed_sales": 3,
+        "paid_credits": 3,
+        "paid_late": 1,
+        "pending_overdue": 0,
+        "pending_current": 1,
+        "outstanding": 5,
+        "utilization": 0.0625,
+        "requested_ratio": 0.25,
+        "tenure_days": 60,
+        "punctuality_rate": 0.6666666666666666,
+        "overdue_rate": 0
+      },
+      "expected": "blocked_pending_balance",
+      "result": {
+        "decision": "blocked_pending_balance",
+        "reason": "Existe saldo pendiente actual o vencido, incluso parcial; no se evalua un nuevo credito.",
+        "requires_manual_review": false
+      },
+      "passed": true
+    },
+    {
+      "case": "deuda_prioritaria_sin_historial",
+      "features": {
+        "completed_sales": 0,
+        "paid_credits": 0,
+        "paid_late": 0,
+        "pending_overdue": 0,
+        "pending_current": 1,
+        "outstanding": 20,
+        "utilization": 0.25,
+        "requested_ratio": 0.25,
+        "tenure_days": 60,
+        "punctuality_rate": null,
+        "overdue_rate": 0
+      },
+      "expected": "blocked_pending_balance",
+      "result": {
+        "decision": "blocked_pending_balance",
+        "reason": "Existe saldo pendiente actual o vencido, incluso parcial; no se evalua un nuevo credito.",
+        "requires_manual_review": false
+      },
+      "passed": true
+    },
+    {
+      "case": "sin_historial",
+      "features": {
+        "completed_sales": 0,
+        "paid_credits": 0,
+        "paid_late": 0,
+        "pending_overdue": 0,
+        "pending_current": 0,
+        "outstanding": 0,
+        "utilization": 0,
+        "requested_ratio": 0.25,
+        "tenure_days": 60,
+        "punctuality_rate": null,
+        "overdue_rate": 0
+      },
+      "expected": "requires_owner_review",
+      "result": {
+        "decision": "requires_owner_review",
+        "reason": "No hay creditos totalmente pagados confirmados; requiere revision del propietario.",
+        "requires_manual_review": true
+      },
+      "passed": true
+    },
+    {
+      "case": "saldo_desconocido",
+      "features": {
+        "completed_sales": 3,
+        "paid_credits": 3,
+        "paid_late": 1,
+        "pending_overdue": null,
+        "pending_current": null,
+        "outstanding": null,
+        "utilization": null,
+        "requested_ratio": 0.25,
+        "tenure_days": 60,
+        "punctuality_rate": 0.6666666666666666,
+        "overdue_rate": null
+      },
+      "expected": "requires_owner_review",
+      "result": {
+        "decision": "requires_owner_review",
+        "reason": "Falta confirmar la ausencia de saldo pendiente; requiere revision del propietario.",
+        "requires_manual_review": true
+      },
+      "passed": true
+    },
+    {
+      "case": "elegible",
+      "features": {
+        "completed_sales": 3,
+        "paid_credits": 3,
+        "paid_late": 1,
+        "pending_overdue": 0,
+        "pending_current": 0,
+        "outstanding": 0,
+        "utilization": 0,
+        "requested_ratio": 0.25,
+        "tenure_days": 60,
+        "punctuality_rate": 0.6666666666666666,
+        "overdue_rate": 0
+      },
+      "expected": null,
+      "result": null,
+      "passed": true
+    }
+  ],
+  "passed": 7,
+  "failed": 0,
+  "ml_calls_in_these_checks": 0,
+  "scope": "Solo siete llamadas al helper puro; no prueba ni cuenta llamadas del entrenamiento completo"
+}

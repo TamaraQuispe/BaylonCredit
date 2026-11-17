@@ -1,0 +1,7 @@
+{
+  "decision": "blocked_pending_balance",
+  "executed_during_finalization": false,
+  "illustrative_only": true,
+  "model_called_expected": false,
+  "note": "Manual source example, not a cohort row or newly executed inference"
+}

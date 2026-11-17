@@ -1,0 +1,193 @@
+{
+  "incorporated_utc": "2026-11-16T23:00:00.788264+00:00",
+  "scope": "Evidencia resumida de reproduccion local; no sesion de Google Colab",
+  "source_replay_manifest_sha256": "4578f284bcde53e710468efcf265bdb2fd3ee96b56c619fdfc6312604c9c16d8",
+  "source_replay_files_all_verified": true,
+  "full_replay_tree_attached": false,
+  "training_executed": true,
+  "independent_evaluation": false,
+  "selected_family_threshold_params_match": true,
+  "all_families_train_oof_final_classification_metrics_match": true,
+  "numerical_differences": [
+    {
+      "family": "svm",
+      "split": "train",
+      "scope": "raw",
+      "actual": {
+        "n": 534,
+        "f2": 0.5863708399366085,
+        "precision": 0.2578397212543554,
+        "recall": 0.8604651162790697,
+        "f1": 0.3967828418230563,
+        "accuracy": 0.5786516853932584,
+        "balanced_accuracy": 0.6925093438538206,
+        "roc_auc": 0.7681426495016611,
+        "brier": 0.11965947750207889,
+        "confusion_matrix": [
+          [
+            235,
+            213
+          ],
+          [
+            12,
+            74
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "published": {
+        "n": 534,
+        "f2": 0.5863708399366085,
+        "precision": 0.2578397212543554,
+        "recall": 0.8604651162790697,
+        "f1": 0.3967828418230563,
+        "accuracy": 0.5786516853932584,
+        "balanced_accuracy": 0.6925093438538206,
+        "roc_auc": 0.7681426495016611,
+        "brier": 0.11965947750207875,
+        "confusion_matrix": [
+          [
+            235,
+            213
+          ],
+          [
+            12,
+            74
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "family": "svm",
+      "split": "oof",
+      "scope": "raw",
+      "actual": {
+        "n": 534,
+        "f2": 0.5523672883787661,
+        "precision": 0.21813031161473087,
+        "recall": 0.8953488372093024,
+        "f1": 0.35079726651480636,
+        "accuracy": 0.46629213483146065,
+        "balanced_accuracy": 0.6396387043189369,
+        "roc_auc": 0.7549833887043189,
+        "brier": 0.12294102342614494,
+        "confusion_matrix": [
+          [
+            172,
+            276
+          ],
+          [
+            9,
+            77
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "published": {
+        "n": 534,
+        "f2": 0.5523672883787661,
+        "precision": 0.21813031161473087,
+        "recall": 0.8953488372093024,
+        "f1": 0.35079726651480636,
+        "accuracy": 0.46629213483146065,
+        "balanced_accuracy": 0.6396387043189369,
+        "roc_auc": 0.7549833887043189,
+        "brier": 0.1229410234261447,
+        "confusion_matrix": [
+          [
+            172,
+            276
+          ],
+          [
+            9,
+            77
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "family": "svm",
+      "split": "final",
+      "scope": "raw",
+      "actual": {
+        "n": 275,
+        "f2": 0.6060606060606061,
+        "precision": 0.32,
+        "recall": 0.7804878048780488,
+        "f1": 0.45390070921985815,
+        "accuracy": 0.72,
+        "balanced_accuracy": 0.7449447571398791,
+        "roc_auc": 0.818323952470294,
+        "brier": 0.08548605838513475,
+        "confusion_matrix": [
+          [
+            166,
+            68
+          ],
+          [
+            9,
+            32
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "published": {
+        "n": 275,
+        "f2": 0.6060606060606061,
+        "precision": 0.32,
+        "recall": 0.7804878048780488,
+        "f1": 0.45390070921985815,
+        "accuracy": 0.72,
+        "balanced_accuracy": 0.7449447571398791,
+        "roc_auc": 0.818323952470294,
+        "brier": 0.08548605838513447,
+        "confusion_matrix": [
+          [
+            166,
+            68
+          ],
+          [
+            9,
+            32
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    }
+  ],
+  "note": "Se conservan diferencias de coma flotante; no se afirma igualdad binaria ni se retoco el modelo.",
+  "files": {
+    "execution.json": "1e02a041bed5df86609e565efbe550a5ed90113dcd181def182e31b7bcc12aa9",
+    "runtime.json": "b95c42e831a7fb635f89d9a98e325f9dfabc4992e49087a9838bdca04f8cf831",
+    "published_comparison.json": "d5aae5d9bb3a39e9eba71a3bc641cb239342718f94a5b4dbba5600a821095215",
+    "guard_cases.json": "734bb2b280fb0db44a03ccf92c8f937cd55be8f5e9c9d84473d0d7627ac342ab",
+    "new_example.json": "c45089aacfa926be29a77ea4e4be4e89bc5dce63e364c67a91e50c1a6d2a34dc",
+    "new_example_input.json": "b5a97b5e5677c63829aa07bbfef5019d3e58c3a96da7cf42eabf9f1e64d0f039",
+    "comparison.csv": "b6d725a19c49639c76ac214f9febe51ca11cbe2c6e34d2cc78fab024941e6ec9",
+    "eda_dev.json": "47a175433e5b8018ef9035912360203b41802bff3420696b2bc99520e95c5983",
+    "eda_dev_descriptives.csv": "64b9f248baf0f85012b3ee9de7b6979f24183308b2b842b86a0296902beac777",
+    "eda_dev_target_counts.csv": "97702ed9ec84f7d540eebeb646a4218c0ef9ef3ee30651c8fbf5f35d75042171",
+    "eda_dev_relationships.csv": "2c68e6efd72ec9edf4036de8d37c5fd385ff5e6a99114b86c2b7b58f807662b4",
+    "eda_dev_relationships.json": "32272718e188170e357d2c7a1a229e52236c43c6aa34c4d941e4a6ba6d14160a"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "DEV only, descriptive post hoc, synthetic, no actual data",
+  "rows": 541,
+  "known_rows": 534,
+  "labels": {
+    "0": 448,
+    "1": 86,
+    "unknown": 7
+  },
+  "clients_known": 24,
+  "missing_by_feature_known": {
+    "completed_sales": 0,
+    "paid_credits": 0,
+    "paid_late": 0,
+    "pending_overdue": 0,
+    "pending_current": 0,
+    "outstanding": 0,
+    "utilization": 0,
+    "requested_ratio": 0,
+    "tenure_days": 0,
+    "punctuality_rate": 0,
+    "overdue_rate": 0
+  },
+  "duplicate_loan_ids": 0,
+  "caveats": [
+    "EDA descriptiva post hoc, posterior al freeze/replay; no seleccion ni retune.",
+    "Datos 100% sinteticos, no datos reales ni evidencia causal o beneficio comercial.",
+    "534 etiquetas DEV conocidas; 7 nulas excluidas de estadisticas y relaciones, nunca clase 0.",
+    "Observaciones repetidas por cliente; asociaciones no independientes, sin pruebas inferenciales.",
+    "Pearson no implica monotonia; medias por intervalos no prueban tendencia creciente.",
+    "Cuantiles lineales; std muestral ddof=1; sin imputacion; faltantes por variable excluidos."
+  ],
+  "conclusions": [
+    "Pearson tenure_days/completed_sales = 0.6596835502787145; pares completos n=534. Asociacion lineal positiva.",
+    "Tasa de atraso observado: historial paid_late>0=0.21937321937321938 (n=351), sin ese historial=0.04918032786885246 (n=183); diferencia si-no=0.17019289150436692. Mayor tasa con historial."
+  ]
+}

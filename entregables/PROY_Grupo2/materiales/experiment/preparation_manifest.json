@@ -1,0 +1,52 @@
+{
+  "version": "academic-owner-pending-v6",
+  "revision_id": "v6-final-r1",
+  "display_name": "V6 Final",
+  "origen": "simulado",
+  "research_only": true,
+  "business_approval": false,
+  "protocol_sha256": "7e489955792aab975c8ff14a95a77e70095a1c8a2ed1682847851773b8922541",
+  "source_sha256": {
+    "APF3_OWNER_ANCHORS_V4.json": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+    "APF3_OWNER_REVIEW_V5.json": "a72ea574fa2997d3477b0522c0044d590638957f0b5e553c31d97764df1a89a3",
+    "APF3_PENDING_V6_DATA_PROTOCOL.json": "5f3cea3798b73d31cf8aea54dc6bc45341777871988f7ef68686d34287811431",
+    "APF3_PENDING_V6_MODEL_PROTOCOL.json": "eb7fcd39f69be0115895cbb43b6d84e4488535646108bd6f21381d0fb1607923"
+  },
+  "code_sha256": {
+    "/revision/academic_credit_pending_v6_final.py": "eac29527d158918b21c4a9bd88e447913ed113e902ce6f050e3246dfde2ac034",
+    "/revision/policy.py": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+    "/app/scripts/academic_credit_pending_v6.py": "60f0ed75e2dec6175232776e8820369e53baf1944819d272f3bcef484e0aae6d",
+    "/app/scripts/freeze_pending_v6_model_protocol.py": "6e01d57a41fb9007a84ec4e219c60daacb74e8bd52294bb2e5cad89a11d69f7c",
+    "/app/scripts/audit_pending_v6_development.py": "237b7334b1c4b241799dee2b5abed4253cd64774e5d2262cb9942d25e2409969",
+    "/app/scripts/academic_credit_aligned_v4.py": "517290f1ce71fd1b6ac0dad93c604e0cabede4839b9bc40373b51f67f47afffb",
+    "/app/scripts/academic_credit_grouped_cv.py": "9ad30618093d5e066e8b3f9dcc37344bb44d73bd920c86e460e352840b0a969a",
+    "/app/scripts/prepare_pending_v6_data.py": "f718efd85668df2c34280787b01e1f5cbf67d26fa00885acf2dacbdf39b728d0",
+    "/app/app/ml/owner_pending_synthetic.py": "1f122cea1fec04d416e31c62d36dea8882ff2b55b3956fa2969637776dca3e28",
+    "/app/app/ml/owner_aligned_synthetic.py": "9fdb39dbcf33d507dc42876e53496841f79ec8c71a309ffbc8cc3b3224560a92",
+    "/app/app/ml/synthetic.py": "b1c96b9a0a8135b74bf7d7115d0b08adbbd917e2bf7df01e9382c6ab91d29e78",
+    "/app/app/ml/features.py": "ec22f6675b9eab61749a86a0ae613781503fab3905e80da08c73f7b8f568fcc1",
+    "/app/app/ml/outcomes.py": "c385d1c91af185f305a7fc0429e0c937f5dc11df3ac5af515d810ce751ba59fc"
+  },
+  "policy_sha256": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+  "runtime": {
+    "python": "3.12.14",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0"
+  },
+  "development_replicas": [
+    {
+      "seed": 2026112601,
+      "prefix": "PND6F-R1-D1"
+    },
+    {
+      "seed": 2026112602,
+      "prefix": "PND6F-R1-D2"
+    }
+  ],
+  "final_generated": false,
+  "model_fit_performed": false,
+  "frozen_utc": "2026-11-16T16:00:01.878254+00:00"
+}

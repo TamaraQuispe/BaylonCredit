@@ -1,0 +1,333 @@
+{
+  "version": "academic-owner-pending-v6-model-protocol-1",
+  "stage": "prospective_model_protocol_after_DEV_review_before_any_V6_fit_or_FINAL",
+  "scope": "Synthetic research only; not business approval, customer validation or production authorization",
+  "relationship_to_data_protocol": "Separate subsequent modeling specification. Do not alter the historical data-only protocol, its null model fields, or the prepared DEV bytes.",
+  "business_rules": {
+    "source_review": "APF3_OWNER_REVIEW_V5.json",
+    "pending_balance": "Any positive previous balance blocks new credit, including current debt. Only full observed settlement permits evaluation, not automatic approval.",
+    "target": "late_payment",
+    "target_scope": "Outcome of an actually granted synthetic credit, not approval or permanent loss",
+    "row_scope": "Study phase only; warmup supplies history but is excluded from supervised rows",
+    "source_review_limit": "Rildo reviewed 23 intentional V5 sample items and supplied later answers; not all V6 rows and not predictive performance"
+  },
+  "frozen_inputs": {
+    "development_manifest_sha256": "d41e9f0114a7c5a22006f23ba757ee93b022c972b233669dda583dc328b01b1c",
+    "development_complete_csv_sha256": "14055cddf111e5737e26cddaa89fe7f80dd241eaa580c5fc04f17b6506c5e9cf",
+    "development_labeled_csv_sha256": "b979fb2076a9226351e6b6d9336f7d44841754435cb8a34a8ef1c11bf4be08f0",
+    "development_gate_sha256": "c672762079e6e1dd9aadb18a64112b1338234f0c15633c989836e50b8f80e925",
+    "fold_plan_sha256": "98cf89702b05c64c214a00b81c9129f1598d8e2b21a8f12cb10d9a63536b6e79",
+    "anchors_sha256": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+    "owner_review_sha256": "a72ea574fa2997d3477b0522c0044d590638957f0b5e553c31d97764df1a89a3",
+    "data_protocol_sha256": "5f3cea3798b73d31cf8aea54dc6bc45341777871988f7ef68686d34287811431",
+    "generator_sha256": "1f122cea1fec04d416e31c62d36dea8882ff2b55b3956fa2969637776dca3e28",
+    "data_preparation_script_sha256": "f718efd85668df2c34280787b01e1f5cbf67d26fa00885acf2dacbdf39b728d0"
+  },
+  "development": {
+    "replicas": [
+      "PND6F-R1-D1",
+      "PND6F-R1-D2"
+    ],
+    "row_scope": "Policy-eligible granted study rows only"
+  },
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "feature_policy": {
+    "exclude": [
+      "IDs",
+      "replica_id",
+      "dates",
+      "late_payment",
+      "future_payments",
+      "latent_propensity",
+      "scenario",
+      "pending_at_cutoff",
+      "previous_model_scores"
+    ],
+    "group_metadata": "client_id only for disjoint partitions; replica and Lima civil date only for review capacity",
+    "constant_features": [
+      "pending_overdue",
+      "pending_current",
+      "outstanding",
+      "utilization",
+      "overdue_rate"
+    ],
+    "constants_and_duplicates": "Retain the eleven-field contract. Report constants and completed_sales == paid_credits; never claim independent importance, add noise, or fabricate cash-sale history.",
+    "no_feature_selection": "No new variables, removal of constants, or changes in distributions after examining OOF or FINAL"
+  },
+  "preprocessing": [
+    "SimpleImputer(strategy=median)",
+    "StandardScaler"
+  ],
+  "preprocessing_policy": "Fresh Pipeline per training fold for every family including Dummy; SVM calibration wraps that Pipeline. Fit preprocessing only on known-label training rows. Missing targets are never imputed; all-missing training features stop execution.",
+  "cv": {
+    "group": "client_id",
+    "preferred_folds": 3,
+    "fallback_folds": null,
+    "outer_seed": 2026112604,
+    "inner_seed": 2026112605,
+    "fold_source": "Fresh eligible-only planned_folds.json",
+    "fallback_policy": "Exactly three folds; stop, never reseed",
+    "unknown_oof": "Assign each unknown study row to its client's held-out outer fold. Fit on known training rows only; score both known and unknown held-out cases. Unknowns compete for daily capacity, but never enter supervised metrics or calibration.",
+    "oof_queue_scope": "Compute held-out daily queues per outer fold, replica and Lima date; folds have separate models, so do not pretend their capacity competition is one deployable full-cohort queue. Report this limitation.",
+    "selection_optimism": "OOF is reused for configuration and threshold selection, so winning OOF metrics are optimistic. Inner sigmoid calibration is not nested independent hyperparameter evaluation.",
+    "evaluation_scope": "Generalization to new synthetic clients in the same simulator, not prospective time validation or real customers",
+    "folds": 3
+  },
+  "tree": {
+    "max_depth": [
+      2,
+      3,
+      4
+    ],
+    "min_samples_leaf": [
+      8,
+      16
+    ],
+    "class_weight": [
+      null,
+      "balanced"
+    ],
+    "random_state": 42
+  },
+  "svm": {
+    "kernel": "linear",
+    "C": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "class_weight": [
+      null,
+      "balanced"
+    ],
+    "probability": false,
+    "random_state": 42
+  },
+  "svm_calibration": {
+    "method": "sigmoid",
+    "ensemble": false,
+    "group": "client_id",
+    "policy": "Use exact saved inner partitions inside each outer training subset, plus saved full-DEV partitions for the final refit. Unknown labels never calibrate. Convergence failure stops without retuning."
+  },
+  "candidate_count": {
+    "tree": 12,
+    "svm": 6,
+    "thresholds_per_candidate": 7,
+    "configuration_threshold_pairs": 126
+  },
+  "thresholds": [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7
+  ],
+  "baselines": [
+    "DummyClassifier(strategy=most_frequent)",
+    "DummyClassifier(strategy=constant,constant=1)"
+  ],
+  "baseline_threshold": 0.5,
+  "baseline_policy": "Same rows, partitions, preprocessing and capacity. Report raw predictions separately from threshold-then-cap actions. Dummy constant scores tie by fictional loan_id, not business priority.",
+  "review_policy": {
+    "daily_cap": 5,
+    "minutes_per_case": 2,
+    "queue": "Threshold first, descending score, then fictional loan_id for ties; at most five per replica and civil date in America/Lima",
+    "scope": "Hypothetical review of granted synthetic credits only, not real authorization, all applications, collections, or mandatory business work",
+    "capacity_status": "Owner estimate, not measured capacity",
+    "single_input_inference": "Threshold classification only. A single response does not establish admission to the daily queue."
+  },
+  "selection": {
+    "primary": "OOF F2 of held-out capped review actions on known labels, beta=2",
+    "tie_breakers": [
+      "Higher policy recall",
+      "Higher policy precision",
+      "Higher policy F1",
+      "Fewer total review actions including unknowns",
+      "Earlier configuration in declared tree-then-SVM grid",
+      "Threshold nearest 0.5",
+      "Lower threshold"
+    ],
+    "minimum_precision": null,
+    "rationale": "Declared concern about missed delays supports studying recall-weighted F2. Beta=2 and every tie-breaker are team research choices, not measured business error costs.",
+    "no_inherited_winner": "Neither SVM nor tree is predetermined. V4 and V5 results do not choose the V6 winner, threshold, seed, or grid.",
+    "global_winner": "Select only between the two U3 model-family winners using the same frozen rules; report both Dummy references regardless of whether ML beats them"
+  },
+  "reporting": {
+    "splits": [
+      "train",
+      "oof",
+      "final"
+    ],
+    "raw_metrics": [
+      "n",
+      "accuracy",
+      "balanced_accuracy",
+      "precision",
+      "recall",
+      "f1",
+      "f2",
+      "roc_auc",
+      "brier",
+      "confusion_matrix"
+    ],
+    "policy_metrics": [
+      "n",
+      "accuracy",
+      "precision",
+      "recall",
+      "f1",
+      "f2",
+      "confusion_matrix"
+    ],
+    "policy_counts": [
+      "reviews",
+      "reviews_known",
+      "reviews_unknown",
+      "daily_max",
+      "days_over_before_cap",
+      "capacity_respected"
+    ],
+    "positive_class": 1,
+    "confusion_order": [
+      0,
+      1
+    ],
+    "undefined_precision": "zero_division=0, explicitly disclosed",
+    "overfit": "Compare train and OOF before FINAL; retain regularization/depth/leaf limits. Never promote a model on test metrics.",
+    "interpretation": "Saved tree paths in original units, standardized SVM coefficients, and limitations from constant/duplicate features; no causal claims",
+    "errors": "At least three deterministic first-by-loan_id misclassifications from cached FINAL predictions, or all if fewer than three; never rerun test to choose explanatory cases",
+    "business_comparison": "Report review actions and FN/FP against review-all limited; two-minute time differences are hypothetical, not financial savings or owner-approved utility"
+  },
+  "freeze_before_final": [
+    "This protocol and all source/data/code hashes",
+    "Exact DEV manifest and saved fold plan",
+    "Complete OOF search, including unsuccessful candidates",
+    "Family winners and single selected U3 winner with thresholds",
+    "Preprocessing and all four refitted trusted model artifacts",
+    "Artifact manifests and runtime versions"
+  ],
+  "final_replica": {
+    "seed": 2026112603,
+    "prefix": "PND6F-R1-T"
+  },
+  "success_proposal": {
+    "technical": "Selected ML final policy F2 strictly exceeds both frozen Dummy policy F2 values, with capacity respected",
+    "failure": "If it does not, report the study as failing this proposal; do not iterate on the test",
+    "business": "A future authorized real pilot must measure review time and FN/FP consequences against a documented reference. No current savings or acceptable error cost is established."
+  },
+  "illustrative_input": {
+    "features": {
+      "completed_sales": 6,
+      "paid_credits": 6,
+      "paid_late": 1,
+      "pending_overdue": 0,
+      "pending_current": 0,
+      "outstanding": 0,
+      "utilization": 0,
+      "requested_ratio": 0.25,
+      "tenure_days": 60,
+      "punctuality_rate": 0.8333333333333334,
+      "overdue_rate": 0
+    },
+    "known_label": null,
+    "policy": "Illustrative fictional S/20 request on S/80 cap, no prior outstanding debt; not a real customer or test row. Check distinctness against DEV and FINAL; if duplicate, disclose and omit live inference rather than choose a favorable case."
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0"
+  },
+  "reproducibility": "Fresh outputs only, fixed seeds and declared versions; preserve all original V4/V5/V6 DEV sources. A repeated fixed protocol checks reproducibility, not a second independent validation.",
+  "current_action": "Freeze protocol and verify inputs only. No V6 fit, final generation, artifact promotion, deployment or production change is performed in this step.",
+  "limits": [
+    "Synthetic histories, 24 DEV example clients and repeated observations, not real validation",
+    "Owner review covers an intentional V5 sample, not all V6 rows",
+    "75/25 amount mixture, exact payment-time distribution, 20:00 strict cutoff, latent Beta, warmup and stationarity are team assumptions",
+    "Finite complete-payment plans do not estimate permanent loss",
+    "Only linked credit sales are modeled; cash sales are unmeasured",
+    "Granted-only analysis cannot estimate outcomes of rejected applications",
+    "Fold-specific OOF queues miss cross-fold capacity competition and are not a deployed full-day queue",
+    "Global source coherence, client consent, human review, real costs and public deployment are not certified"
+  ],
+  "revision_overrides": {
+    "version": "academic-owner-pending-v6",
+    "display_name": "V6 Final",
+    "revision_id": "v6-final-r1",
+    "declared_utc": "2026-11-16T15:41:59Z",
+    "authorized_user_request": "que se reetrene y que de los datos finales; me refiero a que sea v6 final",
+    "authorization_scope": "New synthetic research execution named V6 Final. Preserve prior V6 as history; no permission for commercial production or real-customer decisions.",
+    "relationship_to_previous_v6": "Prospective revision after prior V6 results were consulted. New seeds, clients and eligible-only training/evaluation; no claim that the study design was chosen before seeing earlier results.",
+    "development_replicas": [
+      {
+        "seed": 2026112601,
+        "prefix": "PND6F-R1-D1"
+      },
+      {
+        "seed": 2026112602,
+        "prefix": "PND6F-R1-D2"
+      }
+    ],
+    "final_replica": {
+      "seed": 2026112603,
+      "prefix": "PND6F-R1-T"
+    },
+    "cv": {
+      "outer_seed": 2026112604,
+      "inner_seed": 2026112605,
+      "folds": 3
+    },
+    "inherited_model_protocol_filename": "APF3_PENDING_V6_MODEL_PROTOCOL.json",
+    "inherited_model_protocol_sha256": "eb7fcd39f69be0115895cbb43b6d84e4488535646108bd6f21381d0fb1607923",
+    "source_sha256": {
+      "APF3_OWNER_ANCHORS_V4.json": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+      "APF3_OWNER_REVIEW_V5.json": "a72ea574fa2997d3477b0522c0044d590638957f0b5e553c31d97764df1a89a3",
+      "APF3_PENDING_V6_DATA_PROTOCOL.json": "5f3cea3798b73d31cf8aea54dc6bc45341777871988f7ef68686d34287811431"
+    },
+    "policy_sha256": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+    "runtime": {
+      "python": "3.12.14",
+      "sklearn": "1.9.1",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "joblib": "1.6.0",
+      "threadpoolctl": "3.7.0"
+    },
+    "no_reseed": true,
+    "policies": {
+      "block_any_pending_balance": true,
+      "require_paid_credit_history": true,
+      "unknown_history_requires_owner_review": true,
+      "debt_precedes_history": true,
+      "blocked_or_manual_excluded_from_model_metrics": true,
+      "initial_loans": "Simulated owner-authorized first credits stay in event history, but their evaluations never fit or score the model. Their later observed repayments may supply legitimate paid history.",
+      "as_of": "Only loans, sales and payments strictly before the application timestamp may affect features; no pending_at_cutoff or future outcomes enter routing.",
+      "supervised_population": "Granted study loans with confirmed zero prior balance and at least one fully repaid credit. Known outcomes only fit/calibrate/score supervised metrics; eligible unknowns compete only for queue capacity.",
+      "refusals": "Report pending blocks, owner-review referrals and any other simulator refusals separately. They are not predicted class zero/one, model true positives or evidence of model accuracy.",
+      "selection": "Retain original 12 tree and 6 SVM configurations, seven thresholds, F2 OOF capped-review primary criterion, tie-breakers and two Dummy baselines. No predetermined winning family or threshold.",
+      "fold_feasibility": "Exactly three grouped outer and inner folds with both labels in every subset; otherwise preserve failure and stop without another seed.",
+      "final": "Generate only after selection, model artifacts and hash freeze. One batch per frozen model on eligible FINAL cases. Never retune from this test; retain poor results or class-adequacy deviations.",
+      "capacity": "Five alerts/day and two minutes/case remain unmeasured hypotheses. Mandatory owner reviews are reported separately, not treated as capacity-free or included in the model-alert queue.",
+      "generator": "Unchanged frozen V6 simulator and assumptions; do not alter latent distributions, 75/25 amount mix, payment windows, warmup or approvals to improve metrics.",
+      "reporting": "Metrics are conditional on model eligibility in fresh synthetic clients, not all applications, real customers, commercial benefit or prospective calendar-time validation. Earlier V6 results are historical and not directly interchangeable."
+    },
+    "execution_policy": "Freeze runner/helper/policy/runtime/source hashes before DEV generation. Keep original V6 directories untouched. A repeat of these fixed seeds checks reproducibility only, not an independent second validation.",
+    "human_status": "PENDIENTE: review by four team members, rehearsal and academic submission; owner review is conditional, not predictive model approval"
+  }
+}

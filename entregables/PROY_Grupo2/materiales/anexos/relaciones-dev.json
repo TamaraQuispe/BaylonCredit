@@ -1,0 +1,23 @@
+{
+  "population": "DEV conocido elegible; post hoc tras congelamiento",
+  "n": 534,
+  "pearson_tenure_completed_sales": 0.6596835502787145,
+  "prior_late_groups": [
+    {
+      "prior_paid_late": false,
+      "n": 183,
+      "late": 9,
+      "on_time": 174,
+      "rate": 0.04918032786885246
+    },
+    {
+      "prior_paid_late": true,
+      "n": 351,
+      "late": 77,
+      "on_time": 274,
+      "rate": 0.21937321937321938
+    }
+  ],
+  "difference_percentage_points": 17.01928915043669,
+  "no_causal_or_independent_inference": true
+}

@@ -1,0 +1,89 @@
+{
+  "version": "owner-review-v5-1",
+  "source_status": "owner_responses_relayed_by_user_in_current_conversation",
+  "review_date": "2026-11-15",
+  "source_docx_sha256": "82d4c748b3403e8a3e45b4361b95e9da4ffaf0b0ca21e3a9ac4baedc6040f29b",
+  "source_docx_role": "Completed Rildo review of the intentional V5 sample; not signed, not an audit of all rows",
+  "base_anchors_sha256": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+  "v5_protocol_sha256": "5892958972ca96764d100d9833ab970f66c5214ad2f274f42b7b42c43ccf20c1",
+  "settlement_clarification_sha256": "63e0e57052fa31a93de3710a8bba69fadef95f0cb97e9de452fe7d281082ad7f",
+  "sample": {
+    "fiados_reviewed": 12,
+    "rejections_reviewed": 4,
+    "weeks_reviewed": 4,
+    "assumptions_reviewed": 3,
+    "fiados": [
+      {"id": "SET5-D1-L00046", "response": "Habitual"},
+      {"id": "SET5-D1-L00048", "response": "Habitual"},
+      {"id": "SET5-D1-L00045", "response": "Posible"},
+      {"id": "SET5-D1-L00049", "response": "Posible"},
+      {"id": "SET5-D1-L00047", "response": "Posible"},
+      {"id": "SET5-D1-L00060", "response": "Posible"},
+      {"id": "SET5-D1-L00058", "response": "Posible"},
+      {"id": "SET5-D1-L00092", "response": "Posible"},
+      {"id": "SET5-D1-L00315", "response": "Posible"},
+      {"id": "SET5-D1-L00316", "response": "Posible"},
+      {"id": "SET5-D2-L00104", "response": "Habitual"},
+      {"id": "SET5-D1-L00281", "response": "Posible"}
+    ],
+    "rejections": [
+      {"id": "SET5-D1-A00060", "response": "Habitual"},
+      {"id": "SET5-D1-A00077", "response": "Habitual"},
+      {"id": "SET5-D2-A00049", "response": "Habitual"},
+      {"id": "SET5-D2-A00061", "response": "Habitual"}
+    ],
+    "weeks": [
+      {"world": "SET5-D1", "week_start": "2026-04-20", "grants": 12, "grant_clients": 9, "response": "Habitual"},
+      {"world": "SET5-D1", "week_start": "2026-05-04", "grants": 11, "grant_clients": 8, "response": "Habitual"},
+      {"world": "SET5-D2", "week_start": "2026-04-13", "grants": 10, "grant_clients": 8, "response": "Posible"},
+      {"world": "SET5-D2", "week_start": "2026-04-20", "grants": 8, "grant_clients": 7, "response": "Posible"}
+    ],
+    "assumptions": [
+      {"id": "fixed_12_clients", "response": "no", "correction": "12 clients may stay as an example, but customers can vary week to week"},
+      {"id": "amounts_abonos_and_dates", "response": "posible", "correction": "Use more rounded amounts and varied payment hours"},
+      {"id": "weekly_variation_including_8_7", "response": "posible", "correction": "8-loan weeks are less common than 11- or 12-loan weeks"}
+    ]
+  },
+  "correction_verbatim": [
+    "Los montos me parecen razonables, pero algunos tienen cantidades de céntimos demasiado específicas. En mi negocio sería más común encontrar montos redondeados, como S/35.50 o S/36.00.",
+    "También cambiaría algunas horas de pago, porque los clientes no siempre vienen a la misma hora.",
+    "Mantendría los 12 clientes como un grupo de ejemplo, pero aclararía que en mi negocio los clientes pueden variar de una semana a otra.",
+    "Estos casos me parecen posibles. Solamente cambiaría algunos montos para que sean más redondeados.",
+    "También aclararía que los casos 9 y 10 todavía no pueden considerarse puntuales ni atrasados porque su fecha de vencimiento aún no había llegado al momento de la revisión.",
+    "Además, aunque un cliente se encuentre dentro del plazo acordado, no puede recibir otro fiado mientras tenga un saldo pendiente.",
+    "Lo único que corregiría es que no necesariamente tiene que ser una deuda vencida para que yo rechace una solicitud.",
+    "Por ejemplo, si un cliente me debe S/30 y acordamos que pagará el viernes, pero el miércoles viene a pedirme otro fiado, no se lo concedo.",
+    "Aunque todavía no haya llegado el viernes, sigue teniendo una deuda conmigo.",
+    "Tampoco basta con que pague una parte. Si de los S/30 solamente me paga S/20, todavía debe S/10 y no puede recibir otro fiado.",
+    "El cliente tiene que cancelar toda su deuda antes de que yo pueda considerar darle otro fiado."
+  ],
+  "additional_responses_verbatim": [
+    "Normalmente manejo montos en soles completos o terminados en 50 céntimos. Por ejemplo, si el monto es S/35.58, podría redondearlo a S/35.50 o S/36.00, dependiendo de lo que se haya acordado con el cliente. Sin embargo, si el total corresponde a los precios exactos de los productos, también puedo mantener ese importe.",
+    "Los clientes pueden pagar en diferentes momentos del día. Por lo general, sería normal que vengan entre las 8:00 a. m. y las 12:00 p. m., o durante la tarde, entre las 4:00 p. m. y las 8:00 p. m.\n\nNo todos pagan a la misma hora. Algunos vienen por la mañana, otros por la tarde y otros cuando salen de trabajar. Por eso, los horarios de pago pueden variar.",
+    "Sí, los clientes pueden cambiar de una semana a otra. No siempre son las mismas personas las que solicitan fiados.\n\nPor ejemplo, una semana puedo dar 12 fiados a 9 clientes diferentes y la siguiente 11 fiados a 8 clientes. Algunos pueden ser los mismos de la semana anterior y otros pueden ser diferentes.\n\nTambién hay clientes que regresan después de varios días o semanas. Sin embargo, si todavía tienen una deuda pendiente, primero deben cancelarla completamente antes de que pueda darles otro fiado."
+  ],
+  "confirmed_rules": {
+    "pending_balance": "Any positive remaining balance blocks a new credit evaluation, including debt not yet due",
+    "partial_payment_restores_eligibility": false,
+    "agreements_restore_eligibility": false,
+    "full_settlement_required": true,
+    "settlement_payment_must_be_observed_before_evaluation": true,
+    "after_settlement": "Eligibility for evaluation resumes, but granting is never automatic",
+    "amount_precision": "Whole soles or .50 céntimos are common; exact product-price totals may remain exact",
+    "payment_times": "Various times, normally 08:00-12:00 or 16:00-20:00",
+    "client_pool": "12 clients can be an example, not a real fixed population; customers can vary weekly",
+    "usual_week": "About 12 fiados to 9 different customers",
+    "late_payment": "Payment after the due date is late; grace does not make it punctual"
+  },
+  "not_confirmed": [
+    "Exact frequency or maximum of multi-week customer population",
+    "Absolute weekly minimum or maximum",
+    "Exact probability or distribution of rounded versus exact-price amounts",
+    "Exact distribution of payment times inside the two windows",
+    "Real predictive performance, model approval, or production authorization"
+  ],
+  "timing": "Received after the V5 development cohort was generated; use only through a new predeclared data protocol",
+  "not_customer_data": true,
+  "not_business_model_approval": true,
+  "not_training_dataset": true
+}

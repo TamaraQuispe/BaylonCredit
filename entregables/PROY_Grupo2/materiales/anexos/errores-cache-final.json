@@ -1,0 +1,104 @@
+{
+  "source": "experiment/final_cache_svm.json",
+  "source_sha256": "0631037a16c7819e750ef86c05cc9302ffc37864ea9f96e2be6f51c57c74bcde",
+  "selection": "Tres primeros errores por loan_id; sin nueva inferencia",
+  "cases": [
+    {
+      "case": {
+        "origen": "simulado",
+        "replica_id": "PND6F-R1-T",
+        "loan_id": "PND6F-R1-T-L00051",
+        "client_id": "PND6F-R1-T-C009",
+        "evaluated_at": "2026-04-15T09:00:00",
+        "actual": 1,
+        "probability": 0.08781869298232603,
+        "threshold": 0.1,
+        "predicted": 0,
+        "review": 0,
+        "features": {
+          "completed_sales": 4.0,
+          "paid_credits": 4.0,
+          "paid_late": 0.0,
+          "pending_overdue": 0.0,
+          "pending_current": 0.0,
+          "outstanding": 0.0,
+          "utilization": 0.0,
+          "requested_ratio": 0.3375,
+          "tenure_days": 115.0,
+          "punctuality_rate": 1.0,
+          "overdue_rate": 0.0
+        },
+        "raw_error": "FN",
+        "policy_error": "FN"
+      },
+      "hypothesis": "Cuatro creditos anteriores puntuales pueden aportar una senal insuficiente del proximo atraso. La representacion y aproximacion del modelo producen un score bajo el umbral; no se conoce la causa del atraso."
+    },
+    {
+      "case": {
+        "origen": "simulado",
+        "replica_id": "PND6F-R1-T",
+        "loan_id": "PND6F-R1-T-L00054",
+        "client_id": "PND6F-R1-T-C008",
+        "evaluated_at": "2026-04-16T09:00:00",
+        "actual": 0,
+        "probability": 0.22631908398134237,
+        "threshold": 0.1,
+        "predicted": 1,
+        "review": 1,
+        "features": {
+          "completed_sales": 3.0,
+          "paid_credits": 3.0,
+          "paid_late": 1.0,
+          "pending_overdue": 0.0,
+          "pending_current": 0.0,
+          "outstanding": 0.0,
+          "utilization": 0.0,
+          "requested_ratio": 0.2625,
+          "tenure_days": 39.0,
+          "punctuality_rate": 0.6666666666666666,
+          "overdue_rate": 0.0
+        },
+        "raw_error": "FP",
+        "policy_error": "FP"
+      },
+      "hypothesis": "Un atraso entre tres creditos anteriores puede inducir sobrealerta en esta representacion; el score supera el umbral aunque el desenlace es puntual."
+    },
+    {
+      "case": {
+        "origen": "simulado",
+        "replica_id": "PND6F-R1-T",
+        "loan_id": "PND6F-R1-T-L00058",
+        "client_id": "PND6F-R1-T-C002",
+        "evaluated_at": "2026-04-21T09:00:00",
+        "actual": 1,
+        "probability": 0.08798598130897806,
+        "threshold": 0.1,
+        "predicted": 0,
+        "review": 0,
+        "features": {
+          "completed_sales": 4.0,
+          "paid_credits": 4.0,
+          "paid_late": 0.0,
+          "pending_overdue": 0.0,
+          "pending_current": 0.0,
+          "outstanding": 0.0,
+          "utilization": 0.0,
+          "requested_ratio": 0.157875,
+          "tenure_days": 191.0,
+          "punctuality_rate": 1.0,
+          "overdue_rate": 0.0
+        },
+        "raw_error": "FN",
+        "policy_error": "FN"
+      },
+      "hypothesis": "Cuatro creditos anteriores puntuales tampoco garantizan puntualidad posterior; historial escaso y aproximacion del modelo son hipotesis de senal insuficiente, no causas demostradas."
+    }
+  ],
+  "existing_pdf_sha256": "f45e719ee1c069bcce7779bf2def27ad621571360a63380e42e40694f8fff405",
+  "existing_pdf_pages": 22,
+  "already_cited": {
+    "PND6F-R1-T-L00051": true,
+    "PND6F-R1-T-L00054": true,
+    "PND6F-R1-T-L00058": true
+  }
+}

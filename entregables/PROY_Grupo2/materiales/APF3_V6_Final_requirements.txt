@@ -1,0 +1,14 @@
+# No ejecutar pip -r en el kernel global de Colab: el .py crea su propio runtime.
+# Runtime ML y EDA: Python == 3.12.14 (gestionado por uv en directorio temporal).
+scikit-learn==1.9.1
+numpy==2.5.3
+scipy==1.18.1
+joblib==1.6.0
+threadpoolctl==3.7.0
+SQLAlchemy==2.0.54
+# EDA obligatoria en el mismo runtime aislado; no usa matplotlib del kernel padre:
+matplotlib==3.11.2
+# Solo bootstrap: uv se instala por pip --target fuera del venv ML/EDA y del kernel:
+uv>=0.9,<1
+# Las seis dependencias ML directas estan fijadas; no se afirma lock transitivo
+# completo ni equivalencia binaria entre plataformas. Diferencias se reportan.

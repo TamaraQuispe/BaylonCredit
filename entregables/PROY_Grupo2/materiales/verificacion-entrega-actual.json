@@ -1,0 +1,29 @@
+{
+  "scope": "Integridad de la carpeta actual y cobertura de archivos; no nueva validacion predictiva",
+  "display_name": "V6 Final",
+  "revision_id": "v6-final-r1",
+  "checks_passed": true,
+  "pdf_pages": 22,
+  "pdf_body_pages": 15,
+  "slides": 13,
+  "document_content_sha256": {
+    "informe/APF3_TD_Grupo2_ML_Innovacion.pdf": "f45e719ee1c069bcce7779bf2def27ad621571360a63380e42e40694f8fff405",
+    "sustentacion/APF3_TD_Grupo2_ML_Innovacion.pptx": "f31ca299ce1f799f2a69666bd223e2f663aa9446685d75dffcd9e32f0034316e"
+  },
+  "original_pdf_and_ppt_content_unchanged": true,
+  "frozen_experiment_and_data_unchanged": true,
+  "script_notebook_syntax_and_source_match": true,
+  "local_replay_evidence_hashes_checked": true,
+  "local_replay_has_reported_floating_point_differences": true,
+  "annex_outputs_and_sources": "Ver anotaciones de preservacion en manifiesto-complemento.json",
+  "human_review_project": "Realizada por los cuatro integrantes segun confirmacion del grupo",
+  "new_supplement_review": "Requiere cotejo final del grupo",
+  "not_verified": [
+    "Cuenta/ejecucion en Google Colab",
+    "Ensayo de 12 minutos",
+    "Participacion durante sustentacion",
+    "Carga y plazo en Aula Virtual"
+  ],
+  "historical_record": "verificacion-v6-final.json conserva el estado de una entrega anterior, no certifica los documentos actuales",
+  "recorded_utc": "2026-11-16T23:05:20.955500+00:00"
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "version": "academic-owner-pending-v6",
+    "revision_id": "v6-final-r1",
+    "display_name": "V6 Final",
+    "origen": "simulado",
+    "research_only": true,
+    "business_approval": false,
+    "decision": "blocked_pending_balance",
+    "reason": "Existe saldo pendiente actual o vencido, incluso parcial; no se evalua un nuevo credito.",
+    "requires_manual_review": false,
+    "features": {
+      "completed_sales": 6,
+      "paid_credits": 6,
+      "paid_late": 1,
+      "pending_overdue": 0,
+      "pending_current": 1,
+      "outstanding": 30,
+      "utilization": 0,
+      "requested_ratio": 0.25,
+      "tenure_days": 60,
+      "punctuality_rate": 0.8333333333333334,
+      "overdue_rate": 0
+    },
+    "model_called": false,
+    "probability": null,
+    "predicted": null,
+    "review_policy_applied": false
+  },
+  {
+    "version": "academic-owner-pending-v6",
+    "revision_id": "v6-final-r1",
+    "display_name": "V6 Final",
+    "origen": "simulado",
+    "research_only": true,
+    "business_approval": false,
+    "decision": "requires_owner_review",
+    "reason": "No hay creditos totalmente pagados confirmados; requiere revision del propietario.",
+    "requires_manual_review": true,
+    "features": {
+      "completed_sales": 0,
+      "paid_credits": 0,
+      "paid_late": 0,
+      "pending_overdue": 0,
+      "pending_current": 0,
+      "outstanding": 0,
+      "utilization": 0,
+      "requested_ratio": 0.25,
+      "tenure_days": 60,
+      "punctuality_rate": 0,
+      "overdue_rate": 0
+    },
+    "model_called": false,
+    "probability": null,
+    "predicted": null,
+    "review_policy_applied": false
+  }
+]

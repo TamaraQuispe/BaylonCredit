@@ -1,0 +1,28 @@
+{
+  "version": "academic-owner-pending-v6",
+  "revision_id": "v6-final-r1",
+  "display_name": "V6 Final",
+  "origen": "simulado",
+  "research_only": true,
+  "business_approval": false,
+  "files": {
+    "APF3_OWNER_ANCHORS_V4.json": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+    "APF3_OWNER_REVIEW_V5.json": "a72ea574fa2997d3477b0522c0044d590638957f0b5e553c31d97764df1a89a3",
+    "APF3_PENDING_V6_DATA_PROTOCOL.json": "5f3cea3798b73d31cf8aea54dc6bc45341777871988f7ef68686d34287811431",
+    "APF3_PENDING_V6_MODEL_PROTOCOL.json": "eb7fcd39f69be0115895cbb43b6d84e4488535646108bd6f21381d0fb1607923",
+    "PND6F-R1-D1_transactions.json": "302e6ad5cc3c5d71b425aa8710dd1a2db6c0abc62ec7d6e6405bb3a2e306126a",
+    "PND6F-R1-D2_transactions.json": "828315bab2ee9c13a6e44e58119b422efc52f248f4c714c7bfed6f1d06870f3b",
+    "development_audits.json": "3f13d870a33f5b8b69c4efb37833c4bf117c502583bbd14ef33e7814b56dd2bf",
+    "development_eligible.csv": "33d21dcc4d4b55fc7d313491dc5314f26f79e0a0b5e1da87da15ccb589286e88",
+    "development_known.csv": "4099ddba545eea26681e133c84cbb705488cfe1922c7085ca4ac71ceefafc544",
+    "development_known_rows.json": "2c0e34be64982f840bcf815e804c74989fbf4632f10d1896ffaa65d33c82b49b",
+    "development_raw.csv": "ba68753e2b27987cee01e50ad7c40c50c7effa20bd3f0b8582d51327ae82dedb",
+    "development_routing_ledger.json": "8e59e414d6a6025874d8d9e107049f1a8bc4706385d4e8493b761472c0367b5f",
+    "development_study_rows.json": "d163f60b774274374ec05c23723a42bed19268f3ad4c059e67a3120c15aeb170",
+    "development_summary.json": "4b2768ef394f8a0dff588f91c7df4a9be228ca9152a053e3e6223acaad0466da",
+    "effective_protocol.json": "f4e6fb30c748de9ca6a755c73815bcc91d52c94f5689cce9263b82d772c02c96",
+    "planned_folds.json": "5e720c2ad7e078a581ae3a3ad09a4c53c4638e15dfebc0cd33e81229683ae38d",
+    "preparation_manifest.json": "2a36e88fa7b0fa50d735e20a5ce40081bfe763208c44f3d14619729620442fd0",
+    "revision_protocol.json": "7e489955792aab975c8ff14a95a77e70095a1c8a2ed1682847851773b8922541"
+  }
+}

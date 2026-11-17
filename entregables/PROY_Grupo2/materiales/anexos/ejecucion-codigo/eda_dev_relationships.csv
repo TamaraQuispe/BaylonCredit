@@ -1,0 +1,7 @@
+relationship,group,count,denominator,mean_completed_sales,late_count,late_rate
+tenure_vs_completed_sales,"[0,90)",47,534,5.9787234042553195,,
+tenure_vs_completed_sales,"[90,180)",156,534,11.801282051282051,,
+tenure_vs_completed_sales,"[180,365)",329,534,16.896656534954406,,
+tenure_vs_completed_sales,"[365,inf)",2,534,25.0,,
+prior_paid_late_vs_observed_late,no,183,183,,9,0.04918032786885246
+prior_paid_late_vs_observed_late,yes,351,351,,77,0.21937321937321938

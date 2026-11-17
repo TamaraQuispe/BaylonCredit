@@ -5,6 +5,7 @@ pruebas son ficticios. No son historial real, aceptación humana ni una demostra
 de reducción de pérdidas.
 
 - [APF3 V6 Final: paquete de entrega](APF3_Grupo2_V6_Final.zip).
+- [Ultimos materiales APF3 y guia de traspaso a PROY](PROY_Grupo2/README.md).
 - [APF3 V6 Final: carpeta de datos y diccionario](APF3_Grupo2_V6_Final/datos/README.md).
 - [APF3 V6 Final: resultados y alcance](../docs/APF3_RESULTADOS_V6_FINAL.md).
 - [APF3 CV3: informe, presentación, código y modelos históricos](APF3_CV3/README.md).

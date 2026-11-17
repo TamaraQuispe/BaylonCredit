@@ -1,3 +1,4 @@
 # Preserve frozen evidence bytes and their recorded SHA-256 values on every platform.
 entregables/** -text
+entregables/**/*.pdf binary
 entregables/**/*.csv whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,2 @@
+# Solo para verificar la estructura y paginas del PDF; no cambia el runtime ML.
+pypdf==7.1.0

@@ -1,0 +1,96 @@
+{
+  "version": "academic-owner-pending-v6-data",
+  "stage": "data_revision_only_no_models_or_final_test_authorized_by_this_protocol",
+  "scope": "Synthetic data aligned with the latest owner-relayed review; not real predictive validation or production approval",
+  "target": "late_payment",
+  "base_anchors": "APF3_OWNER_ANCHORS_V4.json",
+  "latest_source_review": "APF3_OWNER_REVIEW_V5.json",
+  "previous_rules_preserved": [
+    "APF3_OWNER_SETTLEMENT_CLARIFICATION.json as historical overdue evidence",
+    "APF3_OWNER_SCALE_CLARIFICATION.json",
+    "APF3_SETTLED_V5_DATA_PROTOCOL.json as historical data revision"
+  ],
+  "amount_policy": {
+    "source": "Owner review: whole soles or .50 are normal examples; exact product-price totals may be kept",
+    "generation": "Draw the inherited truncated lognormal anchor, then with an explicit scenario probability of 0.75 quantize to nearest 0.50 with Decimal ROUND_HALF_UP; otherwise retain the exact two-decimal amount",
+    "exact_price_scenario_probability": 0.25,
+    "bounds_pen": [5, 50],
+    "cap_pen": 80,
+    "mean_pen": "Not owner-measured; typical S/20 remains a log-location assumption, not a proven mean",
+    "certainty": "The 0.75/0.25 split is a scenario assumption, not owner-declared frequencies"
+  },
+  "payment_time_policy": {
+    "timezone": "America/Lima",
+    "windows": ["08:00-12:00", "16:00-20:00"],
+    "window_endpoint_inclusive": true,
+    "future_or_simultaneous_payments": "Never used as settled before evaluation",
+    "due_cutoff": "20:00 on the contractual due date; pending balance after that is late",
+    "grace_days": 3,
+    "grace_relabels_late": false
+  },
+  "client_pool_policy": {
+    "example_replica_size": 12,
+    "real_fixed_population": false,
+    "weekly_distinct_recipients": "About 9 and varying week to week",
+    "source_meaning": "Customers can change week to week; 12 is a finite example roster, not population knowledge",
+    "rotation": "Inherited 3-group rotation with 9 weekly scheduled examples; never pooled as simultaneous branches"
+  },
+  "pending_balance_policy": {
+    "applies_to": "Any positive remaining principal, including current debt not yet due",
+    "new_credit_while_pending": false,
+    "partial_payment_restores_eligibility": false,
+    "agreement_restores_eligibility": false,
+    "full_settlement_must_be_observed_before_evaluation": true,
+    "after_settlement": "Eligibility for evaluation resumes; no automatic approval",
+    "simultaneous_payment_clears": false,
+    "historical_overdue_rule_superseded": "Yes, for eligibility scope; original overdue clarification retained as source history"
+  },
+  "simulation": {
+    "population_clients_per_replica": 12,
+    "population_interpretation": "Finite example roster per history, not a real fixed population",
+    "warmup_weeks": 4,
+    "study_start": "2026-04-13",
+    "study_full_weeks": 24,
+    "study_trailing_days": 3,
+    "observed_on": "2026-09-30",
+    "timezone": "America/Lima",
+    "registration_age_range_days": [0, 180],
+    "schedule": "Rotate an absent group of 3 among 12 example clients each week; the inherited calendar is a scenario assumption, not a measurement of real traffic",
+    "amount_distribution": "Inherited truncated lognormal with S/20 log-location, then the amount_policy above",
+    "amount_log_sigma": 0.45,
+    "exact_price_scenario_probability": 0.25,
+    "latent_lateness": "Inherited Beta heterogeneity, an explicit unmeasured hypothesis",
+    "latent_beta_concentration": 3.0,
+    "partial_payment_probability": "10/48, an assumption from the owner-reviewed denominator",
+    "partial_payment_fraction": 0.5,
+    "partial_before_due_probability_when_late": 0.5,
+    "late_delay_distribution": "Inherited truncated lognormal rounded to integers 1..15; shape unmeasured",
+    "late_delay_log_sigma": 0.55,
+    "payment_time_windows": ["08:00-12:00", "16:00-20:00"],
+    "due_cutoff": "20:00",
+    "payments": "Every generated credit has a planned complete payment possibly after cutoff; permanent loss rate unknown and not invented",
+    "sales": "Only linked granted-credit sales are modeled; cash-sale volume not quantified",
+    "unknowns": "Population, distribution shapes, warmup length, stationarity, time distributions, and exact weekly frequencies remain assumptions"
+  },
+  "development_candidates": [
+    {"seed": 2026111701, "prefix": "PND6-D1"},
+    {"seed": 2026111702, "prefix": "PND6-D2"}
+  ],
+  "audit_before_any_model": [
+    "No granted credit has any pending balance at evaluation, including current debt",
+    "No partial payment or agreement bypasses the pending-balance block",
+    "Settlement payments are observed strictly before evaluation; simultaneous timestamps do not clear",
+    "Snapshots contain observed events only and no future plans",
+    "Amounts respect 5..50 PEN, whole/.50 amounts are an explicit scenario policy, and exposure is at most 80 PEN",
+    "Payment times fall in 08:00-12:00 or 16:00-20:00; payments after the due date are late",
+    "Requests and grants are reported separately by complete week",
+    "All development candidates report losses, scale deviations, and unknown labels even if unfavorable",
+    "No reseeding, forcing approvals, labels, distribution shapes, or payment schedules to improve metrics"
+  ],
+  "scale_acceptance": "Owner confirms 12/9 is usual but variable. V5 review showed 8/7 possible; frequencies remain unmeasured. No numerical tolerance is predeclared as owner-confirmed.",
+  "selection_protocol": null,
+  "final_seed": null,
+  "final_dataset": null,
+  "models_authorized": false,
+  "publication": "Local data revision only; no production changes, no deployment, no replacement of frozen evidence"
+}

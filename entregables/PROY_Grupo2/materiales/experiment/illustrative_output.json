@@ -1,0 +1,31 @@
+{
+  "version": "academic-owner-pending-v6",
+  "revision_id": "v6-final-r1",
+  "display_name": "V6 Final",
+  "origen": "simulado",
+  "research_only": true,
+  "business_approval": false,
+  "features": {
+    "completed_sales": 6,
+    "paid_credits": 6,
+    "paid_late": 1,
+    "pending_overdue": 0,
+    "pending_current": 0,
+    "outstanding": 0,
+    "utilization": 0,
+    "requested_ratio": 0.25,
+    "tenure_days": 60,
+    "punctuality_rate": 0.8333333333333334,
+    "overdue_rate": 0
+  },
+  "family": "svm",
+  "model_called": true,
+  "probability": 0.15310676521820216,
+  "threshold": 0.1,
+  "predicted": 1,
+  "known_label": null,
+  "illustrative_only": true,
+  "review_policy_applied": false,
+  "distinctness_pass": true,
+  "requested_amount_pen": 20
+}

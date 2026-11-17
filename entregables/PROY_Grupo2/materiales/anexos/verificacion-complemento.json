@@ -1,0 +1,37 @@
+{
+  "checked_at_utc": "2026-11-16T22:56:22.694227+00:00",
+  "protected_hashes_unchanged": true,
+  "accepted_document_aliases": [
+    {
+      "original": "informe/APF3_TD_Grupo2_ML_Innovacion (4).pdf",
+      "canonical": "informe/APF3_TD_Grupo2_ML_Innovacion.pdf",
+      "sha256": "f45e719ee1c069bcce7779bf2def27ad621571360a63380e42e40694f8fff405"
+    },
+    {
+      "original": "sustentacion/APF3_Sustentacion_Grupo2_.pptx",
+      "canonical": "sustentacion/APF3_TD_Grupo2_ML_Innovacion.pptx",
+      "sha256": "f31ca299ce1f799f2a69666bd223e2f663aa9446685d75dffcd9e32f0034316e"
+    }
+  ],
+  "dev_n": 534,
+  "class_counts": {
+    "0": 448,
+    "1": 86
+  },
+  "statistics_rows": 12,
+  "graphs": 3,
+  "gate_checks_passed": 7,
+  "technical_success_from_saved_metrics": true,
+  "existing_pdf_cases_confirmed": {
+    "PND6F-R1-T-L00051": true,
+    "PND6F-R1-T-L00054": true,
+    "PND6F-R1-T-L00058": true
+  },
+  "existing_pdf_pages": 22,
+  "standalone_pdf_pages": 6,
+  "standalone_pdf_text_checks": true,
+  "external_accounts_checked": false,
+  "full_training_executed": false,
+  "imports_ml_or_joblib": false,
+  "no_new_final_inference": true
+}

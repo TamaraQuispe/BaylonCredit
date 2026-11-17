@@ -1,0 +1,7 @@
+{
+  "decision": "eligible; frozen class 1, threshold 0.1",
+  "executed_during_finalization": false,
+  "illustrative_only": true,
+  "model_called_expected": true,
+  "note": "Manual source example, not a cohort row or newly executed inference"
+}

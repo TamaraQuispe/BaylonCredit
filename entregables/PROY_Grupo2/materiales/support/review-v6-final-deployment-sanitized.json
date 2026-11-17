@@ -1,0 +1,80 @@
+{
+  "credentials_or_tokens_recorded": false,
+  "display_name": "V6 Final",
+  "illustrative_probability_comparison": {
+    "abs_tol": 1e-12,
+    "absolute_delta": 1.7208456881689926e-15,
+    "api_hex": "0x1.39900a2b44a6cp-3",
+    "api_localhost_public_and_browser": 0.15310676521820044,
+    "authorization": "Explicit follow-up authorization: abs_tol=1e-12, rel_tol=0, illustrative probability only",
+    "exact_numeric_match": false,
+    "frozen": 0.15310676521820216,
+    "frozen_hex": "0x1.39900a2b44aaap-3",
+    "frozen_output_or_trained_model_rewritten": false,
+    "limitation": "Illustrative inference differs at floating-point roundoff scale across execution kernels; it is numerically equivalent under the authorized tolerance, not byte-exact numeric inference. No tolerance applies to model bytes, features, labels, routes, threshold, revision, metrics or hashes.",
+    "predicted_class_exact": 1,
+    "rel_tol": 0,
+    "threshold_exact": 0.1,
+    "within_tolerance": true
+  },
+  "observations": [
+    "Initial exact-score preflight failure retained above; resolved only by explicit authorization of an illustrative-probability tolerance, not by changing model, frozen output or application source.",
+    "First public browser attempt received transient HTTP 503 responses for lab summary/cases and business GET requests. A subsequent run that waited for navigation requests to settle passed without service restart or configuration changes. Cause not established; this is a limited technical verification, not a sustained-availability guarantee."
+  ],
+  "promotion": {
+    "all_four_families_raw_and_policy_metrics_exact_against_frozen_report": true,
+    "api_verified_utc": "2026-11-16T16:33:07.486560Z",
+    "cases": {
+      "illustrative-v6": {
+        "decision": "model_review_candidate",
+        "model_called": true,
+        "prediction": 1,
+        "probability": 0.15310676521820044,
+        "threshold": 0.1
+      },
+      "no-history-v6": {
+        "decision": "requires_owner_review",
+        "model_called": false,
+        "prediction": null,
+        "probability": null,
+        "threshold": null
+      },
+      "pending-balance-v6": {
+        "decision": "blocked_pending_balance",
+        "model_called": false,
+        "prediction": null,
+        "probability": null,
+        "threshold": null
+      }
+    },
+    "final_summary": {
+      "development_clients": 24,
+      "development_eligible_rows": 541,
+      "development_oof_policy_f2": 0.5523672883787661,
+      "development_unknown": 7,
+      "display_name": "V6 Final",
+      "final_blocked_pending_balance": 15,
+      "final_clients": 12,
+      "final_labeled_rows": 275,
+      "final_model_eligible": 277,
+      "final_study_attempts": 292,
+      "final_unknown": 2,
+      "revision_id": "v6-final-r1",
+      "selected_model": "svm",
+      "svm_final_raw_f2": 0.6060606060606061,
+      "threshold": 0.1,
+      "training_scope": "eligible_known_only"
+    },
+    "model_bytes_features_threshold_class_revision_metrics_exact": true,
+    "scope": "Public synthetic academic demo only; no production or operational credit-policy deployment",
+    "status": "passed"
+  },
+  "public_demo_updated": true,
+  "reason": "Promoted after explicit authorization of abs_tol=1e-12, rel_tol=0 for illustrative probability only; exact artifact, feature, class, threshold, revision and metric checks preserved.",
+  "revision_id": "v6-final-r1",
+  "sanitization": "Whitelist; no commands, host paths, credentials or database fingerprints",
+  "source_record_sha256": "16c3e75b13a1a2e230468a0c53588eb364cbea3bdb7faf33623ded21fa114e51",
+  "status": "deployed_and_publicly_verified",
+  "url": "https://demo-credify.168-75-71-113.sslip.io/laboratorio-academico/v6",
+  "version": "academic-owner-pending-v6"
+}

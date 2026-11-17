@@ -1,0 +1,30 @@
+{
+  "freeze_unchanged": true,
+  "development_unchanged": true,
+  "clients_disjoint": true,
+  "final_generation_calls": 1,
+  "final_batch_calls": {
+    "tree": {
+      "batch_calls": 1,
+      "rows_scored": 277,
+      "unknown_rows_scored": 2
+    },
+    "svm": {
+      "batch_calls": 1,
+      "rows_scored": 277,
+      "unknown_rows_scored": 2
+    },
+    "most_frequent": {
+      "batch_calls": 1,
+      "rows_scored": 277,
+      "unknown_rows_scored": 2
+    },
+    "constant_1": {
+      "batch_calls": 1,
+      "rows_scored": 277,
+      "unknown_rows_scored": 2
+    }
+  },
+  "capacity_respected": true,
+  "no_reseed": true
+}

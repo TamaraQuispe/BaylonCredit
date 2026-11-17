@@ -1,0 +1,326 @@
+{
+  "version": "academic-owner-pending-v6",
+  "revision_id": "v6-final-r1",
+  "display_name": "V6 Final",
+  "origen": "simulado",
+  "research_only": true,
+  "business_approval": false,
+  "protocol_sha256": "7e489955792aab975c8ff14a95a77e70095a1c8a2ed1682847851773b8922541",
+  "source_sha256": {
+    "APF3_OWNER_ANCHORS_V4.json": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+    "APF3_OWNER_REVIEW_V5.json": "a72ea574fa2997d3477b0522c0044d590638957f0b5e553c31d97764df1a89a3",
+    "APF3_PENDING_V6_DATA_PROTOCOL.json": "5f3cea3798b73d31cf8aea54dc6bc45341777871988f7ef68686d34287811431",
+    "APF3_PENDING_V6_MODEL_PROTOCOL.json": "eb7fcd39f69be0115895cbb43b6d84e4488535646108bd6f21381d0fb1607923"
+  },
+  "code_sha256": {
+    "/revision/academic_credit_pending_v6_final.py": "eac29527d158918b21c4a9bd88e447913ed113e902ce6f050e3246dfde2ac034",
+    "/revision/policy.py": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+    "/app/scripts/academic_credit_pending_v6.py": "60f0ed75e2dec6175232776e8820369e53baf1944819d272f3bcef484e0aae6d",
+    "/app/scripts/freeze_pending_v6_model_protocol.py": "6e01d57a41fb9007a84ec4e219c60daacb74e8bd52294bb2e5cad89a11d69f7c",
+    "/app/scripts/audit_pending_v6_development.py": "237b7334b1c4b241799dee2b5abed4253cd64774e5d2262cb9942d25e2409969",
+    "/app/scripts/academic_credit_aligned_v4.py": "517290f1ce71fd1b6ac0dad93c604e0cabede4839b9bc40373b51f67f47afffb",
+    "/app/scripts/academic_credit_grouped_cv.py": "9ad30618093d5e066e8b3f9dcc37344bb44d73bd920c86e460e352840b0a969a",
+    "/app/scripts/prepare_pending_v6_data.py": "f718efd85668df2c34280787b01e1f5cbf67d26fa00885acf2dacbdf39b728d0",
+    "/app/app/ml/owner_pending_synthetic.py": "1f122cea1fec04d416e31c62d36dea8882ff2b55b3956fa2969637776dca3e28",
+    "/app/app/ml/owner_aligned_synthetic.py": "9fdb39dbcf33d507dc42876e53496841f79ec8c71a309ffbc8cc3b3224560a92",
+    "/app/app/ml/synthetic.py": "b1c96b9a0a8135b74bf7d7115d0b08adbbd917e2bf7df01e9382c6ab91d29e78",
+    "/app/app/ml/features.py": "ec22f6675b9eab61749a86a0ae613781503fab3905e80da08c73f7b8f568fcc1",
+    "/app/app/ml/outcomes.py": "c385d1c91af185f305a7fc0429e0c937f5dc11df3ac5af515d810ce751ba59fc"
+  },
+  "policy_sha256": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+  "runtime": {
+    "python": "3.12.14",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0"
+  },
+  "development_manifest_sha256": "e2e654b57c7ec7173d7098fd52f84ec443bf0d274bbb2a5799463161997704cb",
+  "source_anchors": {
+    "version": "owner-anchors-v4",
+    "source_status": "owner_declared_confirmed_by_user",
+    "declared_consultation_date": "2026-10-08",
+    "reference_period": [
+      "2026-09-01",
+      "2026-09-30"
+    ],
+    "source_quality": "Recall and partial notebook review, approximate and not independently audited",
+    "source_docx_sha256": "45bc22a10ad5dccf323708b8aeabb780d8de4629ff5087cca2582c7dd055819f",
+    "authoritative_form": "APF3_Ficha_Propietario_Baylon.docx, version declaring Rildo as respondent",
+    "source_policy": "Use only this owner declaration and the user's denominator clarification. The earlier wholly hypothetical completed form is excluded as evidence or calibration input.",
+    "reviewed_annotations": 48,
+    "unknown_included": 3,
+    "evaluable": 45,
+    "late": 8,
+    "partial_payment_annotations": 10,
+    "partial_payment_denominator": 48,
+    "approximate_loans_per_week": 12,
+    "approximate_distinct_clients_per_week": 9,
+    "usual_return_days": 7,
+    "return_days_range": [
+      3,
+      14
+    ],
+    "typical_amount_estimate_pen": 20,
+    "loan_amount_range_pen": [
+      5,
+      50
+    ],
+    "client_cap_pen": 80,
+    "contract_term_days": 1,
+    "approximate_close_time": "20:00",
+    "grace_days": 3,
+    "usual_late_delay_days": 4,
+    "late_delay_range_days": [
+      1,
+      15
+    ],
+    "overdue_grant_condition": "Prior abono or payment agreement with owner review; exceptions not quantified",
+    "initial_amount_without_history": null,
+    "daily_review_capacity_estimate": 5,
+    "minutes_per_review_estimate": 2,
+    "capacity_measured": false,
+    "business_recall_goal": null,
+    "not_a_training_dataset": true,
+    "privacy": "Aggregate source parameters only; no customer identities, signatures or real snapshots"
+  },
+  "source_review": {
+    "version": "owner-review-v5-1",
+    "source_status": "owner_responses_relayed_by_user_in_current_conversation",
+    "review_date": "2026-11-15",
+    "source_docx_sha256": "82d4c748b3403e8a3e45b4361b95e9da4ffaf0b0ca21e3a9ac4baedc6040f29b",
+    "source_docx_role": "Completed Rildo review of the intentional V5 sample; not signed, not an audit of all rows",
+    "base_anchors_sha256": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+    "v5_protocol_sha256": "5892958972ca96764d100d9833ab970f66c5214ad2f274f42b7b42c43ccf20c1",
+    "settlement_clarification_sha256": "63e0e57052fa31a93de3710a8bba69fadef95f0cb97e9de452fe7d281082ad7f",
+    "sample": {
+      "fiados_reviewed": 12,
+      "rejections_reviewed": 4,
+      "weeks_reviewed": 4,
+      "assumptions_reviewed": 3,
+      "fiados": [
+        {
+          "id": "SET5-D1-L00046",
+          "response": "Habitual"
+        },
+        {
+          "id": "SET5-D1-L00048",
+          "response": "Habitual"
+        },
+        {
+          "id": "SET5-D1-L00045",
+          "response": "Posible"
+        },
+        {
+          "id": "SET5-D1-L00049",
+          "response": "Posible"
+        },
+        {
+          "id": "SET5-D1-L00047",
+          "response": "Posible"
+        },
+        {
+          "id": "SET5-D1-L00060",
+          "response": "Posible"
+        },
+        {
+          "id": "SET5-D1-L00058",
+          "response": "Posible"
+        },
+        {
+          "id": "SET5-D1-L00092",
+          "response": "Posible"
+        },
+        {
+          "id": "SET5-D1-L00315",
+          "response": "Posible"
+        },
+        {
+          "id": "SET5-D1-L00316",
+          "response": "Posible"
+        },
+        {
+          "id": "SET5-D2-L00104",
+          "response": "Habitual"
+        },
+        {
+          "id": "SET5-D1-L00281",
+          "response": "Posible"
+        }
+      ],
+      "rejections": [
+        {
+          "id": "SET5-D1-A00060",
+          "response": "Habitual"
+        },
+        {
+          "id": "SET5-D1-A00077",
+          "response": "Habitual"
+        },
+        {
+          "id": "SET5-D2-A00049",
+          "response": "Habitual"
+        },
+        {
+          "id": "SET5-D2-A00061",
+          "response": "Habitual"
+        }
+      ],
+      "weeks": [
+        {
+          "world": "SET5-D1",
+          "week_start": "2026-04-20",
+          "grants": 12,
+          "grant_clients": 9,
+          "response": "Habitual"
+        },
+        {
+          "world": "SET5-D1",
+          "week_start": "2026-05-04",
+          "grants": 11,
+          "grant_clients": 8,
+          "response": "Habitual"
+        },
+        {
+          "world": "SET5-D2",
+          "week_start": "2026-04-13",
+          "grants": 10,
+          "grant_clients": 8,
+          "response": "Posible"
+        },
+        {
+          "world": "SET5-D2",
+          "week_start": "2026-04-20",
+          "grants": 8,
+          "grant_clients": 7,
+          "response": "Posible"
+        }
+      ],
+      "assumptions": [
+        {
+          "id": "fixed_12_clients",
+          "response": "no",
+          "correction": "12 clients may stay as an example, but customers can vary week to week"
+        },
+        {
+          "id": "amounts_abonos_and_dates",
+          "response": "posible",
+          "correction": "Use more rounded amounts and varied payment hours"
+        },
+        {
+          "id": "weekly_variation_including_8_7",
+          "response": "posible",
+          "correction": "8-loan weeks are less common than 11- or 12-loan weeks"
+        }
+      ]
+    },
+    "correction_verbatim": [
+      "Los montos me parecen razonables, pero algunos tienen cantidades de c\u00e9ntimos demasiado espec\u00edficas. En mi negocio ser\u00eda m\u00e1s com\u00fan encontrar montos redondeados, como S/35.50 o S/36.00.",
+      "Tambi\u00e9n cambiar\u00eda algunas horas de pago, porque los clientes no siempre vienen a la misma hora.",
+      "Mantendr\u00eda los 12 clientes como un grupo de ejemplo, pero aclarar\u00eda que en mi negocio los clientes pueden variar de una semana a otra.",
+      "Estos casos me parecen posibles. Solamente cambiar\u00eda algunos montos para que sean m\u00e1s redondeados.",
+      "Tambi\u00e9n aclarar\u00eda que los casos 9 y 10 todav\u00eda no pueden considerarse puntuales ni atrasados porque su fecha de vencimiento a\u00fan no hab\u00eda llegado al momento de la revisi\u00f3n.",
+      "Adem\u00e1s, aunque un cliente se encuentre dentro del plazo acordado, no puede recibir otro fiado mientras tenga un saldo pendiente.",
+      "Lo \u00fanico que corregir\u00eda es que no necesariamente tiene que ser una deuda vencida para que yo rechace una solicitud.",
+      "Por ejemplo, si un cliente me debe S/30 y acordamos que pagar\u00e1 el viernes, pero el mi\u00e9rcoles viene a pedirme otro fiado, no se lo concedo.",
+      "Aunque todav\u00eda no haya llegado el viernes, sigue teniendo una deuda conmigo.",
+      "Tampoco basta con que pague una parte. Si de los S/30 solamente me paga S/20, todav\u00eda debe S/10 y no puede recibir otro fiado.",
+      "El cliente tiene que cancelar toda su deuda antes de que yo pueda considerar darle otro fiado."
+    ],
+    "additional_responses_verbatim": [
+      "Normalmente manejo montos en soles completos o terminados en 50 c\u00e9ntimos. Por ejemplo, si el monto es S/35.58, podr\u00eda redondearlo a S/35.50 o S/36.00, dependiendo de lo que se haya acordado con el cliente. Sin embargo, si el total corresponde a los precios exactos de los productos, tambi\u00e9n puedo mantener ese importe.",
+      "Los clientes pueden pagar en diferentes momentos del d\u00eda. Por lo general, ser\u00eda normal que vengan entre las 8:00 a. m. y las 12:00 p. m., o durante la tarde, entre las 4:00 p. m. y las 8:00 p. m.\n\nNo todos pagan a la misma hora. Algunos vienen por la ma\u00f1ana, otros por la tarde y otros cuando salen de trabajar. Por eso, los horarios de pago pueden variar.",
+      "S\u00ed, los clientes pueden cambiar de una semana a otra. No siempre son las mismas personas las que solicitan fiados.\n\nPor ejemplo, una semana puedo dar 12 fiados a 9 clientes diferentes y la siguiente 11 fiados a 8 clientes. Algunos pueden ser los mismos de la semana anterior y otros pueden ser diferentes.\n\nTambi\u00e9n hay clientes que regresan despu\u00e9s de varios d\u00edas o semanas. Sin embargo, si todav\u00eda tienen una deuda pendiente, primero deben cancelarla completamente antes de que pueda darles otro fiado."
+    ],
+    "confirmed_rules": {
+      "pending_balance": "Any positive remaining balance blocks a new credit evaluation, including debt not yet due",
+      "partial_payment_restores_eligibility": false,
+      "agreements_restore_eligibility": false,
+      "full_settlement_required": true,
+      "settlement_payment_must_be_observed_before_evaluation": true,
+      "after_settlement": "Eligibility for evaluation resumes, but granting is never automatic",
+      "amount_precision": "Whole soles or .50 c\u00e9ntimos are common; exact product-price totals may remain exact",
+      "payment_times": "Various times, normally 08:00-12:00 or 16:00-20:00",
+      "client_pool": "12 clients can be an example, not a real fixed population; customers can vary weekly",
+      "usual_week": "About 12 fiados to 9 different customers",
+      "late_payment": "Payment after the due date is late; grace does not make it punctual"
+    },
+    "not_confirmed": [
+      "Exact frequency or maximum of multi-week customer population",
+      "Absolute weekly minimum or maximum",
+      "Exact probability or distribution of rounded versus exact-price amounts",
+      "Exact distribution of payment times inside the two windows",
+      "Real predictive performance, model approval, or production authorization"
+    ],
+    "timing": "Received after the V5 development cohort was generated; use only through a new predeclared data protocol",
+    "not_customer_data": true,
+    "not_business_model_approval": true,
+    "not_training_dataset": true
+  },
+  "revision_protocol": {
+    "version": "academic-owner-pending-v6",
+    "display_name": "V6 Final",
+    "revision_id": "v6-final-r1",
+    "declared_utc": "2026-11-16T15:41:59Z",
+    "authorized_user_request": "que se reetrene y que de los datos finales; me refiero a que sea v6 final",
+    "authorization_scope": "New synthetic research execution named V6 Final. Preserve prior V6 as history; no permission for commercial production or real-customer decisions.",
+    "relationship_to_previous_v6": "Prospective revision after prior V6 results were consulted. New seeds, clients and eligible-only training/evaluation; no claim that the study design was chosen before seeing earlier results.",
+    "development_replicas": [
+      {
+        "seed": 2026112601,
+        "prefix": "PND6F-R1-D1"
+      },
+      {
+        "seed": 2026112602,
+        "prefix": "PND6F-R1-D2"
+      }
+    ],
+    "final_replica": {
+      "seed": 2026112603,
+      "prefix": "PND6F-R1-T"
+    },
+    "cv": {
+      "outer_seed": 2026112604,
+      "inner_seed": 2026112605,
+      "folds": 3
+    },
+    "inherited_model_protocol_filename": "APF3_PENDING_V6_MODEL_PROTOCOL.json",
+    "inherited_model_protocol_sha256": "eb7fcd39f69be0115895cbb43b6d84e4488535646108bd6f21381d0fb1607923",
+    "source_sha256": {
+      "APF3_OWNER_ANCHORS_V4.json": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+      "APF3_OWNER_REVIEW_V5.json": "a72ea574fa2997d3477b0522c0044d590638957f0b5e553c31d97764df1a89a3",
+      "APF3_PENDING_V6_DATA_PROTOCOL.json": "5f3cea3798b73d31cf8aea54dc6bc45341777871988f7ef68686d34287811431"
+    },
+    "policy_sha256": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+    "runtime": {
+      "python": "3.12.14",
+      "sklearn": "1.9.1",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "joblib": "1.6.0",
+      "threadpoolctl": "3.7.0"
+    },
+    "no_reseed": true,
+    "policies": {
+      "block_any_pending_balance": true,
+      "require_paid_credit_history": true,
+      "unknown_history_requires_owner_review": true,
+      "debt_precedes_history": true,
+      "blocked_or_manual_excluded_from_model_metrics": true,
+      "initial_loans": "Simulated owner-authorized first credits stay in event history, but their evaluations never fit or score the model. Their later observed repayments may supply legitimate paid history.",
+      "as_of": "Only loans, sales and payments strictly before the application timestamp may affect features; no pending_at_cutoff or future outcomes enter routing.",
+      "supervised_population": "Granted study loans with confirmed zero prior balance and at least one fully repaid credit. Known outcomes only fit/calibrate/score supervised metrics; eligible unknowns compete only for queue capacity.",
+      "refusals": "Report pending blocks, owner-review referrals and any other simulator refusals separately. They are not predicted class zero/one, model true positives or evidence of model accuracy.",
+      "selection": "Retain original 12 tree and 6 SVM configurations, seven thresholds, F2 OOF capped-review primary criterion, tie-breakers and two Dummy baselines. No predetermined winning family or threshold.",
+      "fold_feasibility": "Exactly three grouped outer and inner folds with both labels in every subset; otherwise preserve failure and stop without another seed.",
+      "final": "Generate only after selection, model artifacts and hash freeze. One batch per frozen model on eligible FINAL cases. Never retune from this test; retain poor results or class-adequacy deviations.",
+      "capacity": "Five alerts/day and two minutes/case remain unmeasured hypotheses. Mandatory owner reviews are reported separately, not treated as capacity-free or included in the model-alert queue.",
+      "generator": "Unchanged frozen V6 simulator and assumptions; do not alter latent distributions, 75/25 amount mix, payment windows, warmup or approvals to improve metrics.",
+      "reporting": "Metrics are conditional on model eligibility in fresh synthetic clients, not all applications, real customers, commercial benefit or prospective calendar-time validation. Earlier V6 results are historical and not directly interchangeable."
+    },
+    "execution_policy": "Freeze runner/helper/policy/runtime/source hashes before DEV generation. Keep original V6 directories untouched. A repeat of these fixed seeds checks reproducibility only, not an independent second validation.",
+    "human_status": "PENDIENTE: review by four team members, rehearsal and academic submission; owner review is conditional, not predictive model approval"
+  },
+  "historical_documents_unchanged": true
+}

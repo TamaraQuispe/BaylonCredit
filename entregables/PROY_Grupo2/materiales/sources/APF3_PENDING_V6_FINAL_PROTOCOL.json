@@ -1,0 +1,51 @@
+{
+  "version": "academic-owner-pending-v6",
+  "display_name": "V6 Final",
+  "revision_id": "v6-final-r1",
+  "declared_utc": "2026-11-16T15:41:59Z",
+  "authorized_user_request": "que se reetrene y que de los datos finales; me refiero a que sea v6 final",
+  "authorization_scope": "New synthetic research execution named V6 Final. Preserve prior V6 as history; no permission for commercial production or real-customer decisions.",
+  "relationship_to_previous_v6": "Prospective revision after prior V6 results were consulted. New seeds, clients and eligible-only training/evaluation; no claim that the study design was chosen before seeing earlier results.",
+  "development_replicas": [
+    {"seed": 2026112601, "prefix": "PND6F-R1-D1"},
+    {"seed": 2026112602, "prefix": "PND6F-R1-D2"}
+  ],
+  "final_replica": {"seed": 2026112603, "prefix": "PND6F-R1-T"},
+  "cv": {"outer_seed": 2026112604, "inner_seed": 2026112605, "folds": 3},
+  "inherited_model_protocol_filename": "APF3_PENDING_V6_MODEL_PROTOCOL.json",
+  "inherited_model_protocol_sha256": "eb7fcd39f69be0115895cbb43b6d84e4488535646108bd6f21381d0fb1607923",
+  "source_sha256": {
+    "APF3_OWNER_ANCHORS_V4.json": "81f858bc8827c88e41352745f65345a72d2b9d06361046bc86d3f07540806064",
+    "APF3_OWNER_REVIEW_V5.json": "a72ea574fa2997d3477b0522c0044d590638957f0b5e553c31d97764df1a89a3",
+    "APF3_PENDING_V6_DATA_PROTOCOL.json": "5f3cea3798b73d31cf8aea54dc6bc45341777871988f7ef68686d34287811431"
+  },
+  "policy_sha256": "418af45fcdc1a5d952daac7aa5139bfa87d2a66ef126255f306cff3c66591f1f",
+  "runtime": {
+    "python": "3.12.14",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0"
+  },
+  "no_reseed": true,
+  "policies": {
+    "block_any_pending_balance": true,
+    "require_paid_credit_history": true,
+    "unknown_history_requires_owner_review": true,
+    "debt_precedes_history": true,
+    "blocked_or_manual_excluded_from_model_metrics": true,
+    "initial_loans": "Simulated owner-authorized first credits stay in event history, but their evaluations never fit or score the model. Their later observed repayments may supply legitimate paid history.",
+    "as_of": "Only loans, sales and payments strictly before the application timestamp may affect features; no pending_at_cutoff or future outcomes enter routing.",
+    "supervised_population": "Granted study loans with confirmed zero prior balance and at least one fully repaid credit. Known outcomes only fit/calibrate/score supervised metrics; eligible unknowns compete only for queue capacity.",
+    "refusals": "Report pending blocks, owner-review referrals and any other simulator refusals separately. They are not predicted class zero/one, model true positives or evidence of model accuracy.",
+    "selection": "Retain original 12 tree and 6 SVM configurations, seven thresholds, F2 OOF capped-review primary criterion, tie-breakers and two Dummy baselines. No predetermined winning family or threshold.",
+    "fold_feasibility": "Exactly three grouped outer and inner folds with both labels in every subset; otherwise preserve failure and stop without another seed.",
+    "final": "Generate only after selection, model artifacts and hash freeze. One batch per frozen model on eligible FINAL cases. Never retune from this test; retain poor results or class-adequacy deviations.",
+    "capacity": "Five alerts/day and two minutes/case remain unmeasured hypotheses. Mandatory owner reviews are reported separately, not treated as capacity-free or included in the model-alert queue.",
+    "generator": "Unchanged frozen V6 simulator and assumptions; do not alter latent distributions, 75/25 amount mix, payment windows, warmup or approvals to improve metrics.",
+    "reporting": "Metrics are conditional on model eligibility in fresh synthetic clients, not all applications, real customers, commercial benefit or prospective calendar-time validation. Earlier V6 results are historical and not directly interchangeable."
+  },
+  "execution_policy": "Freeze runner/helper/policy/runtime/source hashes before DEV generation. Keep original V6 directories untouched. A repeat of these fixed seeds checks reproducibility only, not an independent second validation.",
+  "human_status": "PENDIENTE: review by four team members, rehearsal and academic submission; owner review is conditional, not predictive model approval"
+}

@@ -1,0 +1,22 @@
+{
+  "tree": {
+    "batch_calls": 1,
+    "rows_scored": 277,
+    "unknown_rows_scored": 2
+  },
+  "svm": {
+    "batch_calls": 1,
+    "rows_scored": 277,
+    "unknown_rows_scored": 2
+  },
+  "most_frequent": {
+    "batch_calls": 1,
+    "rows_scored": 277,
+    "unknown_rows_scored": 2
+  },
+  "constant_1": {
+    "batch_calls": 1,
+    "rows_scored": 277,
+    "unknown_rows_scored": 2
+  }
+}

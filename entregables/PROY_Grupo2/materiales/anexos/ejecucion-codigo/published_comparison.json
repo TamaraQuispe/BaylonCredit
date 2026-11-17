@@ -1,0 +1,173 @@
+{
+  "archive_sha256": "d3095eae427a4d67927d820d1951b36cbeef339adad10edc89bd40cfdde500f6",
+  "exact_raw_and_policy_reports": false,
+  "selection_matches": false,
+  "differences": [
+    {
+      "family": "svm",
+      "split": "train",
+      "scope": "raw",
+      "actual": {
+        "n": 534,
+        "f2": 0.5863708399366085,
+        "precision": 0.2578397212543554,
+        "recall": 0.8604651162790697,
+        "f1": 0.3967828418230563,
+        "accuracy": 0.5786516853932584,
+        "balanced_accuracy": 0.6925093438538206,
+        "roc_auc": 0.7681426495016611,
+        "brier": 0.11965947750207889,
+        "confusion_matrix": [
+          [
+            235,
+            213
+          ],
+          [
+            12,
+            74
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "published": {
+        "n": 534,
+        "f2": 0.5863708399366085,
+        "precision": 0.2578397212543554,
+        "recall": 0.8604651162790697,
+        "f1": 0.3967828418230563,
+        "accuracy": 0.5786516853932584,
+        "balanced_accuracy": 0.6925093438538206,
+        "roc_auc": 0.7681426495016611,
+        "brier": 0.11965947750207875,
+        "confusion_matrix": [
+          [
+            235,
+            213
+          ],
+          [
+            12,
+            74
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "family": "svm",
+      "split": "oof",
+      "scope": "raw",
+      "actual": {
+        "n": 534,
+        "f2": 0.5523672883787661,
+        "precision": 0.21813031161473087,
+        "recall": 0.8953488372093024,
+        "f1": 0.35079726651480636,
+        "accuracy": 0.46629213483146065,
+        "balanced_accuracy": 0.6396387043189369,
+        "roc_auc": 0.7549833887043189,
+        "brier": 0.12294102342614494,
+        "confusion_matrix": [
+          [
+            172,
+            276
+          ],
+          [
+            9,
+            77
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "published": {
+        "n": 534,
+        "f2": 0.5523672883787661,
+        "precision": 0.21813031161473087,
+        "recall": 0.8953488372093024,
+        "f1": 0.35079726651480636,
+        "accuracy": 0.46629213483146065,
+        "balanced_accuracy": 0.6396387043189369,
+        "roc_auc": 0.7549833887043189,
+        "brier": 0.1229410234261447,
+        "confusion_matrix": [
+          [
+            172,
+            276
+          ],
+          [
+            9,
+            77
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "family": "svm",
+      "split": "final",
+      "scope": "raw",
+      "actual": {
+        "n": 275,
+        "f2": 0.6060606060606061,
+        "precision": 0.32,
+        "recall": 0.7804878048780488,
+        "f1": 0.45390070921985815,
+        "accuracy": 0.72,
+        "balanced_accuracy": 0.7449447571398791,
+        "roc_auc": 0.818323952470294,
+        "brier": 0.08548605838513475,
+        "confusion_matrix": [
+          [
+            166,
+            68
+          ],
+          [
+            9,
+            32
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "published": {
+        "n": 275,
+        "f2": 0.6060606060606061,
+        "precision": 0.32,
+        "recall": 0.7804878048780488,
+        "f1": 0.45390070921985815,
+        "accuracy": 0.72,
+        "balanced_accuracy": 0.7449447571398791,
+        "roc_auc": 0.818323952470294,
+        "brier": 0.08548605838513447,
+        "confusion_matrix": [
+          [
+            166,
+            68
+          ],
+          [
+            9,
+            32
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    }
+  ],
+  "note": "Numerical differences are reported, never patched or used to force the winner."
+}

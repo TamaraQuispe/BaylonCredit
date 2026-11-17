@@ -1,0 +1,78 @@
+{
+  "scope": "known DEV only",
+  "known_rows": 534,
+  "unknown_excluded": 7,
+  "pair_count": 534,
+  "pair_missing": 0,
+  "paid_late_missing": 0,
+  "pearson_r": 0.6596835502787145,
+  "late_rate_difference_yes_minus_no": 0.17019289150436692,
+  "groups": [
+    {
+      "relationship": "tenure_vs_completed_sales",
+      "group": "[0,90)",
+      "count": 47,
+      "denominator": 534,
+      "mean_completed_sales": 5.9787234042553195,
+      "late_count": null,
+      "late_rate": null
+    },
+    {
+      "relationship": "tenure_vs_completed_sales",
+      "group": "[90,180)",
+      "count": 156,
+      "denominator": 534,
+      "mean_completed_sales": 11.801282051282051,
+      "late_count": null,
+      "late_rate": null
+    },
+    {
+      "relationship": "tenure_vs_completed_sales",
+      "group": "[180,365)",
+      "count": 329,
+      "denominator": 534,
+      "mean_completed_sales": 16.896656534954406,
+      "late_count": null,
+      "late_rate": null
+    },
+    {
+      "relationship": "tenure_vs_completed_sales",
+      "group": "[365,inf)",
+      "count": 2,
+      "denominator": 534,
+      "mean_completed_sales": 25.0,
+      "late_count": null,
+      "late_rate": null
+    },
+    {
+      "relationship": "prior_paid_late_vs_observed_late",
+      "group": "no",
+      "count": 183,
+      "denominator": 183,
+      "mean_completed_sales": null,
+      "late_count": 9,
+      "late_rate": 0.04918032786885246
+    },
+    {
+      "relationship": "prior_paid_late_vs_observed_late",
+      "group": "yes",
+      "count": 351,
+      "denominator": 351,
+      "mean_completed_sales": null,
+      "late_count": 77,
+      "late_rate": 0.21937321937321938
+    }
+  ],
+  "caveats": [
+    "EDA descriptiva post hoc, posterior al freeze/replay; no seleccion ni retune.",
+    "Datos 100% sinteticos, no datos reales ni evidencia causal o beneficio comercial.",
+    "534 etiquetas DEV conocidas; 7 nulas excluidas de estadisticas y relaciones, nunca clase 0.",
+    "Observaciones repetidas por cliente; asociaciones no independientes, sin pruebas inferenciales.",
+    "Pearson no implica monotonia; medias por intervalos no prueban tendencia creciente.",
+    "Cuantiles lineales; std muestral ddof=1; sin imputacion; faltantes por variable excluidos."
+  ],
+  "conclusions": [
+    "Pearson tenure_days/completed_sales = 0.6596835502787145; pares completos n=534. Asociacion lineal positiva.",
+    "Tasa de atraso observado: historial paid_late>0=0.21937321937321938 (n=351), sin ese historial=0.04918032786885246 (n=183); diferencia si-no=0.17019289150436692. Mayor tasa con historial."
+  ]
+}
