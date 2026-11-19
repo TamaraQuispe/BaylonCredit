@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from xml.etree import ElementTree
 from zipfile import ZipFile, ZipInfo
 
 SPEC = importlib.util.spec_from_file_location('handoff', Path(__file__).with_name('prepare-proy-handoff.py'))
@@ -74,6 +75,26 @@ class HandoffTests(unittest.TestCase):
         self.assertEqual(sorted(variants['APF3_Grupo2 (1).zip']['manifest_mismatches']),
                          sorted(MODULE.DOCUMENTS))
         self.assertTrue(all(v['official_submission_confirmed'] is False for v in variants.values()))
+
+    def test_guide_requires_all_workshop_models_without_rewriting_apf3(self):
+        root = Path(__file__).resolve().parents[1] / 'entregables/PROY_Grupo2'
+        guide = root / MODULE.GUIDE
+        if not guide.is_file():
+            self.skipTest('Guia no disponible')
+        self.assertEqual(MODULE.sha(guide.read_bytes()), MODULE.GUIDE_SHA)
+        with ZipFile(guide) as archive:
+            self.assertIsNone(archive.testzip())
+            document = ElementTree.fromstring(archive.read('word/document.xml'))
+        text = '\n'.join(t.text or '' for t in document.iter(
+            '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t'))
+        for required in ('SVM', 'KNN', 'Arbol de decision', 'AdaBoost', 'P0-05', 'T26',
+                         'k=1,3,5,7,9', '50 frente a 400',
+                         'No basta con reutilizar la metodologia', 'APF3 YA FUE ENVIADO'):
+            self.assertIn(required, text)
+        self.assertEqual(len(document.findall('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}tbl')), 19)
+        amendment = json.loads((root / 'inventario-traspaso.json').read_bytes())['guide_amendment']
+        self.assertEqual(amendment['required_models'], ['SVM', 'KNN', 'Arbol de decision', 'AdaBoost'])
+        self.assertIs(amendment['apf3_evidence_changed'], False)
 
 
 if __name__ == '__main__':

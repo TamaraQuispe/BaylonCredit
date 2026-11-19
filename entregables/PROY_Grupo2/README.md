@@ -13,6 +13,20 @@
 La guia es un plan de trabajo, no una implementacion terminada. APF3 ya se envio:
 sus resultados y fuentes se conservan; las mejoras corresponden a PROY.
 
+## Aclaracion Prioritaria Del Taller
+
+La indicacion del profesor aclarada por el equipo es aplicar TODO el taller de
+Dona Rosa al proyecto: **SVM, KNN, Arbol de decision y AdaBoost**, incluidos los
+retos de vecinos `k=1,3,5,7,9` y rondas `50/400`. Los Dummy son referencias
+adicionales, no sustituyen KNN ni AdaBoost. La guia lo exige en las prioridades,
+el plan de entrenamiento, las pruebas de aceptacion y el checklist.
+
+V6 Final evaluo SVM y arbol, no KNN ni AdaBoost. Esta ampliacion sigue PENDIENTE
+para PROY: no se han inventado resultados ni cambiado los del avance enviado.
+Reutilizar todos los pasos significa adaptarlos a los datos y reglas de Baylon,
+no copiar los clientes, metas, costos o ganador del taller. Seleccionar sobre
+DEV y evaluar despues con una prueba nueva; no volver a elegir con FINAL APF3.
+
 ## Materiales Disponibles
 
 - `materiales/`: copia de los 166 archivos de contenido de `APF3_Grupo2.zip`,

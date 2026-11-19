@@ -14,7 +14,7 @@ ARCHIVES = {
     'APF3_Grupo2 (1).zip': 'dd2d5d48c46510b3fd58fb915e875e27d63b31605f5f574b78072a58095515b4',
 }
 GUIDE = 'Guia_Traspaso_PROY_Grupo2_Credify.docx'
-GUIDE_SHA = '0468b09fc75a52634274a151f31a89afcc01b33367150f8eae5d2e442c139c68'
+GUIDE_SHA = 'b62b64a3d4b2238b5e8efbf119ff875a43170e6c50b1de343d38305877e6cc14'
 DOCUMENTS = ('informe/APF3_TD_Grupo2_ML_Innovacion.pdf',
              'sustentacion/APF3_TD_Grupo2_ML_Innovacion.pptx')
 
