@@ -67,7 +67,7 @@ class HandoffTests(unittest.TestCase):
         if not (root / 'inventario-traspaso.json').is_file():
             self.skipTest('Material de traspaso no disponible')
         manifest = json.loads((root / 'inventario-traspaso.json').read_bytes())
-        self.assertEqual(len(manifest['files']), 170)
+        self.assertEqual(len(manifest['files']), 171)
         for name, expected in manifest['files'].items():
             self.assertEqual(MODULE.sha((root / name).read_bytes()), expected, name)
         variants = manifest['source_variants']
@@ -91,10 +91,33 @@ class HandoffTests(unittest.TestCase):
                          'k=1,3,5,7,9', '50 frente a 400',
                          'No basta con reutilizar la metodologia', 'APF3 YA FUE ENVIADO'):
             self.assertIn(required, text)
-        self.assertEqual(len(document.findall('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}tbl')), 19)
+        self.assertEqual(len(document.findall('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}tbl')), 22)
         amendment = json.loads((root / 'inventario-traspaso.json').read_bytes())['guide_amendment']
         self.assertEqual(amendment['required_models'], ['SVM', 'KNN', 'Arbol de decision', 'AdaBoost'])
         self.assertIs(amendment['apf3_evidence_changed'], False)
+
+    def test_feedback_plan_is_complete_and_not_presented_as_implemented(self):
+        root = Path(__file__).resolve().parents[1] / 'entregables/PROY_Grupo2'
+        guide = root / MODULE.GUIDE
+        with ZipFile(guide) as archive:
+            document = ElementTree.fromstring(archive.read('word/document.xml'))
+        text = '\n'.join(t.text or '' for t in document.iter(
+            '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t'))
+        for required in ('F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08', 'F09',
+                         'Plantilla de constancia, NO firmada', 'no antedatarla',
+                         'abs_tol=1e-12 y rel_tol=0', 'numerically_equivalent',
+                         'bootstrap por cliente', '2000 remuestreos',
+                         'POST /api/v1/scoring', 'Responsable con nombre', 'T27', 'T28', 'T29',
+                         '17.9/20', '16.9/20', 'no sustituye el archivo que solicita'):
+            self.assertIn(required, text)
+        manifest = json.loads((root / 'inventario-traspaso.json').read_bytes())
+        feedback = manifest['teacher_feedback_amendment']
+        self.assertEqual(feedback['action_ids'], ['F%02d' % i for i in range(1, 10)])
+        self.assertEqual(feedback['current_guide_sha256'], MODULE.sha(guide.read_bytes()))
+        self.assertIs(feedback['apf3_evidence_changed'], False)
+        self.assertIs(feedback['raw_feedback_published'], False)
+        self.assertIn('Plan pendiente', feedback['implementation_status'])
+        self.assertIn('FEEDBACK_DOCENTE_APF3.md', manifest['files'])
 
 
 if __name__ == '__main__':

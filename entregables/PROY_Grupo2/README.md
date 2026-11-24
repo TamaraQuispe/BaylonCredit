@@ -13,6 +13,16 @@
 La guia es un plan de trabajo, no una implementacion terminada. APF3 ya se envio:
 sus resultados y fuentes se conservan; las mejoras corresponden a PROY.
 
+## Feedback Docente Incorporado
+
+Leer [acciones del feedback](FEEDBACK_DOCENTE_APF3.md) y la seccion 25 del Word.
+La prioridad critica es acreditar la revision humana de los cuatro integrantes y
+resolver los estados contradictorios, sin inventar firmas ni reescribir evidencia.
+Siguen la version oficial/legibilidad, tolerancias flotantes, mas clientes e
+intervalos bootstrap por cliente, endpoint operativo real, costos/capacidad con
+el propietario y responsables con nombre. Son tareas pendientes, no mejoras ya
+implementadas por actualizar la guia. La nota final debe confirmarse con el docente.
+
 ## Aclaracion Prioritaria Del Taller
 
 La indicacion del profesor aclarada por el equipo es aplicar TODO el taller de

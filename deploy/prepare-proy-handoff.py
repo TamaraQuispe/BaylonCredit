@@ -14,7 +14,7 @@ ARCHIVES = {
     'APF3_Grupo2 (1).zip': 'dd2d5d48c46510b3fd58fb915e875e27d63b31605f5f574b78072a58095515b4',
 }
 GUIDE = 'Guia_Traspaso_PROY_Grupo2_Credify.docx'
-GUIDE_SHA = 'b62b64a3d4b2238b5e8efbf119ff875a43170e6c50b1de343d38305877e6cc14'
+GUIDE_SHA = 'f5ec8bedbac95db94650d81a8c04366083d1a2d6860acc2016bfbf878534ef7f'
 DOCUMENTS = ('informe/APF3_TD_Grupo2_ML_Innovacion.pdf',
              'sustentacion/APF3_TD_Grupo2_ML_Innovacion.pptx')
 
@@ -102,6 +102,8 @@ def prepare(downloads, destination):
     files.update({'paquetes/' + name: content for name, content in source_bytes.items()})
     files[GUIDE] = guide
     files['README.md'] = (destination / 'README.md').read_bytes()
+    feedback = Path(__file__).resolve().parents[1] / 'entregables/PROY_Grupo2/FEEDBACK_DOCENTE_APF3.md'
+    files[feedback.name] = feedback.read_bytes()
     manifest = dict(scope='Copias integras; variantes documentales advertidas, no certificacion del envio oficial',
                     source_variants=records, normalized_payload_changed_paths=changed,
                     files={name: sha(content) for name, content in sorted(files.items())})

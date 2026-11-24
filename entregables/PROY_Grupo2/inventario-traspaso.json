@@ -26,8 +26,8 @@
     "sustentacion/APF3_TD_Grupo2_ML_Innovacion.pptx"
   ],
   "files": {
-    "Guia_Traspaso_PROY_Grupo2_Credify.docx": "b62b64a3d4b2238b5e8efbf119ff875a43170e6c50b1de343d38305877e6cc14",
-    "README.md": "16569d5b7440434d9c39c949b5fd278fdff79a00b5d722067130a8ae0716f555",
+    "Guia_Traspaso_PROY_Grupo2_Credify.docx": "f5ec8bedbac95db94650d81a8c04366083d1a2d6860acc2016bfbf878534ef7f",
+    "README.md": "049ba8303b23acbaa754caf6dca8010267c29f939a6778ea712777edba5366ee",
     "materiales/APF3_TD_Grupo2_ML_Innovacion.ipynb": "f3fdd43e20722a7ff9ca07e9c76712c30111e85fd9fccdd889bf5ca470ab57e8",
     "materiales/APF3_TD_Grupo2_ML_Innovacion.py": "2a434e35159cfd850e16e047f0c144e278c6ff93823548bb8e258b0ad84240c3",
     "materiales/APF3_V6_Final_requirements.txt": "d2f763ca24b0638220373d6fe616cb87403c36f37cfe441855e708c4f5b2c26c",
@@ -195,11 +195,12 @@
     "materiales/verificacion-entrega-actual.json": "021112e02354d4480ab0a21c6e4500a86201c69d35b81b2aeccf307f2745bdd9",
     "materiales/verificacion-v6-final.json": "30115c350c2679608bb3ab53800f92addd8184c48a9c2981764b4af872482c0a",
     "paquetes/APF3_Grupo2 (1).zip": "dd2d5d48c46510b3fd58fb915e875e27d63b31605f5f574b78072a58095515b4",
-    "paquetes/APF3_Grupo2.zip": "98825722f03d17b61b6613b7cf02b96f1af69b83ad3357d5049a955b013f9f92"
+    "paquetes/APF3_Grupo2.zip": "98825722f03d17b61b6613b7cf02b96f1af69b83ad3357d5049a955b013f9f92",
+    "FEEDBACK_DOCENTE_APF3.md": "f65509cc4d13c7f8cb185c1090e1bc3790c3f171d95adcdf132cbf50c19a326e"
   },
   "guide_amendment": {
     "previous_sha256": "0468b09fc75a52634274a151f31a89afcc01b33367150f8eae5d2e442c139c68",
-    "current_sha256": "b62b64a3d4b2238b5e8efbf119ff875a43170e6c50b1de343d38305877e6cc14",
+    "current_sha256": "f5ec8bedbac95db94650d81a8c04366083d1a2d6860acc2016bfbf878534ef7f",
     "scope": "Aclaracion del equipo: todos los modelos y procedimientos del taller para PROY",
     "required_models": [
       "SVM",
@@ -209,5 +210,24 @@
     ],
     "implementation_status": "Pendiente de ejecutar en PROY",
     "apf3_evidence_changed": false
+  },
+  "teacher_feedback_amendment": {
+    "previous_guide_sha256": "b62b64a3d4b2238b5e8efbf119ff875a43170e6c50b1de343d38305877e6cc14",
+    "current_guide_sha256": "f5ec8bedbac95db94650d81a8c04366083d1a2d6860acc2016bfbf878534ef7f",
+    "feedback_source_sha256": "3868059e689b5ece2fc1a912eac73f5da1df39d8f3d1f30ff6c49d68b9572606",
+    "action_ids": [
+      "F01",
+      "F02",
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07",
+      "F08",
+      "F09"
+    ],
+    "implementation_status": "Plan pendiente; sin firmas, endpoint, piloto ni intervalos nuevos acreditados",
+    "apf3_evidence_changed": false,
+    "raw_feedback_published": false
   }
 }
