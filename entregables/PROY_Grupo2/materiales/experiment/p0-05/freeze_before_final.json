@@ -1,0 +1,20 @@
+{
+  "version": "proy-credit-experiment-v1",
+  "frozen_utc": "2026-11-25T00:58:31.329763+00:00",
+  "files": {
+    "adaboost.joblib": "88ac430e25120c43199e3f527206efb85ef1cb27022820d84cbd1c4299f563c5",
+    "artifact_manifest.json": "874c246559a545fad231b1a457fa71f09fe677a60c34bb54ee5962f4e9e063f2",
+    "cv_search.json": "52b121086347421661619125c585e7a08711215276c823f567daf733b3d70d7d",
+    "dummy_constant_1.joblib": "5d307d0b7645e06546b32ebdc271b0c7ef7b18f49d33a4017b1d58792d08d650",
+    "dummy_most_frequent.joblib": "ca8b200194ec0f916ddd8b2c6c1d86b1c02e7eaf13785a9605a657e8794f1762",
+    "family_winners.json": "d9bb42ca1e94769c531f7f0fdeb649f0a506a13dd858cd0fd47ac716b3ea8f1b",
+    "frozen_selection.json": "90548dcfc7562cf01a8175df99bd4884eee042c473b11818e7210afdec3d046c",
+    "knn.joblib": "6ad4da639f0cf49651b68afc75d04b53307aaea62d71cd5722e5c25ee6287180",
+    "provenance.json": "a738b147775b574a968dfac55dbe5cd07f5f2b39bf57accac78be2e09703d4ee",
+    "selected_model.joblib": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45",
+    "svm.joblib": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45",
+    "tree.joblib": "6e3ce7710f05a87c17345cdd0b4c47c2912a1873a77bbaad4c86e44b4f37dca7"
+  },
+  "final_generation_calls": 0,
+  "final_prediction_calls": 0
+}

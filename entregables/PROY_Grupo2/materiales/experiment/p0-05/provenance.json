@@ -1,0 +1,34 @@
+{
+  "recorded_utc": "2026-11-25T00:58:29.505447+00:00",
+  "version": "proy-credit-experiment-v1",
+  "protocol_sha256": "b345352ae4c6539de9abfa0c6e40bdff3ec528ef966b95711d2631cdd50e14c0",
+  "input_sha256": {
+    "development_known_csv_sha256": "4099ddba545eea26681e133c84cbb705488cfe1922c7085ca4ac71ceefafc544",
+    "planned_folds_sha256": "5e720c2ad7e078a581ae3a3ad09a4c53c4638e15dfebc0cd33e81229683ae38d",
+    "development_manifest_sha256": "e2e654b57c7ec7173d7098fd52f84ec443bf0d274bbb2a5799463161997704cb",
+    "effective_protocol_sha256": "f4e6fb30c748de9ca6a755c73815bcc91d52c94f5689cce9263b82d772c02c96"
+  },
+  "runtime": {
+    "python": "3.14.6",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.5",
+    "joblib": "1.6.0"
+  },
+  "code_sha256": {
+    "scripts/proy_credit_experiment_v1.py": "c8a2ca8942ecb2104a46d7e196c89329e1ea0c836b2b61cd9fb8a8d1ebfb2c3f",
+    "app/ml/features.py": "ec22f6675b9eab61749a86a0ae613781503fab3905e80da08c73f7b8f568fcc1",
+    "app/ml/proy_contract.py": "ad6d8ee3e8ad1fa4a320879e78afbd28b6f3329e0a3b62d3084bed5c66258da0"
+  },
+  "development": {
+    "rows": 534,
+    "clients": 24,
+    "class_counts": {
+      "0": 448,
+      "1": 86
+    }
+  },
+  "authorization": {
+    "stage": "dev_only_selection",
+    "final_contacted": false
+  }
+}
