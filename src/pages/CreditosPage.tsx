@@ -134,9 +134,8 @@ export default function CreditosPage() {
             credit.risk,
           ])),
     ]
-    const url = URL.createObjectURL(
-      new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }),
-    )
+    const csv = toCsv(rows)
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
     const link = document.createElement('a')
     link.href = url
     link.download = 'creditos.csv'
