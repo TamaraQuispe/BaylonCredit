@@ -214,7 +214,10 @@ async def test_non_payment_history_never_unlocks_credit(credit_env, history_kind
     async with session_factory() as db:
         customer = await db.get(Client, UUID(client_id))
         if history_kind == "tenure":
-            customer.created_at = datetime.now(UTC) - timedelta(days=3650)
+            # 3655 dias y no 3650: la antiguedad se calcula con date.today() local
+            # frente a un created_at en UTC, y la frontera de dia movia la cuenta
+            # a 3649 dias entre las 19:00 y la medianoche de Lima.
+            customer.created_at = datetime.now(UTC) - timedelta(days=3655)
         elif history_kind == "sales":
             admin = await db.scalar(select(User).where(User.role == UserRole.ADMIN))
             db.add_all(
@@ -404,6 +407,26 @@ async def test_only_full_payment_unlocks_automatic_credit_and_sales(credit_env):
         json=_credit_payload(client_id, manual_override=False, exception_reason=None),
     )
     assert direct.status_code == 201, direct.text
+    # Politica PROY (P0-02): el fiado directo recien concedido deja saldo pendiente,
+    # por lo que la venta al credito queda bloqueada aunque pida excepcion manual.
+    blocked_sale = await client.post(
+        "/api/v1/sales",
+        headers=headers["operator"],
+        json={
+            "payment_mode": "credito",
+            "client_id": client_id,
+            "items": [{"product_id": product_id, "quantity": 1}],
+            "manual_override": True,
+            "exception_reason": OVERRIDE_REASON,
+        },
+    )
+    assert blocked_sale.status_code == 422, blocked_sale.text
+    assert "saldo pendiente" in blocked_sale.json()["detail"]
+    async with session_factory() as db:
+        assert await db.scalar(select(func.count(Sale.id))) == 0
+        assert (await db.get(Product, UUID(product_id))).stock == 20
+
+    await _pay(client, headers["operator"], client_id, direct.json()["id"], "40.00")
     sale = await client.post(
         "/api/v1/sales",
         headers=headers["operator"],
@@ -418,7 +441,8 @@ async def test_only_full_payment_unlocks_automatic_credit_and_sales(credit_env):
 
 
 @pytest.mark.parametrize("block", ["overdue", "exposure"])
-async def test_paid_history_does_not_bypass_other_risk_blocks(credit_env, block):
+async def test_pending_balance_block_takes_precedence_over_other_risk_blocks(credit_env, block):
+    """La compuerta P0-02 se resuelve antes que los bloqueos por vencimiento o exposicion."""
     client, session_factory, headers, client_id, _ = credit_env
     first = await client.post(
         "/api/v1/credits", headers=headers["admin"], json=_credit_payload(client_id)
@@ -445,10 +469,75 @@ async def test_paid_history_does_not_bypass_other_risk_blocks(credit_env, block)
     assert evaluation["approved"] is False
     assert evaluation["requires_manual_review"] is False
     assert "payment_history_review" not in {factor["key"] for factor in evaluation["factors"]}
-    assert ("vencidos" if block == "overdue" else "80.0%") in evaluation["recommendation"]
+    assert "saldo pendiente" in evaluation["recommendation"]
+    assert Decimal(evaluation["recommended_limit"]) == 0
+    assert evaluation["confidence"] == 0
     response = await client.post(
         "/api/v1/credits",
         headers=headers["admin"],
-        json=_credit_payload(client_id, manual_override=False),
+        json=_credit_payload(client_id, manual_override=True),
     )
     assert response.status_code == 422, response.text
+    assert "saldo pendiente" in response.json()["detail"]
+
+
+async def test_pending_balance_of_one_cent_blocks_both_routes_and_override(credit_env):
+    """T01: deuda de S/0.01 bloquea credito directo y venta al credito, sin bypass."""
+    client, session_factory, headers, client_id, product_id = credit_env
+    first = await client.post(
+        "/api/v1/credits", headers=headers["admin"], json=_credit_payload(client_id)
+    )
+    assert first.status_code == 201, first.text
+    async with session_factory() as db:
+        overrides_before = await db.scalar(
+            select(func.count(AuditLog.id)).where(AuditLog.action == "credit_overridden")
+        )
+    await _pay(client, headers["operator"], client_id, first.json()["id"], "39.99")
+
+    direct = await client.post(
+        "/api/v1/credits", headers=headers["admin"], json=_credit_payload(client_id)
+    )
+    assert direct.status_code == 422, direct.text
+    assert "saldo pendiente" in direct.json()["detail"]
+    assert "0.01" in direct.json()["detail"]
+
+    sale = await client.post(
+        "/api/v1/sales",
+        headers=headers["admin"],
+        json={
+            "payment_mode": "credito",
+            "client_id": client_id,
+            "items": [{"product_id": product_id, "quantity": 2}],
+            "manual_override": True,
+            "exception_reason": OVERRIDE_REASON,
+        },
+    )
+    assert sale.status_code == 422, sale.text
+    assert "saldo pendiente" in sale.json()["detail"]
+
+    async with session_factory() as db:
+        assert await db.scalar(select(func.count(Credit.id))) == 1
+        assert await db.scalar(select(func.count(Sale.id))) == 0
+        assert await db.scalar(select(func.count(InventoryMovement.id))) == 0
+        assert (await db.get(Product, UUID(product_id))).stock == 20
+        assert await db.scalar(
+            select(func.count(AuditLog.id)).where(AuditLog.action == "credit_overridden")
+        ) == overrides_before
+        blocked = await db.scalar(
+            select(func.count(AuditLog.id)).where(
+                AuditLog.action == "credit_blocked_pending_balance"
+            )
+        )
+        assert blocked == 2
+        entries = (
+            await db.scalars(
+                select(AuditLog).where(AuditLog.action == "credit_blocked_pending_balance")
+            )
+        ).all()
+        assert all(entry.details["pending_amount"] == "0.01" for entry in entries)
+
+    await _pay(client, headers["operator"], client_id, first.json()["id"], "0.01")
+    retry = await client.post(
+        "/api/v1/credits", headers=headers["admin"], json=_credit_payload(client_id)
+    )
+    assert retry.status_code == 201, retry.text

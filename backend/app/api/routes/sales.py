@@ -23,7 +23,13 @@ from app.models.commerce import (
 from app.models.user import User, UserRole
 from app.schemas.commerce import CreditRead, SaleCreate, SaleItemRead, SaleRead
 from app.services.ai_credit import enqueue_ai_explanation
+from app.services.audit import add_audit_log
 from app.services.credit_scoring import evaluate_and_record
+from app.services.proy_credit_policy import (
+    PENDING_BALANCE_BLOCK,
+    lock_client,
+    pending_balance_gate,
+)
 from app.services.whatsapp import enqueue_evaluation_notification
 
 router = APIRouter(prefix="/sales", tags=["sales"])
@@ -75,6 +81,45 @@ async def create_sale(
     current_user: User = Depends(can_sell),
     db: AsyncSession = Depends(get_db),
 ) -> SaleRead:
+    client: Client | None = None
+    credit_evaluation = None
+    due_date: date | None = None
+    if payload.payment_mode == PaymentMode.CREDIT:
+        # Orden global de recursos: primero el cliente, despues los productos por ID.
+        client = await lock_client(db, payload.client_id)
+        if not client or not client.is_active:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        # Regla del propietario (P0-02): la venta al credito exige saldo cero, igual
+        # que el credito directo, y rechaza antes de tocar stock o crear la venta.
+        pending_gate = await pending_balance_gate(db, client.id)
+        if pending_gate.decision == PENDING_BALANCE_BLOCK:
+            add_audit_log(
+                db,
+                "credit_blocked_pending_balance",
+                "client",
+                actor=current_user,
+                entity_id=client.id,
+                details={
+                    "pending_amount": str(pending_gate.pending_amount),
+                    "source": "credit_sale",
+                },
+                description="Venta al credito rechazada: el cliente mantiene saldo pendiente.",
+            )
+            await db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=pending_gate.reason
+            )
+        if payload.due_date is None:
+            settings = await get_settings_record(db)
+            due_date = date.today() + timedelta(days=settings.default_credit_term_days)
+        else:
+            due_date = payload.due_date
+        if due_date <= date.today():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Due date must be after today",
+            )
+
     product_ids = [item.product_id for item in payload.items]
     products = list(
         await db.scalars(
@@ -107,22 +152,7 @@ async def create_sale(
     tax = money(subtotal * TAX_RATE)
     total = subtotal + tax
 
-    client: Client | None = None
-    credit_evaluation = None
     if payload.payment_mode == PaymentMode.CREDIT:
-        client = await db.get(Client, payload.client_id)
-        if not client or not client.is_active:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-        if payload.due_date is None:
-            settings = await get_settings_record(db)
-            due_date = date.today() + timedelta(days=settings.default_credit_term_days)
-        else:
-            due_date = payload.due_date
-        if due_date <= date.today():
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Due date must be after today",
-            )
         credit_evaluation = await evaluate_and_record(
             db, client.id, total, current_user.id, "credit_sale"
         )

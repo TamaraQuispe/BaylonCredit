@@ -18,6 +18,7 @@ from app.models.commerce import (
     RiskLevel,
 )
 from app.models.settings import SETTINGS_ID, BusinessSettings
+from app.services.proy_credit_policy import PENDING_BALANCE_BLOCK, gate_from_pending
 
 DEFAULT_MAX_CREDIT_AMOUNT = Decimal("200")
 CreditEvaluationSource = Literal["manual", "direct_credit", "credit_sale"]
@@ -143,8 +144,14 @@ async def evaluate_credit(
     )
     rules_score = max(0, min(rules_score, MAX_SCORE))
 
-    model = predict_default_probability(features)
-    if model.ml:
+    # Compuerta PROY antes del modelo: con cualquier saldo pendiente no se predice.
+    pending_gate = gate_from_pending(features.outstanding)
+    model = (
+        None
+        if pending_gate.decision == PENDING_BALANCE_BLOCK
+        else predict_default_probability(features)
+    )
+    if model is not None and model.ml:
         default_probability = int(round(model.default_probability))
         confidence = max(0, min(100, round(50 + abs(model.default_probability - 50))))
         model_version = model.model_version
@@ -184,24 +191,25 @@ async def evaluate_credit(
     recommended_limit = Decimal(max(50, round(raw_limit / 50) * 50))
     recommended_limit = min(recommended_limit, max_credit_amount)
 
-    blocked_reason: str | None = None
-    if max_overdue_days > 0 and max_overdue_days >= overdue_block_days:
-        blocked_reason = (
-            f"Cliente con créditos vencidos hace {max_overdue_days} días; "
-            "se bloquean nuevos créditos según la política de riesgo."
-        )
-    elif new_client_blocked_days > 0 and features.tenure_days < new_client_blocked_days:
-        blocked_reason = (
-            f"Cliente con menos de {new_client_blocked_days} días de antigüedad; "
-            "aún no accede a crédito según la política."
-        )
-    elif features.outstanding > 0 and max_credit_amount > 0:
-        utilization = (features.outstanding / max_credit_amount) * 100
-        if float(utilization) >= exposure_percent:
+    blocked_reason: str | None = pending_gate.reason
+    if blocked_reason is None:
+        if max_overdue_days > 0 and max_overdue_days >= overdue_block_days:
             blocked_reason = (
-                f"Exposición de {utilization:.1f}% supera el límite del {exposure_percent}% "
-                "de la línea de crédito."
+                f"Cliente con créditos vencidos hace {max_overdue_days} días; "
+                "se bloquean nuevos créditos según la política de riesgo."
             )
+        elif new_client_blocked_days > 0 and features.tenure_days < new_client_blocked_days:
+            blocked_reason = (
+                f"Cliente con menos de {new_client_blocked_days} días de antigüedad; "
+                "aún no accede a crédito según la política."
+            )
+        elif features.outstanding > 0 and max_credit_amount > 0:
+            utilization = (features.outstanding / max_credit_amount) * 100
+            if float(utilization) >= exposure_percent:
+                blocked_reason = (
+                    f"Exposición de {utilization:.1f}% supera el límite del {exposure_percent}% "
+                    "de la línea de crédito."
+                )
 
     requires_review = get_settings().require_paid_credit_history and features.paid_credits == 0
     if requires_review:
@@ -212,6 +220,11 @@ async def evaluate_credit(
             "registrados. No se aprueba automáticamente ni se recomienda un límite inicial. "
             "El propietario debe revisar el caso y definir un primer monto conservador."
         )
+
+    if pending_gate.decision == PENDING_BALANCE_BLOCK:
+        # Sin monto recomendado ni confianza: la compuerta decide, no el score.
+        recommended_limit = Decimal("0")
+        confidence = 0
 
     approved = (
         score >= min_approved

@@ -33,6 +33,11 @@ from app.schemas.finance import (
 from app.services.ai_credit import dispatch_ai_explanation, enqueue_ai_explanation
 from app.services.audit import add_audit_log
 from app.services.credit_scoring import evaluate_and_record
+from app.services.proy_credit_policy import (
+    PENDING_BALANCE_BLOCK,
+    lock_client,
+    pending_balance_gate,
+)
 from app.services.whatsapp import enqueue_evaluation_notification
 
 router = APIRouter(prefix="/credits", tags=["credits"])
@@ -285,6 +290,31 @@ async def create_credit(
     current_user: User = Depends(can_write),
     db: AsyncSession = Depends(get_db),
 ) -> FinanceCreditRead:
+    # Regla del propietario (P0-02): cualquier saldo pendiente bloquea el fiado.
+    # Se lee de la base con bloqueo de cliente, antes del modelo y sin excepciones.
+    client = await lock_client(db, payload.client_id)
+    if client is None or not client.is_active:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
+    pending_gate = await pending_balance_gate(db, payload.client_id)
+    if pending_gate.decision == PENDING_BALANCE_BLOCK:
+        add_audit_log(
+            db,
+            "credit_blocked_pending_balance",
+            "client",
+            actor=current_user,
+            entity_id=client.id,
+            details={
+                "pending_amount": str(pending_gate.pending_amount),
+                "requested_amount": str(payload.amount),
+                "manual_override_requested": payload.manual_override,
+                "exception_reason": (payload.exception_reason or "").strip() or None,
+            },
+            description="Nuevo fiado rechazado: el cliente mantiene saldo pendiente.",
+        )
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=pending_gate.reason
+        )
     evaluation = await record_evaluation(
         db, payload.client_id, payload.amount, current_user.id, "direct_credit"
     )
