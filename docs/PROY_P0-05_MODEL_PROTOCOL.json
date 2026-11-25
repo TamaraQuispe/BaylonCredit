@@ -1,0 +1,130 @@
+{
+  "version": "proy-credit-model-protocol-1",
+  "stage": "prospective_dev_selection_before_any_final_evaluation",
+  "scope": "Investigacion sintetica de PROY. No es aprobacion de negocio, validacion de clientes reales ni autorizacion de despliegue.",
+  "relationship_to_apf3": "Protocolo nuevo para PROY. No reutiliza el FINAL de APF3, no cambia sus protocolos y no reescribe sus hashes; el AVANCE queda intacto.",
+  "business_rules": {
+    "pending_balance_gate": "Cualquier saldo pendiente mayor que cero bloquea antes del modelo (P0-02). Las filas DEV ya cumplen la regla y tienen exposicion pendiente en cero.",
+    "target": "late_payment",
+    "target_scope": "Desenlace de un fiado sintetico efectivamente concedido; no es aprobacion, morosidad real ni perdida definitiva.",
+    "row_scope": "Filas DEV con desenlace conocido de development_known.csv (534). Las siete filas sin desenlace no entran en metricas supervisadas."
+  },
+  "frozen_inputs": {
+    "development_known_csv_sha256": "4099ddba545eea26681e133c84cbb705488cfe1922c7085ca4ac71ceefafc544",
+    "planned_folds_sha256": "5e720c2ad7e078a581ae3a3ad09a4c53c4638e15dfebc0cd33e81229683ae38d",
+    "development_manifest_sha256": "e2e654b57c7ec7173d7098fd52f84ec443bf0d274bbb2a5799463161997704cb",
+    "effective_protocol_sha256": "f4e6fb30c748de9ca6a755c73815bcc91d52c94f5689cce9263b82d772c02c96"
+  },
+  "development": {
+    "source": "entregables/PROY_Grupo2/materiales/development",
+    "rows": 534,
+    "clients": 24,
+    "class_0": 448,
+    "class_1": 86,
+    "replicas": ["PND6F-R1-D1", "PND6F-R1-D2"],
+    "index_basis": "Orden de planned_folds.json -> known_row_ids; el CSV debe conservar ese orden."
+  },
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "preprocessing": ["SimpleImputer(strategy=median)", "StandardScaler"],
+  "cv": {
+    "group": "client_id",
+    "outer_folds": 3,
+    "fold_source": "planned_folds.json guardado, con su SHA. Sin busqueda de seeds ni fallback guiado por resultados.",
+    "inner_calibration": "inner_sigmoid_by_outer_train guardado (3 folds) mapeado al subconjunto de entrenamiento de cada fold externo; inner_sigmoid_full_train para el ajuste final en DEV.",
+    "unknown_rows": "Las filas sin desenlace quedan fuera del OOF y de las metricas; solo se usarian para capacidad en una etapa posterior."
+  },
+  "candidate_grid": {
+    "svm": {
+      "kernel": "linear",
+      "C": [0.1, 1.0, 10.0],
+      "class_weight": [null, "balanced"],
+      "probability": false,
+      "calibration": "CalibratedClassifierCV(method=sigmoid, ensemble=False) con folds internos disjuntos por cliente",
+      "random_state": 42
+    },
+    "knn": {
+      "n_neighbors": [1, 3, 5, 7, 9],
+      "weights": "uniform",
+      "metric": "minkowski",
+      "p": 2
+    },
+    "tree": {
+      "max_depth": [2, 3, 4],
+      "min_samples_leaf": [8, 16],
+      "class_weight": [null, "balanced"],
+      "random_state": 42
+    },
+    "adaboost": {
+      "n_estimators": [50, 400],
+      "learning_rate": 1.0,
+      "estimator": "DecisionTreeClassifier(max_depth=1) por defecto de sklearn",
+      "random_state": 42
+    }
+  },
+  "candidate_count": {
+    "svm": 6,
+    "knn": 5,
+    "tree": 12,
+    "adaboost": 2,
+    "trained_models": 25,
+    "dummy_references": 2
+  },
+  "baselines": ["dummy_most_frequent", "dummy_constant_1"],
+  "baseline_threshold": 0.5,
+  "thresholds": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7],
+  "selection": {
+    "primary": "F2 OOF con beta=2 sobre etiquetas conocidas",
+    "tie_breakers": [
+      "Mayor recall",
+      "Mayor precision",
+      "Mayor F1",
+      "Indice de candidato mas temprano en la grilla declarada",
+      "Umbral mas cercano a 0.5",
+      "Umbral menor"
+    ],
+    "minimum_precision": null,
+    "rationale": "F2, los desempates y la grilla son supuestos del equipo, no costos medidos. El umbral operativo exige capacidad y costos acordados con el propietario antes de fijarse.",
+    "no_inherited_winner": "Ni SVM ni arbol estan predeterminados por APF3 ni por V6; el ganador de PROY se decide solo con DEV."
+  },
+  "reporting": {
+    "families": "Se elige un ganador por familia (svm, knn, tree, adaboost) y despues el ganador global entre esos cuatro.",
+    "baselines": "Ambos Dummy se reportan siempre; si un modelo no supera a un Dummy se declara explicitamente.",
+    "oof_limit": "El OOF mide seleccion interna sobre 24 clientes sinteticos; no es validacion externa ni desempeno comercial."
+  },
+  "final_cohort": {
+    "seed": 2026112701,
+    "prefix": "PROY-F1",
+    "clients": 120,
+    "status_at_protocol_freeze": "No generado ni inspeccionado.",
+    "generation_gate": "Solo despues de congelar seleccion y artefactos con hashes, con cohorte nueva de clientes disjuntos.",
+    "evaluation": "Una sola evaluacion por modelo congelado; metricas solo sobre etiquetas conocidas.",
+    "no_tuning": "Consultar FINAL cierra la iteracion: cualquier cambio posterior exige protocolo nuevo y test no consultado.",
+    "current_status": "CERRADA en esta entrega: el runner no genera, no puntua y no inspecciona FINAL."
+  },
+  "runtime": {
+    "python": "3.14.6",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.5",
+    "joblib": "1.6.0"
+  },
+  "limits": [
+    "Datos sinteticos de un solo negocio; no representan clientes reales.",
+    "24 clientes en DEV: cualquier metrica tiene incertidumbre alta y no se reporta como desempeno comercial.",
+    "F2 y los desempates son supuestos del equipo, no costos medidos del propietario.",
+    "El umbral seleccionado por F2 no es el umbral operativo; fijarlo requiere medir capacidad y costos.",
+    "Un modelo que empata con Dummy no aporta valor predictivo demostrado.",
+    "FIN no se consulto: el AVANCE de APF3 y su FINAL siguen siendo el unico test ya visto."
+  ]
+}
