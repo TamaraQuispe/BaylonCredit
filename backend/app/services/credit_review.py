@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.commerce import (
@@ -62,7 +63,14 @@ async def enqueue_review(
         threshold=threshold,
     )
     db.add(review)
-    await db.flush()
+    try:
+        async with db.begin_nested():
+            await db.flush()
+    except IntegrityError:
+        existing = await get_review_by_evaluation(db, evaluation.id)
+        if existing is not None:
+            return existing
+        raise
     return review
 
 

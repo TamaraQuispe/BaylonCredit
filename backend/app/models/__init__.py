@@ -2,6 +2,7 @@ from app.models.client import Client
 from app.models.commerce import (
     Credit,
     CreditEvaluation,
+    CreditReview,
     InventoryMovement,
     Payment,
     PaymentAllocation,
@@ -19,6 +20,7 @@ __all__ = [
     "Credit",
     "IdempotencyKey",
     "CreditEvaluation",
+    "CreditReview",
     "InventoryMovement",
     "Payment",
     "PaymentAllocation",
