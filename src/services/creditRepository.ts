@@ -37,7 +37,11 @@ interface CreditState {
   loading: boolean
   loaded: boolean
   error?: string
+  /** La cartera no se pudo cargar: los saldos son desconocidos, no cero. */
+  balancesUnavailable: boolean
 }
+
+type CreditSnapshot = Omit<CreditState, 'balancesUnavailable'>
 
 export interface CreateCreditInput {
   client: Cliente
@@ -104,11 +108,17 @@ interface ApiPayment {
 }
 
 const listeners = new Set<() => void>()
-let state: CreditState = { credits: [], payments: [], loading: false, loaded: false }
+let state: CreditState = {
+  credits: [],
+  payments: [],
+  loading: false,
+  loaded: false,
+  balancesUnavailable: false,
+}
 let loadingPromise: Promise<CreditState> | null = null
 
-function emit(nextState: CreditState) {
-  state = nextState
+function emit(nextState: CreditSnapshot) {
+  state = { ...nextState, balancesUnavailable: Boolean(nextState.error) }
   listeners.forEach((listener) => listener())
 }
 
@@ -233,17 +243,19 @@ export const creditRepository = {
       apiRequest<ApiCredit[]>('/credits'),
       apiRequest<ApiPayment[]>('/payments'),
     ]).then(([credits, payments]) => {
-      const next = {
+      emit({
         credits: credits.map(mapCredit),
         payments: payments.map(mapPayment),
         loading: false,
         loaded: true,
-      }
-      emit(next)
-      return next
+      })
+      return state
     }).catch((error: unknown) => {
-      const next = { ...state, loading: false, error: error instanceof Error ? error.message : 'No se pudo cargar la cartera.' }
-      emit(next)
+      emit({
+        ...state,
+        loading: false,
+        error: error instanceof Error ? error.message : 'No se pudo cargar la cartera.',
+      })
       throw error
     }).finally(() => {
       loadingPromise = null

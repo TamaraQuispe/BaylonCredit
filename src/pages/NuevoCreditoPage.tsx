@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
 import RiskBadge from '@/components/ui/RiskBadge'
 import { getSession } from '@/utils/session'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, orDash } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import { creditRepository, useCreditState } from '@/services/creditRepository'
 import { useSettingsState } from '@/services/settingsRepository'
@@ -24,7 +25,7 @@ export default function NuevoCreditoPage() {
   const navigate = useNavigate()
   const { clients } = useClientState()
   const { settings } = useSettingsState()
-  const { credits, loading: creditsLoading } = useCreditState()
+  const { credits, loading: creditsLoading, balancesUnavailable } = useCreditState()
   const requestedClient = searchParams.get('cliente') ?? ''
   const requestedAmount = Number(searchParams.get('monto'))
   const [clientId, setClientId] = useState(
@@ -76,6 +77,14 @@ export default function NuevoCreditoPage() {
       setError('Selecciona un cliente e ingresa un monto válido.')
       return
     }
+    if (creditsLoading) {
+      setError('Verificando el saldo pendiente del cliente. Espera un momento.')
+      return
+    }
+    if (balancesUnavailable) {
+      setError(balancesUnavailableMessage)
+      return
+    }
     if (blockedByPendingBalance) {
       setError(pendingBalanceMessage(pendingBalance))
       return
@@ -101,6 +110,10 @@ export default function NuevoCreditoPage() {
 
   const confirmCredit = async () => {
     if (!client || !evaluation) return
+    if (balancesUnavailable) {
+      setError(balancesUnavailableMessage)
+      return
+    }
     if (blockedByPendingBalance) {
       setError(pendingBalanceMessage(pendingBalance))
       return
@@ -158,6 +171,13 @@ export default function NuevoCreditoPage() {
         </div>
       )}
 
+      {balancesUnavailable && (
+        <CarteraUnavailableAlert className="mb-6">
+          No es posible verificar si el cliente tiene deuda pendiente, así que no se evalúa ni se
+          registra el crédito. Recarga la página para volver a intentarlo.
+        </CarteraUnavailableAlert>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <form
           onSubmit={evaluate}
@@ -203,7 +223,7 @@ export default function NuevoCreditoPage() {
                 <div className="text-right">
                   <p className="font-label-sm text-label-sm text-on-surface-variant">Saldo pendiente</p>
                   <p className={`font-medium ${blockedByPendingBalance ? 'text-error' : 'text-on-surface'}`}>
-                    {formatCurrency(pendingBalance)}
+                    {orDash(formatCurrency(pendingBalance), balancesUnavailable)}
                   </p>
                 </div>
               </div>
@@ -282,22 +302,24 @@ export default function NuevoCreditoPage() {
 
             <button
               type="submit"
-              disabled={loading || creditsLoading || !client || numericAmount <= 0 || blockedByPendingBalance}
+              disabled={loading || creditsLoading || balancesUnavailable || !client || numericAmount <= 0 || blockedByPendingBalance}
               className="w-full h-12 bg-primary-container text-on-primary rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Icon
                 name={loading ? 'progress_activity' : 'psychology_alt'}
                 className={loading ? 'animate-spin' : ''}
               />
-              {blockedByPendingBalance
-                ? 'Liquida la deuda pendiente para continuar'
-                : creditsLoading
-                  ? 'Verificando saldo pendiente...'
-                  : loading
-                    ? 'Calculando riesgo...'
-                    : evaluation
-                      ? 'Recalcular evaluación'
-                      : 'Calcular score y recomendación'}
+              {balancesUnavailable
+                ? 'No se pudo verificar la deuda pendiente'
+                : blockedByPendingBalance
+                  ? 'Liquida la deuda pendiente para continuar'
+                  : creditsLoading
+                    ? 'Verificando saldo pendiente...'
+                    : loading
+                      ? 'Calculando riesgo...'
+                      : evaluation
+                        ? 'Recalcular evaluación'
+                        : 'Calcular score y recomendación'}
             </button>
           </div>
         </form>
@@ -411,7 +433,7 @@ export default function NuevoCreditoPage() {
               <button
                 type="button"
                 onClick={confirmCredit}
-                disabled={loading || (!evaluation.approved && (!overrideConfirmed || exceptionReason.trim().length < 10)) || (evaluation.requiresManualReview && !isAdmin)}
+                disabled={loading || balancesUnavailable || (!evaluation.approved && (!overrideConfirmed || exceptionReason.trim().length < 10)) || (evaluation.requiresManualReview && !isAdmin)}
                 className="mt-auto w-full h-12 bg-primary text-on-primary rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-primary-container"
               >
                 <Icon name="check_circle" /> {evaluation.approved ? 'Confirmar y registrar credito' : 'Autorizar excepción y registrar crédito'}
@@ -423,6 +445,8 @@ export default function NuevoCreditoPage() {
     </div>
   )
 }
+
+const balancesUnavailableMessage = 'No se pudo cargar la cartera: no es posible verificar el saldo pendiente del cliente, así que no se evalúa ni se registra el crédito.'
 
 function pendingBalanceMessage(pendingBalance: number) {
   return `El cliente mantiene ${formatCurrency(pendingBalance)} de saldo pendiente. Liquida el fiado antes de registrar uno nuevo.`

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
 import type { Cliente } from '@/data/clientes'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, orDash } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
 
@@ -35,6 +36,11 @@ const statusMap: Record<Cliente['status'], { label: string; className: string }>
   },
 }
 
+const balancesUnavailableStatus = {
+  label: 'Sin datos',
+  className: 'bg-surface-container text-on-surface-variant',
+}
+
 const riskMap: Record<Cliente['risk'], { label: string; className: string }> = {
   'muy-bajo': { label: 'Muy Bajo', className: 'bg-surface-variant text-on-surface' },
   bajo: { label: 'Bajo', className: 'bg-surface-variant text-on-surface' },
@@ -47,7 +53,7 @@ export default function ClientesPage() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<FilterKey>('todos')
   const { clients } = useClientState()
-  const { credits } = useCreditState()
+  const { credits, balancesUnavailable } = useCreditState()
   const nameCounts = new Map<string, number>()
   for (const client of clients) {
     const name = client.business.trim().toLocaleLowerCase('es-PE')
@@ -132,6 +138,13 @@ export default function ClientesPage() {
         </div>
       </div>
 
+      {balancesUnavailable && (
+        <CarteraUnavailableAlert className="mb-4">
+          Los saldos pendientes no están disponibles: se ocultan en lugar de mostrarse como S/
+          0.00. Recarga la página para volver a intentarlo.
+        </CarteraUnavailableAlert>
+      )}
+
       {/* Quick filters */}
       <div className="flex overflow-x-auto pb-4 mb-4 gap-2 no-scrollbar w-full border-b border-outline-variant">
         {filters.map((item) => {
@@ -176,9 +189,16 @@ export default function ClientesPage() {
             </thead>
             <tbody className="divide-y divide-outline-variant">
               {filtered.map((client) => {
-                const status = statusMap[client.status]
+                const status = balancesUnavailable ? balancesUnavailableStatus : statusMap[client.status]
                 const risk = riskMap[client.risk]
                 const vencido = client.status === 'vencido'
+                const debtTone = balancesUnavailable
+                  ? 'text-on-surface-variant'
+                  : vencido
+                    ? 'text-error'
+                    : client.debt === 0
+                      ? 'text-on-surface-variant'
+                      : 'text-on-surface'
                 return (
                   <tr
                     key={client.id}
@@ -211,8 +231,8 @@ export default function ClientesPage() {
                     <td className="px-4 align-middle text-center font-body-md text-body-md text-on-surface">
                       {client.purchases}
                     </td>
-                    <td className={`px-4 align-middle text-right font-body-md text-body-md font-medium ${vencido ? 'text-error' : client.debt === 0 ? 'text-on-surface-variant' : 'text-on-surface'}`}>
-                      {formatCurrency(client.debt)}
+                    <td className={`px-4 align-middle text-right font-body-md text-body-md font-medium ${debtTone}`}>
+                      {orDash(formatCurrency(client.debt), balancesUnavailable)}
                     </td>
                     <td className="px-4 align-middle">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-[11px] font-medium ${status.className}`}>

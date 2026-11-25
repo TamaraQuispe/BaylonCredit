@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
 import { clientProfile } from '@/data/clientes'
-import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
+import { formatCurrency, formatDate, formatDateTime, orDash } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
 
@@ -18,7 +19,7 @@ export default function DetalleClientePage() {
   const [activeTab, setActiveTab] = useState<HistoryTab>('compras')
   const { id } = useParams()
   const { clients, loading: loadingClients } = useClientState()
-  const { credits, loading: loadingCredits } = useCreditState()
+  const { credits, loading: loadingCredits, balancesUnavailable } = useCreditState()
   const client = clients.find((item) => item.id === id)
 
   if (loadingClients || loadingCredits) return <div className="py-16 text-center text-on-surface-variant">Cargando cliente...</div>
@@ -57,11 +58,27 @@ export default function DetalleClientePage() {
           )
 
   const kpis = [
-    { label: 'Deuda actual', value: formatCurrency(client.debt), tone: 'text-error' },
+    {
+      label: 'Deuda actual',
+      value: orDash(formatCurrency(client.debt), balancesUnavailable),
+      tone: balancesUnavailable ? 'text-on-surface-variant' : 'text-error',
+    },
     { label: 'Total comprado', value: `${client.purchases} compras`, tone: 'text-on-background' },
-    { label: 'Total credito', value: formatCurrency(totalCredito), tone: 'text-on-background' },
-    { label: 'Créditos pagados', value: String(clientCredits.filter((credit) => credit.status === 'pagado').length), tone: 'text-emerald-600' },
-    { label: 'Pagos atrasados', value: String(clientCredits.filter((credit) => credit.status === 'vencido').length), tone: 'text-amber-600' },
+    {
+      label: 'Total credito',
+      value: orDash(formatCurrency(totalCredito), balancesUnavailable),
+      tone: 'text-on-background',
+    },
+    {
+      label: 'Créditos pagados',
+      value: orDash(String(clientCredits.filter((credit) => credit.status === 'pagado').length), balancesUnavailable),
+      tone: 'text-emerald-600',
+    },
+    {
+      label: 'Pagos atrasados',
+      value: orDash(String(clientCredits.filter((credit) => credit.status === 'vencido').length), balancesUnavailable),
+      tone: 'text-amber-600',
+    },
   ]
 
   return (
@@ -109,6 +126,13 @@ export default function DetalleClientePage() {
           </Link>
         </div>
       </div>
+
+      {balancesUnavailable && (
+        <CarteraUnavailableAlert className="mb-8">
+          Los saldos y el historial de este cliente no están disponibles: se ocultan en lugar de
+          mostrarse como S/ 0.00. Recarga la página para volver a intentarlo.
+        </CarteraUnavailableAlert>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         {kpis.map((kpi) => (
@@ -244,7 +268,9 @@ export default function DetalleClientePage() {
                 {displayedHistory.length === 0 && (
                   <tr>
                     <td colSpan={4} className="py-12 px-6 text-center text-on-surface-variant">
-                      No hay registros en este historial.
+                      {balancesUnavailable
+                        ? 'No disponible: no se pudo cargar el historial del cliente.'
+                        : 'No hay registros en este historial.'}
                     </td>
                   </tr>
                 )}

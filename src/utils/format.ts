@@ -6,6 +6,18 @@ export function formatCurrency(value: number): string {
   }).format(value)
 }
 
+export const UNAVAILABLE_LABEL = 'No disponible'
+
+/** Valor formateado, o '—' si la fuente no permite conocerlo. */
+export function orDash(value: string, unavailable: boolean): string {
+  return unavailable ? '—' : value
+}
+
+/** Texto de apoyo, o la etiqueta de no disponible si falta la fuente. */
+export function orUnavailable(value: string, unavailable: boolean): string {
+  return unavailable ? UNAVAILABLE_LABEL : value
+}
+
 const dateFormatter = new Intl.DateTimeFormat('es-PE', {
   day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Lima',
 })

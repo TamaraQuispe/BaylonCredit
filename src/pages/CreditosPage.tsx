@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
-import { daysUntil, formatCurrency, formatDate, formatDays } from '@/utils/format'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
+import { daysUntil, formatCurrency, formatDate, formatDays, orDash, orUnavailable } from '@/utils/format'
 import { useCreditState } from '@/services/creditRepository'
 import type { RiskLevel, CreditoStatus } from '@/types'
 
@@ -58,7 +59,7 @@ const statusFilters: { key: StatusFilter; label: string }[] = [
 
 export default function CreditosPage() {
   const [filter, setFilter] = useState<StatusFilter>('todos')
-  const { credits } = useCreditState()
+  const { credits, balancesUnavailable } = useCreditState()
 
   const filtered = filter === 'todos' ? credits : credits.filter((credit) => credit.status === filter)
   const activeCredits = credits.filter((credit) => credit.status !== 'pagado')
@@ -77,29 +78,40 @@ export default function CreditosPage() {
   const stats = [
     {
       label: 'Total por cobrar',
-      value: formatCurrency(totalToCollect),
-      detail: `En ${activeCredits.length} creditos activos`,
+      value: orDash(formatCurrency(totalToCollect), balancesUnavailable),
+      detail: orUnavailable(`En ${activeCredits.length} creditos activos`, balancesUnavailable),
       icon: 'account_balance_wallet',
       tone: 'primary-fixed' as const,
     },
     {
       label: 'Deuda al día',
-      value: formatCurrency(currentDebt),
-      detail: totalToCollect > 0 ? `${Math.round((currentDebt / totalToCollect) * 100)}% del total` : 'Sin deuda activa',
+      value: orDash(formatCurrency(currentDebt), balancesUnavailable),
+      detail: orUnavailable(
+        totalToCollect > 0
+          ? `${Math.round((currentDebt / totalToCollect) * 100)}% del total`
+          : 'Sin deuda activa',
+        balancesUnavailable,
+      ),
       icon: 'check_circle',
       tone: 'highest' as const,
     },
     {
       label: 'Deuda vencida',
-      value: formatCurrency(overdueDebt),
-      detail: overdueDebt > 0 ? 'Requiere atención' : 'Sin deuda vencida',
+      value: orDash(formatCurrency(overdueDebt), balancesUnavailable),
+      detail: orUnavailable(
+        overdueDebt > 0 ? 'Requiere atención' : 'Sin deuda vencida',
+        balancesUnavailable,
+      ),
       icon: 'warning',
       tone: 'error-container' as const,
     },
     {
       label: 'Clientes morosos',
-      value: String(delinquentClients),
-      detail: delinquentClients > 0 ? 'Requieren gestión inmediata' : 'Sin clientes morosos',
+      value: orDash(String(delinquentClients), balancesUnavailable),
+      detail: orUnavailable(
+        delinquentClients > 0 ? 'Requieren gestión inmediata' : 'Sin clientes morosos',
+        balancesUnavailable,
+      ),
       icon: 'group_off',
       tone: 'secondary-container' as const,
     },
@@ -145,6 +157,13 @@ export default function CreditosPage() {
           </Button>
         </Link>
       </div>
+
+      {balancesUnavailable && (
+        <CarteraUnavailableAlert>
+          Los totales y saldos de la cartera no están disponibles: se ocultan en lugar de mostrarse
+          como S/ 0.00. Recarga la página para volver a intentarlo.
+        </CarteraUnavailableAlert>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
@@ -300,6 +319,15 @@ export default function CreditosPage() {
                   </tr>
                 )
               })}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-on-surface-variant">
+                    {balancesUnavailable
+                      ? 'No disponible: no se pudo cargar la cartera.'
+                      : 'No hay creditos para este filtro.'}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -307,7 +335,9 @@ export default function CreditosPage() {
         {/* Pagination */}
         <div className="p-4 border-t border-outline-variant flex items-center justify-between bg-surface-bright">
           <span className="font-label-sm text-label-sm text-on-surface-variant">
-            Mostrando {filtered.length} de {credits.length} creditos
+            {balancesUnavailable
+              ? 'Cartera no disponible'
+              : `Mostrando ${filtered.length} de ${credits.length} creditos`}
           </span>
           <div className="flex gap-1">
             <button
