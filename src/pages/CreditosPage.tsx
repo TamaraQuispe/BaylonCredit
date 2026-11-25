@@ -121,7 +121,7 @@ export default function CreditosPage() {
     const rows = [
       ['Código', 'Cliente', 'Monto original', 'Saldo pendiente', 'Fecha', 'Vencimiento', 'Estado', 'Riesgo'],
       ...(balancesUnavailable
-        ? [['No disponible', 'No se pudo cargar la cartera']]
+        ? [['No disponible', 'No se pudo cargar la cartera', '', '', '', '', '', '']]
         : credits.map((credit) => [
             credit.code,
             credit.client.business,
