@@ -2,7 +2,16 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from uuid import uuid4
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    status,
+)
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +34,21 @@ from app.schemas.commerce import CreditRead, SaleCreate, SaleItemRead, SaleRead
 from app.services.ai_credit import enqueue_ai_explanation
 from app.services.audit import add_audit_log
 from app.services.credit_scoring import evaluate_and_record
+from app.services.idempotency import (
+    HEADER_NAME as IDEMPOTENCY_HEADER,
+)
+from app.services.idempotency import (
+    begin as begin_idempotent_operation,
+)
+from app.services.idempotency import (
+    complete as complete_idempotent_operation,
+)
+from app.services.idempotency import (
+    normalize_key as normalize_idempotency_key,
+)
+from app.services.idempotency import (
+    release as release_idempotent_operation,
+)
 from app.services.proy_credit_policy import (
     PENDING_BALANCE_BLOCK,
     lock_client,
@@ -79,8 +103,20 @@ async def create_sale(
     payload: SaleCreate,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(can_sell),
+    idempotency_key: str | None = Header(default=None, alias=IDEMPOTENCY_HEADER),
     db: AsyncSession = Depends(get_db),
 ) -> SaleRead:
+    # P0-03: idempotencia antes de cualquier bloqueo o escritura.
+    start = await begin_idempotent_operation(
+        db,
+        key=normalize_idempotency_key(idempotency_key),
+        scope="sales.create",
+        user_id=current_user.id,
+        payload=payload.model_dump(mode="json"),
+    )
+    if start.replay_body is not None:
+        return JSONResponse(status_code=start.replay_status, content=start.replay_body)
+
     client: Client | None = None
     credit_evaluation = None
     due_date: date | None = None
@@ -105,6 +141,7 @@ async def create_sale(
                 },
                 description="Venta al credito rechazada: el cliente mantiene saldo pendiente.",
             )
+            await release_idempotent_operation(db, start.record)
             await db.commit()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=pending_gate.reason
@@ -157,6 +194,7 @@ async def create_sale(
             db, client.id, total, current_user.id, "credit_sale"
         )
         if not credit_evaluation.approved:
+            await release_idempotent_operation(db, start.record)
             await db.commit()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -229,10 +267,19 @@ async def create_sale(
         )
         db.add(credit)
 
-    await db.commit()
     await db.refresh(sale)
     if credit:
         await db.refresh(credit)
+    serialized = await serialize_sale(db, sale, credit)
+    complete_idempotent_operation(
+        db,
+        start.record,
+        status_code=status.HTTP_201_CREATED,
+        body=serialized.model_dump(mode="json"),
+        resource_id=sale.id,
+    )
+    await db.commit()
+    if credit:
         enqueue_evaluation_notification(background_tasks, credit_evaluation.id)
         enqueue_ai_explanation(background_tasks, credit_evaluation.id)
-    return await serialize_sale(db, sale, credit)
+    return serialized

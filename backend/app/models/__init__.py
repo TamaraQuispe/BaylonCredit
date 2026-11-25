@@ -9,6 +9,7 @@ from app.models.commerce import (
     Sale,
     SaleItem,
 )
+from app.models.idempotency import IdempotencyKey
 from app.models.settings import BusinessSettings
 from app.models.user import AuditLog, RefreshToken, User, UserRole, WebauthnCredential
 from app.models.whatsapp import NotificationStatus, WhatsappNotification
@@ -16,6 +17,7 @@ from app.models.whatsapp import NotificationStatus, WhatsappNotification
 __all__ = [
     "Client",
     "Credit",
+    "IdempotencyKey",
     "CreditEvaluation",
     "InventoryMovement",
     "Payment",

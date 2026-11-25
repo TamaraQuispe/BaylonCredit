@@ -3,7 +3,16 @@ from decimal import Decimal
 from typing import Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    status,
+)
+from fastapi.responses import JSONResponse
 from sqlalchemy import distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,6 +42,21 @@ from app.schemas.finance import (
 from app.services.ai_credit import dispatch_ai_explanation, enqueue_ai_explanation
 from app.services.audit import add_audit_log
 from app.services.credit_scoring import evaluate_and_record
+from app.services.idempotency import (
+    HEADER_NAME as IDEMPOTENCY_HEADER,
+)
+from app.services.idempotency import (
+    begin as begin_idempotent_operation,
+)
+from app.services.idempotency import (
+    complete as complete_idempotent_operation,
+)
+from app.services.idempotency import (
+    normalize_key as normalize_idempotency_key,
+)
+from app.services.idempotency import (
+    release as release_idempotent_operation,
+)
 from app.services.proy_credit_policy import (
     PENDING_BALANCE_BLOCK,
     lock_client,
@@ -288,8 +312,19 @@ async def create_credit(
     payload: DirectCreditCreate,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(can_write),
+    idempotency_key: str | None = Header(default=None, alias=IDEMPOTENCY_HEADER),
     db: AsyncSession = Depends(get_db),
 ) -> FinanceCreditRead:
+    # P0-03: con Idempotency-Key un reintento no duplica el fiado.
+    start = await begin_idempotent_operation(
+        db,
+        key=normalize_idempotency_key(idempotency_key),
+        scope="credits.create",
+        user_id=current_user.id,
+        payload=payload.model_dump(mode="json"),
+    )
+    if start.replay_body is not None:
+        return JSONResponse(status_code=start.replay_status, content=start.replay_body)
     # Regla del propietario (P0-02): cualquier saldo pendiente bloquea el fiado.
     # Se lee de la base con bloqueo de cliente, antes del modelo y sin excepciones.
     client = await lock_client(db, payload.client_id)
@@ -311,6 +346,7 @@ async def create_credit(
             },
             description="Nuevo fiado rechazado: el cliente mantiene saldo pendiente.",
         )
+        await release_idempotent_operation(db, start.record)
         await db.commit()
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=pending_gate.reason
@@ -322,6 +358,7 @@ async def create_credit(
     overridden = False
     if not approved:
         if not payload.manual_override:
+            await release_idempotent_operation(db, start.record)
             await db.commit()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -332,6 +369,7 @@ async def create_credit(
         )
         if requires_review:
             if current_user.role != UserRole.ADMIN:
+                await release_idempotent_operation(db, start.record)
                 await db.commit()
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
@@ -342,6 +380,7 @@ async def create_credit(
                 )
             policy = await get_settings_record(db)
             if payload.amount > policy.max_credit_amount:
+                await release_idempotent_operation(db, start.record)
                 await db.commit()
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -349,6 +388,7 @@ async def create_credit(
                 )
         reason = (payload.exception_reason or "").strip()
         if len(reason) < 10:
+            await release_idempotent_operation(db, start.record)
             await db.commit()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -376,8 +416,8 @@ async def create_credit(
         recommended_limit=evaluation.recommended_limit,
     )
     db.add(credit)
+    await db.flush()
     if overridden:
-        await db.flush()
         add_audit_log(
             db,
             "credit_overridden",
@@ -394,7 +434,15 @@ async def create_credit(
             },
             description="Crédito aprobado como excepción fuera de la política de riesgo.",
         )
-    await db.commit()
     await db.refresh(credit)
+    serialized = await serialize_credit(db, credit)
+    complete_idempotent_operation(
+        db,
+        start.record,
+        status_code=status.HTTP_201_CREATED,
+        body=serialized.model_dump(mode="json"),
+        resource_id=credit.id,
+    )
+    await db.commit()
     notify_evaluation(background_tasks, evaluation.id)
-    return await serialize_credit(db, credit)
+    return serialized
