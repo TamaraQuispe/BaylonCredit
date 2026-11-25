@@ -56,8 +56,7 @@ export default function ClientesPage() {
 
   const displayedClients = clients.map((client) => {
     const clientCredits = credits.filter((credit) => credit.clientId === client.id)
-    const creditDebt = clientCredits.reduce((sum, credit) => sum + credit.pendingAmount, 0)
-    const debt = client.debt + creditDebt
+    const debt = client.debt
     const latestEvaluation = clientCredits.find((credit) => credit.evaluation)?.evaluation
     const hasOverdue = clientCredits.some(
       (credit) => credit.status === 'vencido' && credit.pendingAmount > 0,

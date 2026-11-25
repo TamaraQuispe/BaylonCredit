@@ -32,7 +32,6 @@ export default function DetalleClientePage() {
   const risk = hasEvaluation
     ? latestEvaluation?.risk.toUpperCase() ?? client.risk.toUpperCase()
     : 'SIN EVALUAR'
-  const additionalDebt = clientCredits.reduce((sum, credit) => sum + credit.pendingAmount, 0)
   const totalCredito = clientCredits.reduce((sum, credit) => sum + credit.originalAmount, 0)
   const displayedHistory =
     activeTab === 'compras'
@@ -58,7 +57,7 @@ export default function DetalleClientePage() {
           )
 
   const kpis = [
-    { label: 'Deuda actual', value: formatCurrency(client.debt + additionalDebt), tone: 'text-error' },
+    { label: 'Deuda actual', value: formatCurrency(client.debt), tone: 'text-error' },
     { label: 'Total comprado', value: `${client.purchases} compras`, tone: 'text-on-background' },
     { label: 'Total credito', value: formatCurrency(totalCredito), tone: 'text-on-background' },
     { label: 'Créditos pagados', value: String(clientCredits.filter((credit) => credit.status === 'pagado').length), tone: 'text-emerald-600' },
