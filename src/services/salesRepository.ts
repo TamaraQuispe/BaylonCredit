@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react'
-import { apiRequest } from './apiClient'
+import { apiRequest, newIdempotencyKey } from './apiClient'
 
 export type SalePaymentMode = 'contado' | 'credito'
 export type SalesPeriod = 'hoy' | 'semana' | 'mes'
@@ -104,6 +104,24 @@ function mapSale(sale: ApiSale): StoredSale {
   }
 }
 
+const MAX_PENDING_WRITE_KEYS = 50
+const pendingWriteKeys = new Map<string, string>()
+
+/** Una clave por cuerpo: un reintento del mismo envio reutiliza la clave. */
+function idempotencyKeyFor(body: string): string {
+  const existing = pendingWriteKeys.get(body)
+  if (existing) return existing
+  if (pendingWriteKeys.size >= MAX_PENDING_WRITE_KEYS) pendingWriteKeys.clear()
+  const key = newIdempotencyKey()
+  pendingWriteKeys.set(body, key)
+  return key
+}
+
+/** La venta se confirmo: el siguiente envio identico es una accion nueva. */
+function settleWriteKey(body: string): void {
+  pendingWriteKeys.delete(body)
+}
+
 export const salesRepository = {
   subscribe(listener: () => void) {
     listeners.add(listener)
@@ -132,15 +150,18 @@ export const salesRepository = {
     return loadingPromise
   },
   async create(input: CreateSaleInput) {
+    const body = JSON.stringify({
+      payment_mode: input.paymentMode,
+      client_id: input.clientId || null,
+      due_date: input.dueDate || null,
+      items: input.items.map((item) => ({ product_id: item.productId, quantity: item.quantity })),
+    })
     const sale = mapSale(await apiRequest<ApiSale>('/sales', {
       method: 'POST',
-      body: JSON.stringify({
-        payment_mode: input.paymentMode,
-        client_id: input.clientId || null,
-        due_date: input.dueDate || null,
-        items: input.items.map((item) => ({ product_id: item.productId, quantity: item.quantity })),
-      }),
+      headers: { 'Idempotency-Key': idempotencyKeyFor(body) },
+      body,
     }))
+    settleWriteKey(body)
     emit({ ...state, sales: [sale, ...state.sales], loaded: true })
     return sale
   },

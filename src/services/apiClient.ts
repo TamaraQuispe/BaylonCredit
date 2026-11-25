@@ -15,6 +15,21 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Clave de idempotencia para una escritura concreta.
+ *
+ * El backend guarda la respuesta de cada clave: si un envio se reintenta con el
+ * mismo cuerpo debe reutilizar la clave para no duplicar el fiado, la venta o el
+ * pago. Los repositorios la conservan mientras el cuerpo no cambie.
+ */
+export function newIdempotencyKey(): string {
+  const cryptoApi = globalThis.crypto
+  if (cryptoApi && typeof cryptoApi.randomUUID === 'function') {
+    return cryptoApi.randomUUID()
+  }
+  return `idem-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export interface AuthUser {
   id: string
   email: string

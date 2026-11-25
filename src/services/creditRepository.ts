@@ -4,7 +4,7 @@ import type { Cliente } from '@/data/clientes'
 import type { PaymentRecord } from '@/data/pagos'
 import type { RiskLevel } from '@/types'
 import { formatDate, formatDateTime } from '@/utils/format'
-import { apiRequest } from './apiClient'
+import { apiRequest, newIdempotencyKey } from './apiClient'
 import type { CreditEvaluation } from './scoringService'
 
 export interface CreditTimelineEntry {
@@ -199,6 +199,24 @@ function mapPayment(payment: ApiPayment): StoredPayment {
   }
 }
 
+const MAX_PENDING_WRITE_KEYS = 50
+const pendingWriteKeys = new Map<string, string>()
+
+/** Una clave por cuerpo: un reintento del mismo envio reutiliza la clave. */
+function idempotencyKeyFor(body: string): string {
+  const existing = pendingWriteKeys.get(body)
+  if (existing) return existing
+  if (pendingWriteKeys.size >= MAX_PENDING_WRITE_KEYS) pendingWriteKeys.clear()
+  const key = newIdempotencyKey()
+  pendingWriteKeys.set(body, key)
+  return key
+}
+
+/** La escritura se confirmo: el siguiente envio identico es una accion nueva. */
+function settleWriteKey(body: string): void {
+  pendingWriteKeys.delete(body)
+}
+
 export const creditRepository = {
   subscribe(listener: () => void) {
     listeners.add(listener)
@@ -233,34 +251,40 @@ export const creditRepository = {
     return loadingPromise
   },
   async create(input: CreateCreditInput) {
+    const body = JSON.stringify({
+      client_id: input.client.id,
+      amount: input.amount,
+      credit_date: input.creditDate,
+      due_date: input.dueDate,
+      manual_override: !input.evaluation.approved && Boolean(input.exceptionReason?.trim()),
+      exception_reason: input.exceptionReason?.trim() || undefined,
+    })
     const credit = mapCredit(await apiRequest<ApiCredit>('/credits', {
       method: 'POST',
-      body: JSON.stringify({
-        client_id: input.client.id,
-        amount: input.amount,
-        credit_date: input.creditDate,
-        due_date: input.dueDate,
-        manual_override: !input.evaluation.approved && Boolean(input.exceptionReason?.trim()),
-        exception_reason: input.exceptionReason?.trim() || undefined,
-      }),
+      headers: { 'Idempotency-Key': idempotencyKeyFor(body) },
+      body,
     }))
+    settleWriteKey(body)
     emit({ ...state, credits: [credit, ...state.credits], loaded: true })
     return credit
   },
   async applyPayment(input: ApplyPaymentInput) {
+    const body = JSON.stringify({
+      client_id: input.client.id,
+      allocations: input.allocations.map((allocation) => ({
+        credit_id: allocation.creditId,
+        amount: allocation.amount,
+      })),
+      payment_date: input.paymentDate,
+      method: input.method,
+      reference: input.reference || null,
+    })
     const payment = mapPayment(await apiRequest<ApiPayment>('/payments', {
       method: 'POST',
-      body: JSON.stringify({
-        client_id: input.client.id,
-        allocations: input.allocations.map((allocation) => ({
-          credit_id: allocation.creditId,
-          amount: allocation.amount,
-        })),
-        payment_date: input.paymentDate,
-        method: input.method,
-        reference: input.reference || null,
-      }),
+      headers: { 'Idempotency-Key': idempotencyKeyFor(body) },
+      body,
     }))
+    settleWriteKey(body)
     await this.load(true)
     return payment
   },
