@@ -120,16 +120,18 @@ export default function CreditosPage() {
   const exportCredits = () => {
     const rows = [
       ['Código', 'Cliente', 'Monto original', 'Saldo pendiente', 'Fecha', 'Vencimiento', 'Estado', 'Riesgo'],
-      ...credits.map((credit) => [
-        credit.code,
-        credit.client.business,
-        credit.originalAmount,
-        credit.pendingAmount,
-        credit.createdAt,
-        credit.dueAt,
-        credit.status,
-        credit.risk,
-      ]),
+      ...(balancesUnavailable
+        ? [['No disponible', 'No se pudo cargar la cartera']]
+        : credits.map((credit) => [
+            credit.code,
+            credit.client.business,
+            credit.originalAmount,
+            credit.pendingAmount,
+            credit.createdAt,
+            credit.dueAt,
+            credit.status,
+            credit.risk,
+          ])),
     ]
     const url = URL.createObjectURL(
       new Blob([rows.map((row) => row.join(',')).join('\n')], { type: 'text/csv;charset=utf-8' }),

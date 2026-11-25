@@ -43,10 +43,10 @@ export default function ReportesPage() {
     const rows = [
       ['Reporte', report.label],
       ['Ventas totales', salesMetrics.total],
-      ['Cartera fiada actual', metrics.totalPending],
-      ['Total recuperado acumulado', metrics.totalRecovered],
-      ['Monto vencido actual', metrics.totalOverdue],
-      ['Tasa de morosidad actual', `${metrics.delinquencyRate}%`],
+      ['Cartera fiada actual', orUnavailable(String(metrics.totalPending), balancesUnavailable)],
+      ['Total recuperado acumulado', orUnavailable(String(metrics.totalRecovered), balancesUnavailable)],
+      ['Monto vencido actual', orUnavailable(String(metrics.totalOverdue), balancesUnavailable)],
+      ['Tasa de morosidad actual', orUnavailable(`${metrics.delinquencyRate}%`, balancesUnavailable)],
       [],
       ...(portfolio ? [
         ['Cartera por cliente', 'Deuda', 'Vencido', 'Créditos', 'Vencidos'],
