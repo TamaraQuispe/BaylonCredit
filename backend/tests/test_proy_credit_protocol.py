@@ -23,7 +23,10 @@ def protocol():
 def test_protocol_declares_the_requested_grid(protocol):
     p05.validate_protocol(protocol)
     candidates = p05.build_candidates(protocol)
-    by_family = {name: [c for c in candidates if c["family"] == name] for name in p05.MODEL_FAMILIES}
+    by_family = {
+        name: [c for c in candidates if c["family"] == name]
+        for name in p05.MODEL_FAMILIES
+    }
     assert len(by_family["svm"]) == 6
     assert len(by_family["knn"]) == 5
     assert len(by_family["tree"]) == 12
@@ -49,7 +52,11 @@ def test_feature_order_matches_application_contract(protocol):
     from app.ml import proy_contract
     from app.ml.features import FEATURE_NAMES
 
-    assert protocol["feature_names"] == list(FEATURE_NAMES) == list(proy_contract.FEATURE_NAMES_PROY)
+    assert (
+        protocol["feature_names"]
+        == list(FEATURE_NAMES)
+        == list(proy_contract.FEATURE_NAMES_PROY)
+    )
 
 
 def test_final_test_is_closed_without_a_freeze(tmp_path):
@@ -66,7 +73,9 @@ def test_final_test_rejects_tampered_artifacts(tmp_path):
         "final_generation_calls": 0,
         "final_prediction_calls": 0,
     }))
-    (tmp_path / "artifact_manifest.json").write_text(json.dumps({"selected_model.joblib": "0" * 64}))
+    (tmp_path / "artifact_manifest.json").write_text(
+        json.dumps({"selected_model.joblib": "0" * 64})
+    )
     (tmp_path / "selected_model.joblib").write_bytes(b"not-the-artifact")
     with pytest.raises(ValueError, match="cambio despues del freeze"):
         p05.final_test_status(tmp_path)

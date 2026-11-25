@@ -7,7 +7,7 @@ para la misma evaluacion.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -101,7 +101,7 @@ async def resolve_review(
     review.resolution = resolution
     review.resolution_note = (note or "").strip() or None
     review.resolved_by_id = user.id
-    review.resolved_at = datetime.now(timezone.utc)
+    review.resolved_at = datetime.now(UTC)
     await db.flush()
     return review
 
@@ -111,7 +111,7 @@ async def expire_review(db: AsyncSession, review: CreditReview) -> CreditReview:
         return review
     review.status = CreditReviewStatus.EXPIRED
     review.resolution = CreditReviewResolution.EXPIRED
-    review.resolved_at = datetime.now(timezone.utc)
+    review.resolved_at = datetime.now(UTC)
     await db.flush()
     return review
 

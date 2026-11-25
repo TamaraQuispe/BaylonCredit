@@ -34,16 +34,23 @@ from app.models.user import User, UserRole
 from app.schemas.finance import (
     CreditEvaluationHistoryRead,
     CreditEvaluationRead,
-    CreditReviewRead,
     CreditEvaluationRequest,
     CreditEvaluationSummary,
     CreditPaymentEntry,
+    CreditReviewRead,
     DirectCreditCreate,
     FinanceCreditRead,
     ScoreFactorRead,
 )
 from app.services.ai_credit import dispatch_ai_explanation, enqueue_ai_explanation
 from app.services.audit import add_audit_log
+from app.services.credit_review import (
+    assign_review,
+    can_assign,
+    can_resolve,
+    enqueue_review,
+    resolve_review,
+)
 from app.services.credit_scoring import evaluate_and_record
 from app.services.idempotency import (
     HEADER_NAME as IDEMPOTENCY_HEADER,
@@ -59,15 +66,6 @@ from app.services.idempotency import (
 )
 from app.services.idempotency import (
     release as release_idempotent_operation,
-)
-from app.services.credit_review import (
-    assign_review,
-    can_assign,
-    can_resolve,
-    enqueue_review,
-    expire_review,
-    get_review_by_evaluation,
-    resolve_review,
 )
 from app.services.proy_credit_policy import (
     PENDING_BALANCE_BLOCK,
@@ -380,9 +378,15 @@ async def assign_credit_review(
 ) -> CreditReviewRead:
     review = await db.get(CreditReview, review_id)
     if review is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Revision no encontrada")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Revision no encontrada",
+        )
     if not can_assign(current_user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permiso para asignar revisiones")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sin permiso para asignar revisiones",
+        )
     await assign_review(db, review, current_user)
     await db.commit()
     await db.refresh(review)
@@ -391,7 +395,11 @@ async def assign_credit_review(
         id=review.id,
         evaluation_id=review.evaluation_id,
         client_id=review.client_id,
-        client_name=(client.business_name or f"{client.first_name} {client.last_name}") if client else None,
+        client_name=(
+            (client.business_name or f"{client.first_name} {client.last_name}")
+            if client
+            else None
+        ),
         requested_amount=review.requested_amount,
         score=review.score,
         risk=review.risk,
@@ -423,14 +431,26 @@ async def resolve_credit_review(
 ) -> CreditReviewRead:
     review = await db.get(CreditReview, review_id)
     if review is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Revision no encontrada")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Revision no encontrada",
+        )
     if not can_resolve(current_user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permiso para resolver revisiones")
-    res = CreditReviewResolution.APPROVED if resolution == "aprobada" else CreditReviewResolution.REJECTED
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sin permiso para resolver revisiones",
+        )
+    res = (
+        CreditReviewResolution.APPROVED
+        if resolution == "aprobada"
+        else CreditReviewResolution.REJECTED
+    )
     try:
         await resolve_review(db, review, user=current_user, resolution=res, note=note)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from exc
     await db.commit()
     await db.refresh(review)
     client = await db.get(Client, review.client_id)
@@ -438,7 +458,11 @@ async def resolve_credit_review(
         id=review.id,
         evaluation_id=review.evaluation_id,
         client_id=review.client_id,
-        client_name=(client.business_name or f"{client.first_name} {client.last_name}") if client else None,
+        client_name=(
+            (client.business_name or f"{client.first_name} {client.last_name}")
+            if client
+            else None
+        ),
         requested_amount=review.requested_amount,
         score=review.score,
         risk=review.risk,

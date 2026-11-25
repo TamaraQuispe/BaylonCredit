@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, PlainSerializer, model_validator
 
-from app.models.commerce import RiskLevel, CreditReviewStatus, CreditReviewResolution
+from app.models.commerce import CreditReviewResolution, CreditReviewStatus, RiskLevel
 
 
 class ScoreFactorRead(BaseModel):

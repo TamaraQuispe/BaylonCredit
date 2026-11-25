@@ -169,7 +169,7 @@ def fold_pairs(plan: dict) -> list[tuple[np.ndarray, np.ndarray]]:
         for fold in plan["folds"]
     ]
     coverage = np.zeros(max(int(i.max()) for _, i in pairs) + 1, dtype=int)
-    for train, valid in pairs:
+    for _train, valid in pairs:
         coverage[valid] += 1
     if not np.all(coverage == 1):
         raise ValueError("Los folds guardados no cubren cada fila exactamente una vez")
@@ -315,12 +315,18 @@ def describe(model, family: str) -> dict:
                 zip(FEATURE_NAMES, classifier.feature_importances_.tolist(), strict=True)
             ),
             "base_estimator": "DecisionTreeClassifier(max_depth=1)",
-            "caveat": "Importancias sobre features estandarizadas; describen el ensamble, no causalidad.",
+            "caveat": (
+                "Importancias sobre features estandarizadas; describen el ensamble, "
+                "no causalidad."
+            ),
         }
     if family == "knn":
         return {
             "reference_rows": len(model.named_steps["classifier"]._fit_X),
-            "caveat": "KNN no ofrece coeficientes; el vecindario depende de la escala estandarizada.",
+            "caveat": (
+                "KNN no ofrece coeficientes; el vecindario depende de la escala "
+                "estandarizada."
+            ),
         }
     return {"caveat": "Referencia Dummy, no un modelo de riesgo entrenado"}
 
@@ -353,7 +359,9 @@ def final_test_status(output: Path) -> dict:
 def run(development: Path, protocol_path: Path, output: Path) -> dict:
     if not __debug__:
         raise RuntimeError("La validacion exige assertions activas")
-    development, protocol_path, output = (path.resolve() for path in (development, protocol_path, output))
+    development, protocol_path, output = (
+        path.resolve() for path in (development, protocol_path, output)
+    )
     if output.exists():
         raise ValueError("El directorio de salida debe ser nuevo; no se reutiliza evidencia")
     protocol = load_json(protocol_path)
@@ -388,7 +396,9 @@ def run(development: Path, protocol_path: Path, output: Path) -> dict:
     candidates = build_candidates(protocol)
     expected = protocol["candidate_count"]
     if len(candidates) != expected["trained_models"]:
-        raise ValueError(f"La grilla produjo {len(candidates)} modelos, no {expected['trained_models']}")
+        raise ValueError(
+            f"La grilla produjo {len(candidates)} modelos, no {expected['trained_models']}"
+        )
 
     search, entries = [], []
     for index, params in enumerate(candidates):
@@ -459,13 +469,19 @@ def run(development: Path, protocol_path: Path, output: Path) -> dict:
         "families": families,
         "global_winner": winner,
         "baselines": {
-            name: {"params": item["params"], "threshold": item["threshold"], "metrics": item["metrics"]}
+            name: {
+                "params": item["params"],
+                "threshold": item["threshold"],
+                "metrics": item["metrics"],
+            }
             for name, item in baselines.items()
         },
         "beat_baselines": {
             name: {
                 "f2_strictly_higher": winner["metrics"]["f2"] > baselines[name]["metrics"]["f2"],
-                "recall_strictly_higher": winner["metrics"]["recall"] > baselines[name]["metrics"]["recall"],
+                "recall_strictly_higher": (
+                    winner["metrics"]["recall"] > baselines[name]["metrics"]["recall"]
+                ),
                 "baseline_f2": baselines[name]["metrics"]["f2"],
             }
             for name in BASELINES
