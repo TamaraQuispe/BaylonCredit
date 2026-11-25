@@ -10,6 +10,7 @@ import { selectDashboardMetrics } from '@/services/dashboardSelectors'
 import { selectSalesMetrics, useSalesState, type SalesPeriod } from '@/services/salesRepository'
 import { localScoringService, type EvaluationSummary } from '@/services/scoringService'
 import { formatCurrency, orDash, orUnavailable } from '@/utils/format'
+import { toCsv } from '@/utils/csv'
 
 export default function ReportesPage() {
   const [period, setPeriod] = useState<SalesPeriod>('mes')
@@ -62,7 +63,7 @@ export default function ReportesPage() {
       ['Producto', 'Cantidad', 'Ingresos'],
       ...salesMetrics.topProducts.map((product) => [product.name, product.quantity, product.revenue]),
     ]
-    const csv = rows.map((row) => row.join(',')).join('\n')
+    const csv = toCsv(rows)
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
     const link = document.createElement('a')
     link.href = url

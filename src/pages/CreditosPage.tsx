@@ -4,6 +4,7 @@ import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
 import { daysUntil, formatCurrency, formatDate, formatDays, orDash, orUnavailable } from '@/utils/format'
+import { toCsv } from '@/utils/csv'
 import { useCreditState } from '@/services/creditRepository'
 import type { RiskLevel, CreditoStatus } from '@/types'
 
@@ -134,7 +135,7 @@ export default function CreditosPage() {
           ])),
     ]
     const url = URL.createObjectURL(
-      new Blob([rows.map((row) => row.join(',')).join('\n')], { type: 'text/csv;charset=utf-8' }),
+      new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }),
     )
     const link = document.createElement('a')
     link.href = url

@@ -5,6 +5,7 @@ import Modal from '@/components/ui/Modal'
 import ProductThumbnail from '@/components/ui/ProductThumbnail'
 import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
 import { formatCurrency } from '@/utils/format'
+import { toCsv } from '@/utils/csv'
 
 type StockFilter = 'todos' | 'optimo' | 'bajo' | 'agotado'
 type StockAction = 'entrada' | 'ajuste'
@@ -91,7 +92,7 @@ export default function InventarioPage() {
       ['Código', 'Producto', 'Categoría', 'Stock actual', 'Stock mínimo'],
       ...items.map((item) => [item.sku, item.name, item.category, item.stock, item.minimumStock]),
     ]
-    const csv = rows.map((row) => row.join(',')).join('\n')
+    const csv = toCsv(rows)
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
     const link = document.createElement('a')
     link.href = url
