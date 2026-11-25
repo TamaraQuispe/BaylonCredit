@@ -144,6 +144,66 @@ class CreditEvaluation(UUIDMixin, TimestampMixin, Base):
     ai_generated_at: Mapped[datetime | None]
 
 
+class CreditReviewStatus(StrEnum):
+    PENDING = "pendiente"
+    ASSIGNED = "asignada"
+    RESOLVED = "resuelta"
+    EXPIRED = "expirada"
+
+
+class CreditReviewResolution(StrEnum):
+    APPROVED = "aprobada"
+    REJECTED = "rechazada"
+    EXPIRED = "expirada"
+
+
+class CreditReview(UUIDMixin, TimestampMixin, Base):
+    """Cola persistente de revisiones humanas de credito (P1-02).
+
+    Una evaluacion que requiere revision obligatoria o una concesion bloqueada
+    genera un item pendiente. Reevaluar deuda al resolver; no duplicar items
+    para la misma evaluacion.
+    """
+
+    __tablename__ = "credit_reviews"
+
+    evaluation_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("credit_evaluations.id", ondelete="SET NULL"), unique=True
+    )
+    client_id: Mapped[UUID] = mapped_column(
+        ForeignKey("clients.id", ondelete="RESTRICT"), index=True, nullable=False
+    )
+    requested_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, nullable=False)
+    risk: Mapped[RiskLevel] = mapped_column(
+        Enum(RiskLevel, name="risk_level", native_enum=False), nullable=False
+    )
+    decision: Mapped[str] = mapped_column(String(40), nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text)
+    priority: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    status: Mapped[CreditReviewStatus] = mapped_column(
+        Enum(CreditReviewStatus, name="credit_review_status", native_enum=False),
+        default=CreditReviewStatus.PENDING,
+        nullable=False,
+    )
+    assigned_to_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    resolved_by_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    resolved_at: Mapped[datetime | None]
+    resolution: Mapped[CreditReviewResolution | None] = mapped_column(
+        Enum(CreditReviewResolution, name="credit_review_resolution", native_enum=False)
+    )
+    resolution_note: Mapped[str | None] = mapped_column(Text)
+    model_version: Mapped[str | None] = mapped_column(String(40))
+    policy_version: Mapped[str | None] = mapped_column(String(40))
+    feature_schema_version: Mapped[str | None] = mapped_column(String(40))
+    threshold: Mapped[Decimal | None] = mapped_column(Numeric(6, 4))
+    expires_at: Mapped[datetime | None]
+
+
 class InventoryMovement(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "inventory_movements"
 

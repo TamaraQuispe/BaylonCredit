@@ -23,6 +23,7 @@ from app.models.client import Client
 from app.models.commerce import (
     Credit,
     CreditEvaluation,
+    CreditReview,
     CreditStatus,
     Payment,
     PaymentAllocation,
@@ -32,6 +33,7 @@ from app.models.user import User, UserRole
 from app.schemas.finance import (
     CreditEvaluationHistoryRead,
     CreditEvaluationRead,
+    CreditReviewRead,
     CreditEvaluationRequest,
     CreditEvaluationSummary,
     CreditPaymentEntry,
@@ -56,6 +58,15 @@ from app.services.idempotency import (
 )
 from app.services.idempotency import (
     release as release_idempotent_operation,
+)
+from app.services.credit_review import (
+    assign_review,
+    can_assign,
+    can_resolve,
+    enqueue_review,
+    expire_review,
+    get_review_by_evaluation,
+    resolve_review,
 )
 from app.services.proy_credit_policy import (
     PENDING_BALANCE_BLOCK,
@@ -201,6 +212,18 @@ async def evaluate_requested_credit(
     evaluation = await record_evaluation(
         db, payload.client_id, payload.amount, current_user.id, "manual"
     )
+    requires_review = any(
+        factor.get("key") == "payment_history_review" for factor in evaluation.factors
+    )
+    if requires_review:
+        await enqueue_review(
+            db,
+            evaluation=evaluation,
+            decision="REQUIRES_OWNER_REVIEW",
+            reason="Sin historial pagado confirmado; revision obligatoria del propietario.",
+            priority=10,
+            policy_version="PROY-propuesta",
+        )
     await db.commit()
     await db.refresh(evaluation)
     await dispatch_ai_explanation(evaluation.id)
@@ -354,6 +377,18 @@ async def create_credit(
     evaluation = await record_evaluation(
         db, payload.client_id, payload.amount, current_user.id, "direct_credit"
     )
+    requires_review = any(
+        factor.get("key") == "payment_history_review" for factor in evaluation.factors
+    )
+    if requires_review:
+        await enqueue_review(
+            db,
+            evaluation=evaluation,
+            decision="REQUIRES_OWNER_REVIEW",
+            reason="Sin historial pagado confirmado; revision obligatoria del propietario.",
+            priority=10,
+            policy_version="PROY-propuesta",
+        )
     approved = evaluation.approved
     overridden = False
     if not approved:
@@ -446,3 +481,142 @@ async def create_credit(
     await db.commit()
     notify_evaluation(background_tasks, evaluation.id)
     return serialized
+
+
+@router.get("/reviews", response_model=list[CreditReviewRead])
+async def list_credit_reviews(
+    status_filter: str | None = Query(default=None, alias="status"),
+    client_id: UUID | None = None,
+    limit: int = Query(default=100, ge=1, le=200),
+    current_user: User = Depends(can_evaluate_risk),
+    db: AsyncSession = Depends(get_db),
+) -> list[CreditReviewRead]:
+    query = (
+        select(CreditReview, Client)
+        .join(Client, Client.id == CreditReview.client_id)
+        .order_by(CreditReview.created_at.desc())
+        .limit(limit)
+    )
+    if status_filter:
+        query = query.where(CreditReview.status == status_filter)
+    if client_id is not None:
+        query = query.where(CreditReview.client_id == client_id)
+    rows = (await db.execute(query)).all()
+    result = []
+    for review, client in rows:
+        result.append(
+            CreditReviewRead(
+                id=review.id,
+                evaluation_id=review.evaluation_id,
+                client_id=review.client_id,
+                client_name=client.business_name
+                or f"{client.first_name} {client.last_name}",
+                requested_amount=review.requested_amount,
+                score=review.score,
+                risk=review.risk,
+                decision=review.decision,
+                reason=review.reason,
+                priority=review.priority,
+                status=review.status,
+                assigned_to_id=review.assigned_to_id,
+                resolved_by_id=review.resolved_by_id,
+                resolved_at=review.resolved_at,
+                resolution=review.resolution,
+                resolution_note=review.resolution_note,
+                model_version=review.model_version,
+                policy_version=review.policy_version,
+                feature_schema_version=review.feature_schema_version,
+                threshold=review.threshold,
+                created_at=review.created_at,
+                updated_at=review.updated_at,
+            )
+        )
+    return result
+
+
+@router.post("/reviews/{review_id}/assign", response_model=CreditReviewRead)
+async def assign_credit_review(
+    review_id: UUID,
+    current_user: User = Depends(can_evaluate_risk),
+    db: AsyncSession = Depends(get_db),
+) -> CreditReviewRead:
+    review = await db.get(CreditReview, review_id)
+    if review is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Revision no encontrada")
+    if not can_assign(current_user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permiso para asignar revisiones")
+    await assign_review(db, review, current_user)
+    await db.commit()
+    await db.refresh(review)
+    client = await db.get(Client, review.client_id)
+    return CreditReviewRead(
+        id=review.id,
+        evaluation_id=review.evaluation_id,
+        client_id=review.client_id,
+        client_name=client.business_name or f"{client.first_name} {client.last_name}" if client else None,
+        requested_amount=review.requested_amount,
+        score=review.score,
+        risk=review.risk,
+        decision=review.decision,
+        reason=review.reason,
+        priority=review.priority,
+        status=review.status,
+        assigned_to_id=review.assigned_to_id,
+        resolved_by_id=review.resolved_by_id,
+        resolved_at=review.resolved_at,
+        resolution=review.resolution,
+        resolution_note=review.resolution_note,
+        model_version=review.model_version,
+        policy_version=review.policy_version,
+        feature_schema_version=review.feature_schema_version,
+        threshold=review.threshold,
+        created_at=review.created_at,
+        updated_at=review.updated_at,
+    )
+
+
+@router.post("/reviews/{review_id}/resolve", response_model=CreditReviewRead)
+async def resolve_credit_review(
+    review_id: UUID,
+    resolution: str = Query(..., pattern="^(aprobada|rechazada)$"),
+    note: str | None = Query(default=None, max_length=500),
+    current_user: User = Depends(can_evaluate_risk),
+    db: AsyncSession = Depends(get_db),
+) -> CreditReviewRead:
+    review = await db.get(CreditReview, review_id)
+    if review is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Revision no encontrada")
+    if not can_resolve(current_user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permiso para resolver revisiones")
+    res = CreditReviewResolution.APPROVED if resolution == "aprobada" else CreditReviewResolution.REJECTED
+    try:
+        await resolve_review(db, review, user=current_user, resolution=res, note=note)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await db.commit()
+    await db.refresh(review)
+    client = await db.get(Client, review.client_id)
+    return CreditReviewRead(
+        id=review.id,
+        evaluation_id=review.evaluation_id,
+        client_id=review.client_id,
+        client_name=client.business_name or f"{client.first_name} {client.last_name}" if client else None,
+        requested_amount=review.requested_amount,
+        score=review.score,
+        risk=review.risk,
+        decision=review.decision,
+        reason=review.reason,
+        priority=review.priority,
+        status=review.status,
+        assigned_to_id=review.assigned_to_id,
+        resolved_by_id=review.resolved_by_id,
+        resolved_at=review.resolved_at,
+        resolution=review.resolution,
+        resolution_note=review.resolution_note,
+        model_version=review.model_version,
+        policy_version=review.policy_version,
+        feature_schema_version=review.feature_schema_version,
+        threshold=review.threshold,
+        created_at=review.created_at,
+        updated_at=review.updated_at,
+    )

@@ -33,6 +33,7 @@ from app.models.user import User, UserRole
 from app.schemas.commerce import CreditRead, SaleCreate, SaleItemRead, SaleRead
 from app.services.ai_credit import enqueue_ai_explanation
 from app.services.audit import add_audit_log
+from app.services.credit_review import enqueue_review
 from app.services.credit_scoring import evaluate_and_record
 from app.services.idempotency import (
     HEADER_NAME as IDEMPOTENCY_HEADER,
@@ -193,6 +194,19 @@ async def create_sale(
         credit_evaluation = await evaluate_and_record(
             db, client.id, total, current_user.id, "credit_sale"
         )
+        requires_review = any(
+            factor.get("key") == "payment_history_review"
+            for factor in credit_evaluation.factors
+        )
+        if requires_review:
+            await enqueue_review(
+                db,
+                evaluation=credit_evaluation,
+                decision="REQUIRES_OWNER_REVIEW",
+                reason="Sin historial pagado confirmado; revision obligatoria del propietario.",
+                priority=10,
+                policy_version="PROY-propuesta",
+            )
         if not credit_evaluation.approved:
             await release_idempotent_operation(db, start.record)
             await db.commit()
