@@ -1,0 +1,190 @@
+{
+  "families": {
+    "svm": {
+      "family": "svm",
+      "candidate_index": 3,
+      "params": {
+        "family": "svm",
+        "C": 1.0,
+        "class_weight": "balanced",
+        "kernel": "linear",
+        "probability": false,
+        "random_state": 42
+      },
+      "threshold": 0.1,
+      "metrics": {
+        "n": 534,
+        "f2": 0.5523672883787661,
+        "precision": 0.21813031161473087,
+        "recall": 0.8953488372093024,
+        "f1": 0.35079726651480636,
+        "accuracy": 0.46629213483146065,
+        "balanced_accuracy": 0.6396387043189369,
+        "roc_auc": 0.7549833887043189,
+        "brier": 0.12294102342614494,
+        "confusion_matrix": [
+          [
+            172,
+            276
+          ],
+          [
+            9,
+            77
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    },
+    "knn": {
+      "family": "knn",
+      "candidate_index": 10,
+      "params": {
+        "family": "knn",
+        "n_neighbors": 9,
+        "weights": "uniform",
+        "metric": "minkowski",
+        "p": 2
+      },
+      "threshold": 0.1,
+      "metrics": {
+        "n": 534,
+        "f2": 0.5130057803468208,
+        "precision": 0.20402298850574713,
+        "recall": 0.8255813953488372,
+        "f1": 0.3271889400921659,
+        "accuracy": 0.45318352059925093,
+        "balanced_accuracy": 0.6036389119601329,
+        "roc_auc": 0.6621158637873754,
+        "brier": 0.1371433855828363,
+        "confusion_matrix": [
+          [
+            171,
+            277
+          ],
+          [
+            15,
+            71
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    },
+    "tree": {
+      "family": "tree",
+      "candidate_index": 17,
+      "params": {
+        "family": "tree",
+        "max_depth": 3,
+        "min_samples_leaf": 16,
+        "class_weight": null,
+        "random_state": 42
+      },
+      "threshold": 0.1,
+      "metrics": {
+        "n": 534,
+        "f2": 0.5460750853242321,
+        "precision": 0.2644628099173554,
+        "recall": 0.7441860465116279,
+        "f1": 0.3902439024390244,
+        "accuracy": 0.6254681647940075,
+        "balanced_accuracy": 0.6734323089700996,
+        "roc_auc": 0.700062292358804,
+        "brier": 0.13442221435031484,
+        "confusion_matrix": [
+          [
+            270,
+            178
+          ],
+          [
+            22,
+            64
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    },
+    "adaboost": {
+      "family": "adaboost",
+      "candidate_index": 23,
+      "params": {
+        "family": "adaboost",
+        "n_estimators": 50,
+        "learning_rate": 1.0,
+        "random_state": 42
+      },
+      "threshold": 0.3,
+      "metrics": {
+        "n": 534,
+        "f2": 0.51875,
+        "precision": 0.18201754385964913,
+        "recall": 0.9651162790697675,
+        "f1": 0.3062730627306273,
+        "accuracy": 0.2958801498127341,
+        "balanced_accuracy": 0.5662634966777409,
+        "roc_auc": 0.6885382059800664,
+        "brier": 0.17072287476396586,
+        "confusion_matrix": [
+          [
+            75,
+            373
+          ],
+          [
+            3,
+            83
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    }
+  },
+  "global_winner": {
+    "family": "svm",
+    "candidate_index": 3,
+    "params": {
+      "family": "svm",
+      "C": 1.0,
+      "class_weight": "balanced",
+      "kernel": "linear",
+      "probability": false,
+      "random_state": 42
+    },
+    "threshold": 0.1,
+    "metrics": {
+      "n": 534,
+      "f2": 0.5523672883787661,
+      "precision": 0.21813031161473087,
+      "recall": 0.8953488372093024,
+      "f1": 0.35079726651480636,
+      "accuracy": 0.46629213483146065,
+      "balanced_accuracy": 0.6396387043189369,
+      "roc_auc": 0.7549833887043189,
+      "brier": 0.12294102342614494,
+      "confusion_matrix": [
+        [
+          172,
+          276
+        ],
+        [
+          9,
+          77
+        ]
+      ],
+      "confusion_labels": [
+        0,
+        1
+      ]
+    }
+  }
+}

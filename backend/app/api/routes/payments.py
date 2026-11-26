@@ -2,16 +2,37 @@ from datetime import date
 from decimal import Decimal
 from uuid import uuid4
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    status,
+)
+from fastapi.responses import JSONResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, require_roles
 from app.db.session import get_db
-from app.models.client import Client
 from app.models.commerce import Credit, CreditStatus, Payment, PaymentAllocation
 from app.models.user import User, UserRole
 from app.schemas.finance import PaymentCreate, PaymentRead
+from app.services.idempotency import (
+    HEADER_NAME as IDEMPOTENCY_HEADER,
+)
+from app.services.idempotency import (
+    begin as begin_idempotent_operation,
+)
+from app.services.idempotency import (
+    complete as complete_idempotent_operation,
+)
+from app.services.idempotency import (
+    normalize_key as normalize_idempotency_key,
+)
+from app.services.proy_credit_policy import lock_client
 from app.services.whatsapp import enqueue_payment_confirmation
 
 router = APIRouter(prefix="/payments", tags=["payments"])
@@ -67,9 +88,20 @@ async def create_payment(
     payload: PaymentCreate,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(can_write),
+    idempotency_key: str | None = Header(default=None, alias=IDEMPOTENCY_HEADER),
     db: AsyncSession = Depends(get_db),
 ) -> PaymentRead:
-    client = await db.get(Client, payload.client_id)
+    # P0-03: mismo orden global de recursos (cliente primero) e idempotencia.
+    start = await begin_idempotent_operation(
+        db,
+        key=normalize_idempotency_key(idempotency_key),
+        scope="payments.create",
+        user_id=current_user.id,
+        payload=payload.model_dump(mode="json"),
+    )
+    if start.replay_body is not None:
+        return JSONResponse(status_code=start.replay_status, content=start.replay_body)
+    client = await lock_client(db, payload.client_id)
     if not client or not client.is_active:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
     allocation_map = {allocation.credit_id: allocation.amount for allocation in payload.allocations}
@@ -144,7 +176,16 @@ async def create_payment(
             for credit in credits
         ]
     )
-    await db.commit()
+    await db.flush()
     await db.refresh(payment)
+    serialized = await serialize_payment(db, payment)
+    complete_idempotent_operation(
+        db,
+        start.record,
+        status_code=status.HTTP_201_CREATED,
+        body=serialized.model_dump(mode="json"),
+        resource_id=payment.id,
+    )
+    await db.commit()
     enqueue_payment_confirmation(background_tasks, payment.id)
-    return await serialize_payment(db, payment)
+    return serialized

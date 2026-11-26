@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import Icon from '@/components/ui/Icon'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
 import ProductThumbnail from '@/components/ui/ProductThumbnail'
 import { productCategories } from '@/data/products'
 import { useClientState } from '@/services/clientRepository'
+import { useCreditState } from '@/services/creditRepository'
 import { productRepository, useProductState, type CommerceProduct } from '@/services/productRepository'
 import { salesRepository } from '@/services/salesRepository'
 import { useSettingsState } from '@/services/settingsRepository'
@@ -30,6 +32,7 @@ export default function VentasPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { clients } = useClientState()
+  const { balancesUnavailable } = useCreditState()
   const { products, loading: loadingProducts } = useProductState()
   const { settings } = useSettingsState()
   const client = clients.find((item) => item.id === clientId)
@@ -350,11 +353,19 @@ export default function VentasPage() {
                 <option value="">Seleccione un cliente...</option>
                 {clients.map((item) => <option key={item.id} value={item.id}>{item.business} · {item.name}</option>)}
               </select>
+              {balancesUnavailable && (
+                <CarteraUnavailableAlert>
+                  El saldo del cliente no está disponible y no se muestra como S/ 0.00. Recarga la
+                  página para volver a intentarlo.
+                </CarteraUnavailableAlert>
+              )}
               {client && (
                 <div className="mt-1 p-3 bg-surface-container-lowest rounded border border-outline-variant flex items-center justify-between">
                   <div>
                     <p className="font-medium text-sm text-on-surface">{client.business}</p>
-                    <p className="text-xs text-on-surface-variant mt-0.5">Deuda actual: {formatCurrency(client.debt)}</p>
+                    <p className={`text-xs mt-0.5 ${balancesUnavailable ? 'text-error' : 'text-on-surface-variant'}`}>
+                      {balancesUnavailable ? 'Deuda actual: no disponible' : `Deuda actual: ${formatCurrency(client.debt)}`}
+                    </p>
                   </div>
                   <div className="flex flex-col items-center justify-center w-10 h-10 rounded-full border-2 border-primary text-primary bg-primary-fixed">
                     <Icon name="psychology_alt" size="20px" />

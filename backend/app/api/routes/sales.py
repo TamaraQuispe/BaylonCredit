@@ -2,7 +2,16 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from uuid import uuid4
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    status,
+)
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +32,29 @@ from app.models.commerce import (
 from app.models.user import User, UserRole
 from app.schemas.commerce import CreditRead, SaleCreate, SaleItemRead, SaleRead
 from app.services.ai_credit import enqueue_ai_explanation
+from app.services.audit import add_audit_log
+from app.services.credit_review import enqueue_review
 from app.services.credit_scoring import evaluate_and_record
+from app.services.idempotency import (
+    HEADER_NAME as IDEMPOTENCY_HEADER,
+)
+from app.services.idempotency import (
+    begin as begin_idempotent_operation,
+)
+from app.services.idempotency import (
+    complete as complete_idempotent_operation,
+)
+from app.services.idempotency import (
+    normalize_key as normalize_idempotency_key,
+)
+from app.services.idempotency import (
+    release as release_idempotent_operation,
+)
+from app.services.proy_credit_policy import (
+    PENDING_BALANCE_BLOCK,
+    lock_client,
+    pending_balance_gate,
+)
 from app.services.whatsapp import enqueue_evaluation_notification
 
 router = APIRouter(prefix="/sales", tags=["sales"])
@@ -73,8 +104,60 @@ async def create_sale(
     payload: SaleCreate,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(can_sell),
+    idempotency_key: str | None = Header(default=None, alias=IDEMPOTENCY_HEADER),
     db: AsyncSession = Depends(get_db),
 ) -> SaleRead:
+    # P0-03: idempotencia antes de cualquier bloqueo o escritura.
+    start = await begin_idempotent_operation(
+        db,
+        key=normalize_idempotency_key(idempotency_key),
+        scope="sales.create",
+        user_id=current_user.id,
+        payload=payload.model_dump(mode="json"),
+    )
+    if start.replay_body is not None:
+        return JSONResponse(status_code=start.replay_status, content=start.replay_body)
+
+    client: Client | None = None
+    credit_evaluation = None
+    due_date: date | None = None
+    if payload.payment_mode == PaymentMode.CREDIT:
+        # Orden global de recursos: primero el cliente, despues los productos por ID.
+        client = await lock_client(db, payload.client_id)
+        if not client or not client.is_active:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        # Regla del propietario (P0-02): la venta al credito exige saldo cero, igual
+        # que el credito directo, y rechaza antes de tocar stock o crear la venta.
+        pending_gate = await pending_balance_gate(db, client.id)
+        if pending_gate.decision == PENDING_BALANCE_BLOCK:
+            add_audit_log(
+                db,
+                "credit_blocked_pending_balance",
+                "client",
+                actor=current_user,
+                entity_id=client.id,
+                details={
+                    "pending_amount": str(pending_gate.pending_amount),
+                    "source": "credit_sale",
+                },
+                description="Venta al credito rechazada: el cliente mantiene saldo pendiente.",
+            )
+            await release_idempotent_operation(db, start.record)
+            await db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=pending_gate.reason
+            )
+        if payload.due_date is None:
+            settings = await get_settings_record(db)
+            due_date = date.today() + timedelta(days=settings.default_credit_term_days)
+        else:
+            due_date = payload.due_date
+        if due_date <= date.today():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Due date must be after today",
+            )
+
     product_ids = [item.product_id for item in payload.items]
     products = list(
         await db.scalars(
@@ -107,26 +190,25 @@ async def create_sale(
     tax = money(subtotal * TAX_RATE)
     total = subtotal + tax
 
-    client: Client | None = None
-    credit_evaluation = None
     if payload.payment_mode == PaymentMode.CREDIT:
-        client = await db.get(Client, payload.client_id)
-        if not client or not client.is_active:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-        if payload.due_date is None:
-            settings = await get_settings_record(db)
-            due_date = date.today() + timedelta(days=settings.default_credit_term_days)
-        else:
-            due_date = payload.due_date
-        if due_date <= date.today():
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Due date must be after today",
-            )
         credit_evaluation = await evaluate_and_record(
             db, client.id, total, current_user.id, "credit_sale"
         )
+        requires_review = any(
+            factor.get("key") == "payment_history_review"
+            for factor in credit_evaluation.factors
+        )
+        if requires_review:
+            await enqueue_review(
+                db,
+                evaluation=credit_evaluation,
+                decision="REQUIRES_OWNER_REVIEW",
+                reason="Sin historial pagado confirmado; revision obligatoria del propietario.",
+                priority=10,
+                policy_version="PROY-propuesta",
+            )
         if not credit_evaluation.approved:
+            await release_idempotent_operation(db, start.record)
             await db.commit()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -199,10 +281,19 @@ async def create_sale(
         )
         db.add(credit)
 
-    await db.commit()
     await db.refresh(sale)
     if credit:
         await db.refresh(credit)
+    serialized = await serialize_sale(db, sale, credit)
+    complete_idempotent_operation(
+        db,
+        start.record,
+        status_code=status.HTTP_201_CREATED,
+        body=serialized.model_dump(mode="json"),
+        resource_id=sale.id,
+    )
+    await db.commit()
+    if credit:
         enqueue_evaluation_notification(background_tasks, credit_evaluation.id)
         enqueue_ai_explanation(background_tasks, credit_evaluation.id)
-    return await serialize_sale(db, sale, credit)
+    return serialized

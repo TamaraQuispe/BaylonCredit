@@ -5,20 +5,21 @@ from uuid import UUID
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
-from app.models.commerce import Product
+from app.models.commerce import Credit, CreditStatus, Product, RiskLevel
 from app.models.user import User, UserRole
 
 PRODUCT_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 
 @pytest_asyncio.fixture
-async def client() -> AsyncIterator[AsyncClient]:
+async def test_app() -> AsyncIterator[tuple[AsyncClient, async_sessionmaker[AsyncSession]]]:
     engine = create_async_engine("sqlite+aiosqlite:///:memory:")
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
     async with engine.begin() as connection:
@@ -53,9 +54,14 @@ async def client() -> AsyncIterator[AsyncClient]:
 
     app.dependency_overrides[get_db] = override_db
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
-        yield test_client
+        yield test_client, session_factory
     app.dependency_overrides.clear()
     await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def client(test_app) -> AsyncIterator[AsyncClient]:
+    yield test_app[0]
 
 
 async def test_login_and_create_client(client: AsyncClient) -> None:
@@ -335,7 +341,8 @@ async def test_late_payment_date_reduces_punctuality_score(client: AsyncClient) 
     assert late.json()["score"] < timely.json()["score"]
 
 
-async def test_portfolio_report_reflects_active_and_overdue_credits(client: AsyncClient) -> None:
+async def test_portfolio_report_reflects_active_and_overdue_credits(test_app) -> None:
+    client, session_factory = test_app
     login = await client.post(
         "/api/v1/auth/login",
         data={"username": "admin@baylon.com", "password": "secure-password"},
@@ -365,19 +372,26 @@ async def test_portfolio_report_reflects_active_and_overdue_credits(client: Asyn
     )
     assert active.status_code == 201, active.text
 
-    overdue = await client.post(
-        "/api/v1/credits",
-        headers=headers,
-        json={
-            "client_id": client_id,
-            "amount": "80.00",
-            "credit_date": "2026-01-01",
-            "due_date": "2026-01-10",
-            "manual_override": True,
-            "exception_reason": "Excepción de prueba con motivo obligatorio",
-        },
-    )
-    assert overdue.status_code == 201, overdue.text
+    # El segundo fiado pendiente se siembra en la base: la regla P0-02 impide
+    # crearlo por la API mientras el primero conserve saldo pendiente.
+    async with session_factory() as db:
+        admin_id = await db.scalar(select(User.id).where(User.email == "admin@baylon.com"))
+        db.add(
+            Credit(
+                code="F-TEST-OVERDUE",
+                client_id=UUID(client_id),
+                created_by_id=admin_id,
+                original_amount=Decimal("80.00"),
+                pending_amount=Decimal("80.00"),
+                credit_date=date(2026, 1, 1),
+                due_date=date(2026, 1, 10),
+                status=CreditStatus.OVERDUE,
+                risk=RiskLevel.HIGH,
+                score=40,
+                recommended_limit=Decimal("50.00"),
+            )
+        )
+        await db.commit()
 
     report = await client.get("/api/v1/reports/portfolio", headers=headers)
     assert report.status_code == 200, report.text

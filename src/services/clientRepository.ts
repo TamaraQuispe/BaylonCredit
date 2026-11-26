@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react'
 import type { Cliente } from '@/data/clientes'
 import { formatDate } from '@/utils/format'
 import { apiRequest } from './apiClient'
+import { creditRepository, type StoredCredit } from './creditRepository'
 
 export interface StoredClient extends Cliente {
   address?: string
@@ -64,6 +65,37 @@ function mapClient(client: ApiClient): StoredClient {
   }
 }
 
+/**
+ * La cartera es la unica fuente del saldo: /clients no trae deuda y fijarla en 0
+ * hacia que otras pantallas mostraran S/ 0.00 con fiados pendientes.
+ */
+function withBalances(clients: StoredClient[], credits: StoredCredit[]): StoredClient[] {
+  return clients.map((client) => {
+    const pending = credits.filter(
+      (credit) => credit.clientId === client.id && credit.pendingAmount > 0,
+    )
+    const debt = pending.reduce((sum, credit) => sum + credit.pendingAmount, 0)
+    const status: Cliente['status'] =
+      debt === 0
+        ? 'sin-deuda'
+        : pending.some((credit) => credit.status === 'vencido')
+          ? 'vencido'
+          : 'pendiente'
+    return { ...client, debt, status }
+  })
+}
+
+// La cartera se carga en otro store: al cambiar sus saldos se recalculan las deudas.
+creditRepository.subscribe(() => {
+  if (!state.loaded) return
+  const clients = withBalances(state.clients, creditRepository.getSnapshot().credits)
+  const changed = clients.some(
+    (client, index) =>
+      client.debt !== state.clients[index].debt || client.status !== state.clients[index].status,
+  )
+  if (changed) emit({ ...state, clients })
+})
+
 export const clientRepository = {
   subscribe(listener: () => void) {
     listeners.add(listener)
@@ -78,7 +110,7 @@ export const clientRepository = {
     emit({ ...state, loading: true, error: undefined })
     loadingPromise = apiRequest<ApiClient[]>('/clients')
       .then((clients) => {
-        const mapped = clients.map(mapClient)
+        const mapped = withBalances(clients.map(mapClient), creditRepository.getSnapshot().credits)
         emit({ clients: mapped, loading: false, loaded: true })
         return mapped
       })

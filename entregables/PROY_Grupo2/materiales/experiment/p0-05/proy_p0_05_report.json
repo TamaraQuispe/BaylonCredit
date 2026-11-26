@@ -1,0 +1,792 @@
+{
+  "version": "proy-credit-experiment-v1",
+  "origen": "simulado",
+  "research_only": true,
+  "business_approval": false,
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "provenance": {
+    "recorded_utc": "2026-11-25T00:58:29.505447+00:00",
+    "version": "proy-credit-experiment-v1",
+    "protocol_sha256": "b345352ae4c6539de9abfa0c6e40bdff3ec528ef966b95711d2631cdd50e14c0",
+    "input_sha256": {
+      "development_known_csv_sha256": "4099ddba545eea26681e133c84cbb705488cfe1922c7085ca4ac71ceefafc544",
+      "planned_folds_sha256": "5e720c2ad7e078a581ae3a3ad09a4c53c4638e15dfebc0cd33e81229683ae38d",
+      "development_manifest_sha256": "e2e654b57c7ec7173d7098fd52f84ec443bf0d274bbb2a5799463161997704cb",
+      "effective_protocol_sha256": "f4e6fb30c748de9ca6a755c73815bcc91d52c94f5689cce9263b82d772c02c96"
+    },
+    "runtime": {
+      "python": "3.14.6",
+      "sklearn": "1.9.1",
+      "numpy": "2.5.5",
+      "joblib": "1.6.0"
+    },
+    "code_sha256": {
+      "scripts/proy_credit_experiment_v1.py": "c8a2ca8942ecb2104a46d7e196c89329e1ea0c836b2b61cd9fb8a8d1ebfb2c3f",
+      "app/ml/features.py": "ec22f6675b9eab61749a86a0ae613781503fab3905e80da08c73f7b8f568fcc1",
+      "app/ml/proy_contract.py": "ad6d8ee3e8ad1fa4a320879e78afbd28b6f3329e0a3b62d3084bed5c66258da0"
+    },
+    "development": {
+      "rows": 534,
+      "clients": 24,
+      "class_counts": {
+        "0": 448,
+        "1": 86
+      }
+    },
+    "authorization": {
+      "stage": "dev_only_selection",
+      "final_contacted": false
+    }
+  },
+  "development": {
+    "rows": 534,
+    "clients": 24,
+    "class_counts": {
+      "0": 448,
+      "1": 86
+    },
+    "outer_folds": 3,
+    "fold_seed": 2026112604
+  },
+  "candidates": {
+    "families": {
+      "svm": 6,
+      "knn": 5,
+      "tree": 12,
+      "adaboost": 2
+    },
+    "total": 25,
+    "baselines": [
+      "dummy_most_frequent",
+      "dummy_constant_1"
+    ]
+  },
+  "selection": {
+    "version": "proy-credit-experiment-v1",
+    "feature_names": [
+      "completed_sales",
+      "paid_credits",
+      "paid_late",
+      "pending_overdue",
+      "pending_current",
+      "outstanding",
+      "utilization",
+      "requested_ratio",
+      "tenure_days",
+      "punctuality_rate",
+      "overdue_rate"
+    ],
+    "frozen_utc": "2026-11-25T00:58:31.329763+00:00",
+    "families": {
+      "svm": {
+        "family": "svm",
+        "candidate_index": 3,
+        "params": {
+          "family": "svm",
+          "C": 1.0,
+          "class_weight": "balanced",
+          "kernel": "linear",
+          "probability": false,
+          "random_state": 42
+        },
+        "threshold": 0.1,
+        "metrics": {
+          "n": 534,
+          "f2": 0.5523672883787661,
+          "precision": 0.21813031161473087,
+          "recall": 0.8953488372093024,
+          "f1": 0.35079726651480636,
+          "accuracy": 0.46629213483146065,
+          "balanced_accuracy": 0.6396387043189369,
+          "roc_auc": 0.7549833887043189,
+          "brier": 0.12294102342614494,
+          "confusion_matrix": [
+            [
+              172,
+              276
+            ],
+            [
+              9,
+              77
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        }
+      },
+      "knn": {
+        "family": "knn",
+        "candidate_index": 10,
+        "params": {
+          "family": "knn",
+          "n_neighbors": 9,
+          "weights": "uniform",
+          "metric": "minkowski",
+          "p": 2
+        },
+        "threshold": 0.1,
+        "metrics": {
+          "n": 534,
+          "f2": 0.5130057803468208,
+          "precision": 0.20402298850574713,
+          "recall": 0.8255813953488372,
+          "f1": 0.3271889400921659,
+          "accuracy": 0.45318352059925093,
+          "balanced_accuracy": 0.6036389119601329,
+          "roc_auc": 0.6621158637873754,
+          "brier": 0.1371433855828363,
+          "confusion_matrix": [
+            [
+              171,
+              277
+            ],
+            [
+              15,
+              71
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        }
+      },
+      "tree": {
+        "family": "tree",
+        "candidate_index": 17,
+        "params": {
+          "family": "tree",
+          "max_depth": 3,
+          "min_samples_leaf": 16,
+          "class_weight": null,
+          "random_state": 42
+        },
+        "threshold": 0.1,
+        "metrics": {
+          "n": 534,
+          "f2": 0.5460750853242321,
+          "precision": 0.2644628099173554,
+          "recall": 0.7441860465116279,
+          "f1": 0.3902439024390244,
+          "accuracy": 0.6254681647940075,
+          "balanced_accuracy": 0.6734323089700996,
+          "roc_auc": 0.700062292358804,
+          "brier": 0.13442221435031484,
+          "confusion_matrix": [
+            [
+              270,
+              178
+            ],
+            [
+              22,
+              64
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        }
+      },
+      "adaboost": {
+        "family": "adaboost",
+        "candidate_index": 23,
+        "params": {
+          "family": "adaboost",
+          "n_estimators": 50,
+          "learning_rate": 1.0,
+          "random_state": 42
+        },
+        "threshold": 0.3,
+        "metrics": {
+          "n": 534,
+          "f2": 0.51875,
+          "precision": 0.18201754385964913,
+          "recall": 0.9651162790697675,
+          "f1": 0.3062730627306273,
+          "accuracy": 0.2958801498127341,
+          "balanced_accuracy": 0.5662634966777409,
+          "roc_auc": 0.6885382059800664,
+          "brier": 0.17072287476396586,
+          "confusion_matrix": [
+            [
+              75,
+              373
+            ],
+            [
+              3,
+              83
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        }
+      }
+    },
+    "global_winner": {
+      "family": "svm",
+      "candidate_index": 3,
+      "params": {
+        "family": "svm",
+        "C": 1.0,
+        "class_weight": "balanced",
+        "kernel": "linear",
+        "probability": false,
+        "random_state": 42
+      },
+      "threshold": 0.1,
+      "metrics": {
+        "n": 534,
+        "f2": 0.5523672883787661,
+        "precision": 0.21813031161473087,
+        "recall": 0.8953488372093024,
+        "f1": 0.35079726651480636,
+        "accuracy": 0.46629213483146065,
+        "balanced_accuracy": 0.6396387043189369,
+        "roc_auc": 0.7549833887043189,
+        "brier": 0.12294102342614494,
+        "confusion_matrix": [
+          [
+            172,
+            276
+          ],
+          [
+            9,
+            77
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      }
+    },
+    "baselines": {
+      "dummy_most_frequent": {
+        "params": {
+          "family": "dummy_most_frequent"
+        },
+        "threshold": 0.5,
+        "metrics": {
+          "n": 534,
+          "f2": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.8389513108614233,
+          "balanced_accuracy": 0.5,
+          "roc_auc": 0.5,
+          "brier": 0.16104868913857678,
+          "confusion_matrix": [
+            [
+              448,
+              0
+            ],
+            [
+              86,
+              0
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        }
+      },
+      "dummy_constant_1": {
+        "params": {
+          "family": "dummy_constant_1"
+        },
+        "threshold": 0.5,
+        "metrics": {
+          "n": 534,
+          "f2": 0.489749430523918,
+          "precision": 0.16104868913857678,
+          "recall": 1.0,
+          "f1": 0.27741935483870966,
+          "accuracy": 0.16104868913857678,
+          "balanced_accuracy": 0.5,
+          "roc_auc": 0.5,
+          "brier": 0.8389513108614233,
+          "confusion_matrix": [
+            [
+              0,
+              448
+            ],
+            [
+              0,
+              86
+            ]
+          ],
+          "confusion_labels": [
+            0,
+            1
+          ]
+        }
+      }
+    },
+    "beat_baselines": {
+      "dummy_most_frequent": {
+        "f2_strictly_higher": true,
+        "recall_strictly_higher": true,
+        "baseline_f2": 0.0
+      },
+      "dummy_constant_1": {
+        "f2_strictly_higher": true,
+        "recall_strictly_higher": false,
+        "baseline_f2": 0.489749430523918
+      }
+    },
+    "research_only": true
+  },
+  "models": {
+    "svm": {
+      "params": {
+        "family": "svm",
+        "C": 1.0,
+        "class_weight": "balanced",
+        "kernel": "linear",
+        "probability": false,
+        "random_state": 42
+      },
+      "threshold": 0.1,
+      "oof": {
+        "n": 534,
+        "f2": 0.5523672883787661,
+        "precision": 0.21813031161473087,
+        "recall": 0.8953488372093024,
+        "f1": 0.35079726651480636,
+        "accuracy": 0.46629213483146065,
+        "balanced_accuracy": 0.6396387043189369,
+        "roc_auc": 0.7549833887043189,
+        "brier": 0.12294102342614494,
+        "confusion_matrix": [
+          [
+            172,
+            276
+          ],
+          [
+            9,
+            77
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "train_descriptive": {
+        "n": 534,
+        "f2": 0.5863708399366085,
+        "precision": 0.2578397212543554,
+        "recall": 0.8604651162790697,
+        "f1": 0.3967828418230563,
+        "accuracy": 0.5786516853932584,
+        "balanced_accuracy": 0.6925093438538206,
+        "roc_auc": 0.7681426495016611,
+        "brier": 0.11965947750207889,
+        "confusion_matrix": [
+          [
+            235,
+            213
+          ],
+          [
+            12,
+            74
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "svm.joblib",
+      "interpretation": {
+        "standardized_coefficients": {
+          "completed_sales": -0.04382680002608774,
+          "paid_credits": -0.04382680002608774,
+          "paid_late": 0.3965532700537864,
+          "pending_overdue": 0.0,
+          "pending_current": 0.0,
+          "outstanding": 0.0,
+          "utilization": 0.0,
+          "requested_ratio": -0.06426819016903806,
+          "tenure_days": -0.10765346902847028,
+          "punctuality_rate": -0.6139123991541666,
+          "overdue_rate": 0.0
+        },
+        "intercept": -0.28229249463075784,
+        "caveat": "Coefficients describe standardized linear SVM margin, not calibrated probabilities, causal effects or business importance."
+      }
+    },
+    "knn": {
+      "params": {
+        "family": "knn",
+        "n_neighbors": 9,
+        "weights": "uniform",
+        "metric": "minkowski",
+        "p": 2
+      },
+      "threshold": 0.1,
+      "oof": {
+        "n": 534,
+        "f2": 0.5130057803468208,
+        "precision": 0.20402298850574713,
+        "recall": 0.8255813953488372,
+        "f1": 0.3271889400921659,
+        "accuracy": 0.45318352059925093,
+        "balanced_accuracy": 0.6036389119601329,
+        "roc_auc": 0.6621158637873754,
+        "brier": 0.1371433855828363,
+        "confusion_matrix": [
+          [
+            171,
+            277
+          ],
+          [
+            15,
+            71
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "train_descriptive": {
+        "n": 534,
+        "f2": 0.6259097525473072,
+        "precision": 0.25072886297376096,
+        "recall": 1.0,
+        "f1": 0.40093240093240096,
+        "accuracy": 0.5187265917602997,
+        "balanced_accuracy": 0.7131696428571428,
+        "roc_auc": 0.8139275332225914,
+        "brier": 0.11064872612937533,
+        "confusion_matrix": [
+          [
+            191,
+            257
+          ],
+          [
+            0,
+            86
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "knn.joblib",
+      "interpretation": {
+        "reference_rows": 534,
+        "caveat": "KNN no ofrece coeficientes; el vecindario depende de la escala estandarizada."
+      }
+    },
+    "tree": {
+      "params": {
+        "family": "tree",
+        "max_depth": 3,
+        "min_samples_leaf": 16,
+        "class_weight": null,
+        "random_state": 42
+      },
+      "threshold": 0.1,
+      "oof": {
+        "n": 534,
+        "f2": 0.5460750853242321,
+        "precision": 0.2644628099173554,
+        "recall": 0.7441860465116279,
+        "f1": 0.3902439024390244,
+        "accuracy": 0.6254681647940075,
+        "balanced_accuracy": 0.6734323089700996,
+        "roc_auc": 0.700062292358804,
+        "brier": 0.13442221435031484,
+        "confusion_matrix": [
+          [
+            270,
+            178
+          ],
+          [
+            22,
+            64
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "train_descriptive": {
+        "n": 534,
+        "f2": 0.5917667238421955,
+        "precision": 0.28870292887029286,
+        "recall": 0.8023255813953488,
+        "f1": 0.4246153846153846,
+        "accuracy": 0.649812734082397,
+        "balanced_accuracy": 0.7114306478405316,
+        "roc_auc": 0.7987697259136213,
+        "brier": 0.10773720219623989,
+        "confusion_matrix": [
+          [
+            278,
+            170
+          ],
+          [
+            17,
+            69
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "tree.joblib",
+      "interpretation": {
+        "raw_unit_rules": "|--- punctuality_rate <= 0.730303\n|   |--- punctuality_rate <= 0.674242\n|   |   |--- tenure_days <= 171.499999\n|   |   |   |--- class: 0\n|   |   |--- tenure_days >  171.499999\n|   |   |   |--- class: 0\n|   |--- punctuality_rate >  0.674242\n|   |   |--- class: 1\n|--- punctuality_rate >  0.730303\n|   |--- punctuality_rate <= 0.881176\n|   |   |--- tenure_days <= 125.999998\n|   |   |   |--- class: 0\n|   |   |--- tenure_days >  125.999998\n|   |   |   |--- class: 0\n|   |--- punctuality_rate >  0.881176\n|   |   |--- tenure_days <= 211.000000\n|   |   |   |--- class: 0\n|   |   |--- tenure_days >  211.000000\n|   |   |   |--- class: 0\n",
+        "caveat": "Rules use raw units after training-median imputation; saved pipeline is unchanged. Rules are not causal."
+      }
+    },
+    "adaboost": {
+      "params": {
+        "family": "adaboost",
+        "n_estimators": 50,
+        "learning_rate": 1.0,
+        "random_state": 42
+      },
+      "threshold": 0.3,
+      "oof": {
+        "n": 534,
+        "f2": 0.51875,
+        "precision": 0.18201754385964913,
+        "recall": 0.9651162790697675,
+        "f1": 0.3062730627306273,
+        "accuracy": 0.2958801498127341,
+        "balanced_accuracy": 0.5662634966777409,
+        "roc_auc": 0.6885382059800664,
+        "brier": 0.17072287476396586,
+        "confusion_matrix": [
+          [
+            75,
+            373
+          ],
+          [
+            3,
+            83
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "train_descriptive": {
+        "n": 534,
+        "f2": 0.5570117955439057,
+        "precision": 0.20286396181384247,
+        "recall": 0.9883720930232558,
+        "f1": 0.33663366336633666,
+        "accuracy": 0.37265917602996257,
+        "balanced_accuracy": 0.6214181893687707,
+        "roc_auc": 0.817016196013289,
+        "brier": 0.15662037644181914,
+        "confusion_matrix": [
+          [
+            114,
+            334
+          ],
+          [
+            1,
+            85
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "adaboost.joblib",
+      "interpretation": {
+        "feature_importances_scaled": {
+          "completed_sales": 0.12420296185651367,
+          "paid_credits": 0.12434852252053667,
+          "paid_late": 0.0,
+          "pending_overdue": 0.0,
+          "pending_current": 0.0,
+          "outstanding": 0.0,
+          "utilization": 0.0,
+          "requested_ratio": 0.1158282752159699,
+          "tenure_days": 0.22830917677157475,
+          "punctuality_rate": 0.40731106363540526,
+          "overdue_rate": 0.0
+        },
+        "base_estimator": "DecisionTreeClassifier(max_depth=1)",
+        "caveat": "Importancias sobre features estandarizadas; describen el ensamble, no causalidad."
+      }
+    },
+    "dummy_most_frequent": {
+      "params": {
+        "family": "dummy_most_frequent"
+      },
+      "threshold": 0.5,
+      "oof": {
+        "n": 534,
+        "f2": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "accuracy": 0.8389513108614233,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.16104868913857678,
+        "confusion_matrix": [
+          [
+            448,
+            0
+          ],
+          [
+            86,
+            0
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "train_descriptive": {
+        "n": 534,
+        "f2": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "accuracy": 0.8389513108614233,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.16104868913857678,
+        "confusion_matrix": [
+          [
+            448,
+            0
+          ],
+          [
+            86,
+            0
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "dummy_most_frequent.joblib",
+      "interpretation": {
+        "caveat": "Referencia Dummy, no un modelo de riesgo entrenado"
+      }
+    },
+    "dummy_constant_1": {
+      "params": {
+        "family": "dummy_constant_1"
+      },
+      "threshold": 0.5,
+      "oof": {
+        "n": 534,
+        "f2": 0.489749430523918,
+        "precision": 0.16104868913857678,
+        "recall": 1.0,
+        "f1": 0.27741935483870966,
+        "accuracy": 0.16104868913857678,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.8389513108614233,
+        "confusion_matrix": [
+          [
+            0,
+            448
+          ],
+          [
+            0,
+            86
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "train_descriptive": {
+        "n": 534,
+        "f2": 0.489749430523918,
+        "precision": 0.16104868913857678,
+        "recall": 1.0,
+        "f1": 0.27741935483870966,
+        "accuracy": 0.16104868913857678,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.5,
+        "brier": 0.8389513108614233,
+        "confusion_matrix": [
+          [
+            0,
+            448
+          ],
+          [
+            0,
+            86
+          ]
+        ],
+        "confusion_labels": [
+          0,
+          1
+        ]
+      },
+      "artifact": "dummy_constant_1.joblib",
+      "interpretation": {
+        "caveat": "Referencia Dummy, no un modelo de riesgo entrenado"
+      }
+    }
+  },
+  "final_test": {
+    "status": "closed",
+    "reason": "Seleccion congelada con hashes. FINAL exige la cohorte nueva del protocolo y el archivo PROY_FINAL_AUTHORIZATION.json, que no forma parte de esta entrega.",
+    "reserved_cohort": {
+      "seed": "declarado en el protocolo",
+      "generated": false
+    }
+  },
+  "artifact_sha256": {
+    "svm.joblib": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45",
+    "knn.joblib": "6ad4da639f0cf49651b68afc75d04b53307aaea62d71cd5722e5c25ee6287180",
+    "tree.joblib": "6e3ce7710f05a87c17345cdd0b4c47c2912a1873a77bbaad4c86e44b4f37dca7",
+    "adaboost.joblib": "88ac430e25120c43199e3f527206efb85ef1cb27022820d84cbd1c4299f563c5",
+    "dummy_most_frequent.joblib": "ca8b200194ec0f916ddd8b2c6c1d86b1c02e7eaf13785a9605a657e8794f1762",
+    "dummy_constant_1.joblib": "5d307d0b7645e06546b32ebdc271b0c7ef7b18f49d33a4017b1d58792d08d650",
+    "selected_model.joblib": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45",
+    "frozen_selection.json": "90548dcfc7562cf01a8175df99bd4884eee042c473b11818e7210afdec3d046c"
+  },
+  "limits": [
+    "Datos sinteticos de un solo negocio; no representan clientes reales.",
+    "24 clientes en DEV: cualquier metrica tiene incertidumbre alta y no se reporta como desempeno comercial.",
+    "F2 y los desempates son supuestos del equipo, no costos medidos del propietario.",
+    "El umbral seleccionado por F2 no es el umbral operativo; fijarlo requiere medir capacidad y costos.",
+    "Un modelo que empata con Dummy no aporta valor predictivo demostrado.",
+    "FIN no se consulto: el AVANCE de APF3 y su FINAL siguen siendo el unico test ya visto."
+  ]
+}

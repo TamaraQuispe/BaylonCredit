@@ -176,3 +176,105 @@ async def test_risk_report_lists_clients_with_score(client: AsyncClient) -> None
     assert entry["risk"] == evaluation.json()["risk"]
     assert entry["recommendation"]
     assert entry["utilization_percent"] >= 0
+
+
+async def _new_client(client: AsyncClient, headers: dict, document: str) -> str:
+    created = await client.post(
+        "/api/v1/clients",
+        headers=headers,
+        json={
+            "first_name": "Clave",
+            "last_name": "Idempotente",
+            "document": document,
+            "phone": "987654321",
+        },
+    )
+    assert created.status_code == 201, created.text
+    return created.json()["id"]
+
+
+def _credit_body(client_id: str, amount: str = "40.00") -> dict:
+    return {
+        "client_id": client_id,
+        "amount": amount,
+        "credit_date": date.today().isoformat(),
+        "due_date": (date.today() + timedelta(days=10)).isoformat(),
+    }
+
+
+async def test_idempotency_key_replays_without_duplicating(client: AsyncClient) -> None:
+    session = await _login(client)
+    headers = {
+        "Authorization": f"Bearer {session['access_token']}",
+        "Idempotency-Key": "credito-0001",
+    }
+    client_id = await _new_client(client, headers, "90909090")
+
+    first = await client.post("/api/v1/credits", headers=headers, json=_credit_body(client_id))
+    assert first.status_code == 201, first.text
+    replay = await client.post("/api/v1/credits", headers=headers, json=_credit_body(client_id))
+    assert replay.status_code == 201, replay.text
+    assert replay.json()["id"] == first.json()["id"]
+
+    listed = await client.get("/api/v1/credits", headers=headers)
+    assert listed.status_code == 200, listed.text
+    assert len([row for row in listed.json() if row["client_id"] == client_id]) == 1
+
+
+async def test_idempotency_key_with_other_payload_conflicts(client: AsyncClient) -> None:
+    session = await _login(client)
+    headers = {
+        "Authorization": f"Bearer {session['access_token']}",
+        "Idempotency-Key": "credito-0002",
+    }
+    client_id = await _new_client(client, headers, "90909091")
+    first = await client.post("/api/v1/credits", headers=headers, json=_credit_body(client_id))
+    assert first.status_code == 201, first.text
+
+    conflicting = await client.post(
+        "/api/v1/credits", headers=headers, json=_credit_body(client_id, "41.00")
+    )
+    assert conflicting.status_code == 409, conflicting.text
+    assert "otra solicitud" in conflicting.json()["detail"]
+
+
+async def test_idempotency_key_is_scoped_per_operation(client: AsyncClient) -> None:
+    session = await _login(client)
+    auth = {"Authorization": f"Bearer {session['access_token']}"}
+    headers = {**auth, "Idempotency-Key": "compartida-01"}
+    client_id = await _new_client(client, auth, "90909092")
+    credit = await client.post("/api/v1/credits", headers=headers, json=_credit_body(client_id))
+    assert credit.status_code == 201, credit.text
+
+    payment = await client.post(
+        "/api/v1/payments",
+        headers=headers,
+        json={
+            "client_id": client_id,
+            "allocations": [{"credit_id": credit.json()["id"], "amount": "40.00"}],
+            "payment_date": date.today().isoformat(),
+            "method": "Efectivo",
+        },
+    )
+    assert payment.status_code == 201, payment.text
+
+
+async def test_idempotency_key_is_released_when_request_is_rejected(
+    client: AsyncClient,
+) -> None:
+    session = await _login(client)
+    headers = {
+        "Authorization": f"Bearer {session['access_token']}",
+        "Idempotency-Key": "credito-0004",
+    }
+    client_id = await _new_client(client, headers, "90909093")
+    rejected = await client.post(
+        "/api/v1/credits", headers=headers, json=_credit_body(client_id, "9999.00")
+    )
+    assert rejected.status_code == 422, rejected.text
+
+    retry = await client.post(
+        "/api/v1/credits", headers=headers, json=_credit_body(client_id, "9999.00")
+    )
+    assert retry.status_code == 422, retry.text
+    assert "otra solicitud" not in retry.json()["detail"]

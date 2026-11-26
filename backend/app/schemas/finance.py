@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, PlainSerializer, model_validator
 
-from app.models.commerce import RiskLevel
+from app.models.commerce import CreditReviewResolution, CreditReviewStatus, RiskLevel
 
 
 class ScoreFactorRead(BaseModel):
@@ -170,3 +170,28 @@ class CreditProfileRead(BaseModel):
     overdue_amount: Decimal
     max_overdue_days: int
     next_due_date: date | None
+
+
+class CreditReviewRead(BaseModel):
+    id: UUID
+    evaluation_id: UUID | None
+    client_id: UUID
+    client_name: str | None = None
+    requested_amount: Decimal
+    score: int
+    risk: RiskLevel
+    decision: str
+    reason: str | None
+    priority: int
+    status: CreditReviewStatus
+    assigned_to_id: UUID | None
+    resolved_by_id: UUID | None
+    resolved_at: datetime | None
+    resolution: CreditReviewResolution | None
+    resolution_note: str | None
+    model_version: str | None
+    policy_version: str | None
+    feature_schema_version: str | None
+    threshold: Decimal | None
+    created_at: datetime
+    updated_at: datetime

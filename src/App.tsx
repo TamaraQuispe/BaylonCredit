@@ -5,6 +5,7 @@ import LoginPage from '@/pages/LoginPage'
 import HomePage from '@/pages/HomePage'
 import VentasPage from '@/pages/VentasPage'
 import CreditosPage from '@/pages/CreditosPage'
+import RevisionesCreditoPage from '@/pages/RevisionesCreditoPage'
 import NuevoCreditoPage from '@/pages/NuevoCreditoPage'
 import DetalleCreditoPage from '@/pages/DetalleCreditoPage'
 import ClientesPage from '@/pages/ClientesPage'
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/inicio" element={<HomePage />} />
           <Route path="/ventas" element={<VentasPage />} />
           <Route path="/creditos" element={<CreditosPage />} />
+          <Route path="/revisiones-credito" element={<RevisionesCreditoPage />} />
           <Route path="/creditos/nuevo" element={<NuevoCreditoPage />} />
           <Route path="/creditos/:id" element={<DetalleCreditoPage />} />
           <Route path="/clientes" element={<ClientesPage />} />

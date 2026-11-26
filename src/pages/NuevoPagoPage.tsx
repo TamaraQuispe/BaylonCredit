@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
-import { formatCurrency, formatDate } from '@/utils/format'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
+import { formatCurrency, formatDate, orDash } from '@/utils/format'
 import { useClientState } from '@/services/clientRepository'
 import {
   creditRepository,
@@ -25,7 +26,7 @@ const riskLabels = {
 export default function NuevoPagoPage() {
   const [searchParams] = useSearchParams()
   const { clients } = useClientState()
-  const { credits } = useCreditState()
+  const { credits, balancesUnavailable } = useCreditState()
   const requestedClient = searchParams.get('cliente') ?? ''
   const requestedCredit = searchParams.get('credito') ?? ''
   const payableCredits = credits.filter((credit) => credit.clientId && credit.pendingAmount > 0)
@@ -162,6 +163,13 @@ export default function NuevoPagoPage() {
         </p>
       </div>
 
+      {balancesUnavailable && (
+        <CarteraUnavailableAlert className="mb-6">
+          No se pudo cargar la cartera: no es posible consultar los créditos pendientes ni registrar
+          un pago ahora. Recarga la página para volver a intentarlo.
+        </CarteraUnavailableAlert>
+      )}
+
       {error && (
         <div className="mb-6 p-4 bg-error-container text-on-error-container border border-error/20 rounded-lg flex items-center gap-2">
           <Icon name="error" size="20px" /> {error}
@@ -219,7 +227,12 @@ export default function NuevoPagoPage() {
                 </select>
               </div>
 
-              {availableClients.length === 0 ? (
+              {balancesUnavailable ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-outline-variant rounded-lg bg-surface-bright">
+                  <Icon name="receipt_long" size="48px" className="text-outline mb-2" />
+                  <p className="text-on-surface-variant">No disponible: no se pudo cargar la cartera.</p>
+                </div>
+              ) : availableClients.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-outline-variant rounded-lg bg-surface-bright">
                   <Icon name="receipt_long" size="48px" className="text-outline mb-2" />
                   <p className="text-on-surface-variant mb-4">No existen creditos pendientes asociados a clientes.</p>
@@ -314,11 +327,11 @@ export default function NuevoPagoPage() {
 
               <div className="border-t border-outline-variant pt-5 space-y-3">
                 <h4 className="font-table-header text-table-header text-on-surface-variant uppercase">Resumen Dinámico</h4>
-                <SummaryRow label="Saldo Anterior (Total)" value={formatCurrency(totalDebt)} />
-                <SummaryRow label="Pago a Aplicar" value={`- ${formatCurrency(amount)}`} valueClass="text-green-600 font-semibold" />
+                <SummaryRow label="Saldo Anterior (Total)" value={orDash(formatCurrency(totalDebt), balancesUnavailable)} />
+                <SummaryRow label="Pago a Aplicar" value={orDash(`- ${formatCurrency(amount)}`, balancesUnavailable)} valueClass={balancesUnavailable ? 'text-on-surface-variant' : 'text-green-600 font-semibold'} />
                 <div className="flex justify-between items-center pt-3 border-t border-dashed border-outline-variant">
                   <span className="font-body-lg text-body-lg font-semibold">Nuevo Saldo</span>
-                  <span className="font-h3-title text-h3-title font-bold text-primary">{formatCurrency(newBalance)}</span>
+                  <span className="font-h3-title text-h3-title font-bold text-primary">{orDash(formatCurrency(newBalance), balancesUnavailable)}</span>
                 </div>
               </div>
               <button type="button" disabled={saving || !client || selectedCredits.length === 0 || amount <= 0} onClick={applyPayment} className="w-full mt-8 bg-primary-container text-on-primary font-body-lg font-semibold py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed">

@@ -5,6 +5,7 @@ import StatCard from '@/components/ui/StatCard'
 import RiskBadge from '@/components/ui/RiskBadge'
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay'
 import DataTable, { type Column } from '@/components/ui/DataTable'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
 import Icon from '@/components/ui/Icon'
 import DonutChart from '@/components/dashboard/DonutChart'
 import ActivityFeed from '@/components/dashboard/ActivityFeed'
@@ -13,7 +14,7 @@ import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
 import { selectDashboardMetrics } from '@/services/dashboardSelectors'
 import { selectSalesMetrics, useSalesState } from '@/services/salesRepository'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, orDash, orUnavailable } from '@/utils/format'
 import { getSession } from '@/utils/session'
 
 const attentionColumns: Column<CustomerAttention>[] = [
@@ -80,7 +81,7 @@ export default function HomePage() {
   const role = getSession()?.rol
   const roleLabel = role === 'operator' ? 'Operador' : role === 'viewer' ? 'Supervisor' : 'Administrador'
   const { clients } = useClientState()
-  const { credits, payments } = useCreditState()
+  const { credits, payments, balancesUnavailable } = useCreditState()
   const { sales } = useSalesState()
   const metrics = selectDashboardMetrics(credits, payments, clients, sales)
   const salesToday = selectSalesMetrics(sales, 'hoy')
@@ -95,30 +96,37 @@ export default function HomePage() {
     },
     {
       label: 'Total credito',
-      value: formatCurrency(metrics.totalPending),
-      detail: `En ${metrics.activeCredits} creditos activos`,
+      value: orDash(formatCurrency(metrics.totalPending), balancesUnavailable),
+      detail: orUnavailable(`En ${metrics.activeCredits} creditos activos`, balancesUnavailable),
       icon: 'account_balance_wallet',
       iconTone: 'secondary' as const,
     },
     {
       label: 'Deuda vencida',
-      value: formatCurrency(metrics.totalOverdue),
-      detail: metrics.totalOverdue > 0 ? 'Requiere atención' : 'Sin deuda vencida',
-      detailTone: metrics.totalOverdue > 0 ? 'negative' as const : 'positive' as const,
+      value: orDash(formatCurrency(metrics.totalOverdue), balancesUnavailable),
+      detail: orUnavailable(
+        metrics.totalOverdue > 0 ? 'Requiere atención' : 'Sin deuda vencida',
+        balancesUnavailable,
+      ),
+      detailTone: balancesUnavailable
+        ? 'neutral' as const
+        : metrics.totalOverdue > 0
+          ? 'negative' as const
+          : 'positive' as const,
       icon: 'warning',
       iconTone: 'error' as const,
     },
     {
       label: 'Clientes con deuda',
-      value: String(metrics.clientsWithDebt),
-      detail: `${metrics.criticalClients} de riesgo alto`,
+      value: orDash(String(metrics.clientsWithDebt), balancesUnavailable),
+      detail: orUnavailable(`${metrics.criticalClients} de riesgo alto`, balancesUnavailable),
       icon: 'group_remove',
       iconTone: 'tertiary' as const,
     },
     {
       label: 'Pagos hoy',
-      value: formatCurrency(metrics.paymentsToday),
-      detail: 'Recibidos',
+      value: orDash(formatCurrency(metrics.paymentsToday), balancesUnavailable),
+      detail: orUnavailable('Recibidos', balancesUnavailable),
       icon: 'payments',
       iconTone: 'success' as const,
     },
@@ -138,6 +146,13 @@ export default function HomePage() {
           </Link>
         }
       />
+
+      {balancesUnavailable && (
+        <CarteraUnavailableAlert>
+          Los indicadores de cartera, deuda y pagos no están disponibles: se ocultan en lugar de
+          mostrarse como S/ 0.00. Recarga la página para volver a intentarlo.
+        </CarteraUnavailableAlert>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((stat) => (
@@ -159,12 +174,18 @@ export default function HomePage() {
               </Link>
             }
           >
-            <DataTable
-              columns={attentionColumns}
-              data={metrics.attention}
-              rowKey={(row) => row.id}
-              minWidth="min-w-[640px]"
-            />
+            {balancesUnavailable ? (
+              <p className="py-10 text-center text-on-surface-variant">
+                No disponible: no se pudo cargar la cartera.
+              </p>
+            ) : (
+              <DataTable
+                columns={attentionColumns}
+                data={metrics.attention}
+                rowKey={(row) => row.id}
+                minWidth="min-w-[640px]"
+              />
+            )}
           </Card>
         </div>
 
@@ -172,7 +193,7 @@ export default function HomePage() {
           <Card title="Estado de los creditos">
             <DonutChart
               segments={metrics.creditoSegments}
-              centerValue={formatCurrency(metrics.totalPending)}
+              centerValue={orDash(formatCurrency(metrics.totalPending), balancesUnavailable)}
               centerLabel="en creditos"
             />
           </Card>

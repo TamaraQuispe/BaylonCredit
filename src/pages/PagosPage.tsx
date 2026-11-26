@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
 import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
 import { useCreditState } from '@/services/creditRepository'
 
 export default function PagosPage() {
   const [search, setSearch] = useState('')
-  const { payments } = useCreditState()
+  const { payments, balancesUnavailable } = useCreditState()
   const filteredPayments = useMemo(() => {
     const term = search.trim().toLowerCase()
     return payments.filter(
@@ -46,6 +47,13 @@ export default function PagosPage() {
           </Link>
         </div>
       </div>
+
+      {balancesUnavailable && (
+        <CarteraUnavailableAlert className="mb-6">
+          No se pudo cargar la cartera: los pagos y saldos restantes no están disponibles. Recarga la
+          página para volver a intentarlo.
+        </CarteraUnavailableAlert>
+      )}
 
       <div className="bg-surface-container-lowest border border-surface-container-high shadow-sm rounded-xl overflow-hidden">
         <div className="overflow-x-auto w-full">
@@ -96,7 +104,7 @@ export default function PagosPage() {
                 </tr>
               ))}
               {filteredPayments.length === 0 && (
-                <tr><td colSpan={7} className="py-14 text-center text-on-surface-variant">No se encontraron pagos.</td></tr>
+                <tr><td colSpan={7} className="py-14 text-center text-on-surface-variant">{balancesUnavailable ? 'No disponible: no se pudo cargar la cartera.' : 'No se encontraron pagos.'}</td></tr>
               )}
             </tbody>
           </table>

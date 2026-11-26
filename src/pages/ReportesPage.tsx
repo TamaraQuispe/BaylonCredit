@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '@/components/ui/Icon'
+import CarteraUnavailableAlert from '@/components/ui/CarteraUnavailableAlert'
 import { reportsByPeriod } from '@/data/reportes'
 import { useClientState } from '@/services/clientRepository'
 import { useCreditState } from '@/services/creditRepository'
@@ -8,14 +9,15 @@ import { useReportsState } from '@/services/reportsRepository'
 import { selectDashboardMetrics } from '@/services/dashboardSelectors'
 import { selectSalesMetrics, useSalesState, type SalesPeriod } from '@/services/salesRepository'
 import { localScoringService, type EvaluationSummary } from '@/services/scoringService'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, orDash, orUnavailable } from '@/utils/format'
+import { toCsv } from '@/utils/csv'
 
 export default function ReportesPage() {
   const [period, setPeriod] = useState<SalesPeriod>('mes')
   const [evaluationSummary, setEvaluationSummary] = useState<EvaluationSummary>()
   const [summaryLoading, setSummaryLoading] = useState(true)
   const { clients } = useClientState()
-  const { credits, payments } = useCreditState()
+  const { credits, payments, balancesUnavailable } = useCreditState()
   const { sales } = useSalesState()
   const { report: portfolio } = useReportsState()
   const report = reportsByPeriod[period]
@@ -42,10 +44,10 @@ export default function ReportesPage() {
     const rows = [
       ['Reporte', report.label],
       ['Ventas totales', salesMetrics.total],
-      ['Cartera fiada actual', metrics.totalPending],
-      ['Total recuperado acumulado', metrics.totalRecovered],
-      ['Monto vencido actual', metrics.totalOverdue],
-      ['Tasa de morosidad actual', `${metrics.delinquencyRate}%`],
+      ['Cartera fiada actual', orUnavailable(String(metrics.totalPending), balancesUnavailable)],
+      ['Total recuperado acumulado', orUnavailable(String(metrics.totalRecovered), balancesUnavailable)],
+      ['Monto vencido actual', orUnavailable(String(metrics.totalOverdue), balancesUnavailable)],
+      ['Tasa de morosidad actual', orUnavailable(`${metrics.delinquencyRate}%`, balancesUnavailable)],
       [],
       ...(portfolio ? [
         ['Cartera por cliente', 'Deuda', 'Vencido', 'Créditos', 'Vencidos'],
@@ -61,7 +63,7 @@ export default function ReportesPage() {
       ['Producto', 'Cantidad', 'Ingresos'],
       ...salesMetrics.topProducts.map((product) => [product.name, product.quantity, product.revenue]),
     ]
-    const csv = rows.map((row) => row.join(',')).join('\n')
+    const csv = toCsv(rows)
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
     const link = document.createElement('a')
     link.href = url
@@ -71,10 +73,10 @@ export default function ReportesPage() {
   }
 
   const kpis = [
-    { label: 'Ventas totales (S/.)', value: salesMetrics.total, trend: salesMetrics.trend, tone: salesMetrics.trend >= 0 ? 'text-emerald-600' : 'text-error' },
-    { label: 'Cartera fiada actual (S/.)', value: metrics.totalPending, detail: `${metrics.activeCredits} activos`, tone: 'text-on-surface-variant' },
-    { label: 'Recuperado acumulado (S/.)', value: metrics.totalRecovered, detail: `${payments.length} pagos`, tone: 'text-emerald-600' },
-    { label: 'Monto vencido actual (S/.)', value: metrics.totalOverdue, detail: 'de cartera', tone: metrics.totalOverdue > 0 ? 'text-error' : 'text-emerald-600' },
+    { label: 'Ventas totales (S/.)', value: salesMetrics.total, trend: salesMetrics.trend, unavailable: false, tone: salesMetrics.trend >= 0 ? 'text-emerald-600' : 'text-error' },
+    { label: 'Cartera fiada actual (S/.)', value: metrics.totalPending, detail: `${metrics.activeCredits} activos`, unavailable: balancesUnavailable, tone: 'text-on-surface-variant' },
+    { label: 'Recuperado acumulado (S/.)', value: metrics.totalRecovered, detail: `${payments.length} pagos`, unavailable: balancesUnavailable, tone: 'text-emerald-600' },
+    { label: 'Monto vencido actual (S/.)', value: metrics.totalOverdue, detail: 'de cartera', unavailable: balancesUnavailable, tone: metrics.totalOverdue > 0 ? 'text-error' : 'text-emerald-600' },
   ]
 
   return (
@@ -94,14 +96,21 @@ export default function ReportesPage() {
         </div>
       </div>
 
+      {balancesUnavailable && (
+        <CarteraUnavailableAlert className="mb-8">
+          Los indicadores de cartera, recuperación y morosidad no están disponibles: se ocultan en
+          lugar de mostrarse como S/ 0.00. Recarga la página para volver a intentarlo.
+        </CarteraUnavailableAlert>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         {kpis.map((kpi) => (
           <div key={kpi.label} className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high flex flex-col justify-between">
             <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">{kpi.label}</p>
             <div className="flex items-end gap-2">
-              <h3 className="font-h2-headline text-h2-headline text-on-background">{kpi.value.toLocaleString('es-PE')}</h3>
+              <h3 className="font-h2-headline text-h2-headline text-on-background">{orDash(kpi.value.toLocaleString('es-PE'), kpi.unavailable)}</h3>
                <span className={`font-label-sm text-label-sm flex items-center mb-1 ${kpi.tone}`}>
-                 {kpi.trend !== undefined ? <><Icon name={kpi.trend < 0 ? 'trending_down' : 'trending_up'} size="14px" /> {Math.abs(kpi.trend)}%</> : kpi.detail}
+                 {kpi.trend !== undefined ? <><Icon name={kpi.trend < 0 ? 'trending_down' : 'trending_up'} size="14px" /> {Math.abs(kpi.trend)}%</> : orUnavailable(kpi.detail ?? '', kpi.unavailable)}
                </span>
             </div>
           </div>
@@ -115,7 +124,7 @@ export default function ReportesPage() {
         <div className="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-surface-container-high relative overflow-hidden">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-error-container rounded-full opacity-20 blur-xl" />
           <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">Tasa de morosidad</p>
-          <div className="flex items-end gap-2 relative"><h3 className="font-h2-headline text-h2-headline text-error">{metrics.delinquencyRate}%</h3><span className="font-label-sm text-label-sm text-on-surface-variant mb-1">Actual</span></div>
+          <div className="flex items-end gap-2 relative"><h3 className="font-h2-headline text-h2-headline text-error">{orDash(`${metrics.delinquencyRate}%`, balancesUnavailable)}</h3><span className="font-label-sm text-label-sm text-on-surface-variant mb-1">Actual</span></div>
         </div>
       </div>
 

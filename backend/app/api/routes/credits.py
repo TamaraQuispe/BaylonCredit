@@ -3,7 +3,16 @@ from decimal import Decimal
 from typing import Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    status,
+)
+from fastapi.responses import JSONResponse
 from sqlalchemy import distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +23,8 @@ from app.models.client import Client
 from app.models.commerce import (
     Credit,
     CreditEvaluation,
+    CreditReview,
+    CreditReviewResolution,
     CreditStatus,
     Payment,
     PaymentAllocation,
@@ -26,13 +37,41 @@ from app.schemas.finance import (
     CreditEvaluationRequest,
     CreditEvaluationSummary,
     CreditPaymentEntry,
+    CreditReviewRead,
     DirectCreditCreate,
     FinanceCreditRead,
     ScoreFactorRead,
 )
 from app.services.ai_credit import dispatch_ai_explanation, enqueue_ai_explanation
 from app.services.audit import add_audit_log
+from app.services.credit_review import (
+    assign_review,
+    can_assign,
+    can_resolve,
+    enqueue_review,
+    resolve_review,
+)
 from app.services.credit_scoring import evaluate_and_record
+from app.services.idempotency import (
+    HEADER_NAME as IDEMPOTENCY_HEADER,
+)
+from app.services.idempotency import (
+    begin as begin_idempotent_operation,
+)
+from app.services.idempotency import (
+    complete as complete_idempotent_operation,
+)
+from app.services.idempotency import (
+    normalize_key as normalize_idempotency_key,
+)
+from app.services.idempotency import (
+    release as release_idempotent_operation,
+)
+from app.services.proy_credit_policy import (
+    PENDING_BALANCE_BLOCK,
+    lock_client,
+    pending_balance_gate,
+)
 from app.services.whatsapp import enqueue_evaluation_notification
 
 router = APIRouter(prefix="/credits", tags=["credits"])
@@ -172,6 +211,18 @@ async def evaluate_requested_credit(
     evaluation = await record_evaluation(
         db, payload.client_id, payload.amount, current_user.id, "manual"
     )
+    requires_review = any(
+        factor.get("key") == "payment_history_review" for factor in evaluation.factors
+    )
+    if requires_review:
+        await enqueue_review(
+            db,
+            evaluation=evaluation,
+            decision="REQUIRES_OWNER_REVIEW",
+            reason="Sin historial pagado confirmado; revision obligatoria del propietario.",
+            priority=10,
+            policy_version="PROY-propuesta",
+        )
     await db.commit()
     await db.refresh(evaluation)
     await dispatch_ai_explanation(evaluation.id)
@@ -266,6 +317,172 @@ async def list_credits(
     return [await serialize_credit(db, credit) for credit in credits]
 
 
+
+
+@router.get("/reviews", response_model=list[CreditReviewRead])
+async def list_credit_reviews(
+    status_filter: str | None = Query(default=None, alias="status"),
+    client_id: UUID | None = None,
+    limit: int = Query(default=100, ge=1, le=200),
+    current_user: User = Depends(can_evaluate_risk),
+    db: AsyncSession = Depends(get_db),
+) -> list[CreditReviewRead]:
+    query = (
+        select(CreditReview, Client)
+        .join(Client, Client.id == CreditReview.client_id)
+        .order_by(CreditReview.created_at.desc())
+        .limit(limit)
+    )
+    if status_filter:
+        query = query.where(CreditReview.status == status_filter)
+    if client_id is not None:
+        query = query.where(CreditReview.client_id == client_id)
+    rows = (await db.execute(query)).all()
+    result = []
+    for review, client in rows:
+        result.append(
+            CreditReviewRead(
+                id=review.id,
+                evaluation_id=review.evaluation_id,
+                client_id=review.client_id,
+                client_name=client.business_name
+                or f"{client.first_name} {client.last_name}",
+                requested_amount=review.requested_amount,
+                score=review.score,
+                risk=review.risk,
+                decision=review.decision,
+                reason=review.reason,
+                priority=review.priority,
+                status=review.status,
+                assigned_to_id=review.assigned_to_id,
+                resolved_by_id=review.resolved_by_id,
+                resolved_at=review.resolved_at,
+                resolution=review.resolution,
+                resolution_note=review.resolution_note,
+                model_version=review.model_version,
+                policy_version=review.policy_version,
+                feature_schema_version=review.feature_schema_version,
+                threshold=review.threshold,
+                created_at=review.created_at,
+                updated_at=review.updated_at,
+            )
+        )
+    return result
+
+
+@router.post("/reviews/{review_id}/assign", response_model=CreditReviewRead)
+async def assign_credit_review(
+    review_id: UUID,
+    current_user: User = Depends(can_evaluate_risk),
+    db: AsyncSession = Depends(get_db),
+) -> CreditReviewRead:
+    review = await db.get(CreditReview, review_id)
+    if review is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Revision no encontrada",
+        )
+    if not can_assign(current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sin permiso para asignar revisiones",
+        )
+    await assign_review(db, review, current_user)
+    await db.commit()
+    await db.refresh(review)
+    client = await db.get(Client, review.client_id)
+    return CreditReviewRead(
+        id=review.id,
+        evaluation_id=review.evaluation_id,
+        client_id=review.client_id,
+        client_name=(
+            (client.business_name or f"{client.first_name} {client.last_name}")
+            if client
+            else None
+        ),
+        requested_amount=review.requested_amount,
+        score=review.score,
+        risk=review.risk,
+        decision=review.decision,
+        reason=review.reason,
+        priority=review.priority,
+        status=review.status,
+        assigned_to_id=review.assigned_to_id,
+        resolved_by_id=review.resolved_by_id,
+        resolved_at=review.resolved_at,
+        resolution=review.resolution,
+        resolution_note=review.resolution_note,
+        model_version=review.model_version,
+        policy_version=review.policy_version,
+        feature_schema_version=review.feature_schema_version,
+        threshold=review.threshold,
+        created_at=review.created_at,
+        updated_at=review.updated_at,
+    )
+
+
+@router.post("/reviews/{review_id}/resolve", response_model=CreditReviewRead)
+async def resolve_credit_review(
+    review_id: UUID,
+    resolution: str = Query(..., pattern="^(aprobada|rechazada)$"),
+    note: str | None = Query(default=None, max_length=500),
+    current_user: User = Depends(can_evaluate_risk),
+    db: AsyncSession = Depends(get_db),
+) -> CreditReviewRead:
+    review = await db.get(CreditReview, review_id)
+    if review is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Revision no encontrada",
+        )
+    if not can_resolve(current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sin permiso para resolver revisiones",
+        )
+    res = (
+        CreditReviewResolution.APPROVED
+        if resolution == "aprobada"
+        else CreditReviewResolution.REJECTED
+    )
+    try:
+        await resolve_review(db, review, user=current_user, resolution=res, note=note)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from exc
+    await db.commit()
+    await db.refresh(review)
+    client = await db.get(Client, review.client_id)
+    return CreditReviewRead(
+        id=review.id,
+        evaluation_id=review.evaluation_id,
+        client_id=review.client_id,
+        client_name=(
+            (client.business_name or f"{client.first_name} {client.last_name}")
+            if client
+            else None
+        ),
+        requested_amount=review.requested_amount,
+        score=review.score,
+        risk=review.risk,
+        decision=review.decision,
+        reason=review.reason,
+        priority=review.priority,
+        status=review.status,
+        assigned_to_id=review.assigned_to_id,
+        resolved_by_id=review.resolved_by_id,
+        resolved_at=review.resolved_at,
+        resolution=review.resolution,
+        resolution_note=review.resolution_note,
+        model_version=review.model_version,
+        policy_version=review.policy_version,
+        feature_schema_version=review.feature_schema_version,
+        threshold=review.threshold,
+        created_at=review.created_at,
+        updated_at=review.updated_at,
+    )
+
 @router.get("/{credit_id}", response_model=FinanceCreditRead)
 async def get_credit(
     credit_id: UUID,
@@ -283,15 +500,65 @@ async def create_credit(
     payload: DirectCreditCreate,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(can_write),
+    idempotency_key: str | None = Header(default=None, alias=IDEMPOTENCY_HEADER),
     db: AsyncSession = Depends(get_db),
 ) -> FinanceCreditRead:
+    # P0-03: con Idempotency-Key un reintento no duplica el fiado.
+    start = await begin_idempotent_operation(
+        db,
+        key=normalize_idempotency_key(idempotency_key),
+        scope="credits.create",
+        user_id=current_user.id,
+        payload=payload.model_dump(mode="json"),
+    )
+    if start.replay_body is not None:
+        return JSONResponse(status_code=start.replay_status, content=start.replay_body)
+    # Regla del propietario (P0-02): cualquier saldo pendiente bloquea el fiado.
+    # Se lee de la base con bloqueo de cliente, antes del modelo y sin excepciones.
+    client = await lock_client(db, payload.client_id)
+    if client is None or not client.is_active:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
+    pending_gate = await pending_balance_gate(db, payload.client_id)
+    if pending_gate.decision == PENDING_BALANCE_BLOCK:
+        add_audit_log(
+            db,
+            "credit_blocked_pending_balance",
+            "client",
+            actor=current_user,
+            entity_id=client.id,
+            details={
+                "pending_amount": str(pending_gate.pending_amount),
+                "requested_amount": str(payload.amount),
+                "manual_override_requested": payload.manual_override,
+                "exception_reason": (payload.exception_reason or "").strip() or None,
+            },
+            description="Nuevo fiado rechazado: el cliente mantiene saldo pendiente.",
+        )
+        await release_idempotent_operation(db, start.record)
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=pending_gate.reason
+        )
     evaluation = await record_evaluation(
         db, payload.client_id, payload.amount, current_user.id, "direct_credit"
     )
+    requires_review = any(
+        factor.get("key") == "payment_history_review" for factor in evaluation.factors
+    )
+    if requires_review:
+        await enqueue_review(
+            db,
+            evaluation=evaluation,
+            decision="REQUIRES_OWNER_REVIEW",
+            reason="Sin historial pagado confirmado; revision obligatoria del propietario.",
+            priority=10,
+            policy_version="PROY-propuesta",
+        )
     approved = evaluation.approved
     overridden = False
     if not approved:
         if not payload.manual_override:
+            await release_idempotent_operation(db, start.record)
             await db.commit()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -302,6 +569,7 @@ async def create_credit(
         )
         if requires_review:
             if current_user.role != UserRole.ADMIN:
+                await release_idempotent_operation(db, start.record)
                 await db.commit()
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
@@ -312,6 +580,7 @@ async def create_credit(
                 )
             policy = await get_settings_record(db)
             if payload.amount > policy.max_credit_amount:
+                await release_idempotent_operation(db, start.record)
                 await db.commit()
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -319,6 +588,7 @@ async def create_credit(
                 )
         reason = (payload.exception_reason or "").strip()
         if len(reason) < 10:
+            await release_idempotent_operation(db, start.record)
             await db.commit()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -346,8 +616,8 @@ async def create_credit(
         recommended_limit=evaluation.recommended_limit,
     )
     db.add(credit)
+    await db.flush()
     if overridden:
-        await db.flush()
         add_audit_log(
             db,
             "credit_overridden",
@@ -364,7 +634,16 @@ async def create_credit(
             },
             description="Crédito aprobado como excepción fuera de la política de riesgo.",
         )
-    await db.commit()
     await db.refresh(credit)
+    serialized = await serialize_credit(db, credit)
+    complete_idempotent_operation(
+        db,
+        start.record,
+        status_code=status.HTTP_201_CREATED,
+        body=serialized.model_dump(mode="json"),
+        resource_id=credit.id,
+    )
+    await db.commit()
     notify_evaluation(background_tasks, evaluation.id)
-    return await serialize_credit(db, credit)
+    return serialized
+
