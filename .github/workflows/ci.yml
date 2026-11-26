@@ -68,3 +68,17 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: alembic upgrade head
       - run: pytest -q tests/test_credit_reviews.py
+
+  no-duplicates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rechazar archivos duplicados con patron " 2."
+        run: |
+          matches=$(git ls-files -z | tr '\0' '\n' | grep ' 2\.' || true)
+          if [ -n "$matches" ]; then
+            echo "::error::Hay archivos con el patron ' 2.' en el repo:"
+            printf '%s\n' "$matches"
+            exit 1
+          fi
+          echo "Sin archivos con el patron ' 2.'"
