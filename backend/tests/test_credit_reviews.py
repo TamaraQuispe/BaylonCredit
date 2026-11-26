@@ -461,3 +461,10 @@ def test_expiry_interval_setting_allows_disabling_and_rejects_negatives() -> Non
 
     with pytest.raises(ValueError):
         Settings(_env_file=None, credit_review_expiry_interval_minutes=-1)
+
+
+def test_credit_review_timestamps_match_postgres_timestamptz() -> None:
+    # SQLite acepta cualquier datetime, pero asyncpg rechaza un datetime UTC
+    # contra una columna timestamp without time zone y rompe la expiracion.
+    assert CreditReview.__table__.c.expires_at.type.timezone is True
+    assert CreditReview.__table__.c.resolved_at.type.timezone is True
