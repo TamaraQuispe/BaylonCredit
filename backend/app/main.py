@@ -1,4 +1,4 @@
-from asyncio import Task, create_task
+from asyncio import Task, create_task, gather
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -11,6 +11,7 @@ from app.api.routes.health import router as health_router
 from app.core.config import get_settings
 from app.core.http_logging import RequestLoggingMiddleware
 from app.db.session import SERVICE_UNAVAILABLE_MESSAGE, DatabaseUnavailable
+from app.services.credit_review import review_expiry_loop
 from app.services.whatsapp import reminder_loop
 
 settings = get_settings()
@@ -21,9 +22,17 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     reminder_task: Task | None = None
     if settings.whatsapp_enabled and settings.whatsapp_notify_reminders:
         reminder_task = create_task(reminder_loop(settings.whatsapp_reminder_interval_hours))
+    review_expiry_task: Task | None = None
+    if settings.credit_review_expiry_interval_minutes > 0:
+        review_expiry_task = create_task(
+            review_expiry_loop(settings.credit_review_expiry_interval_minutes)
+        )
     yield
-    if reminder_task:
-        reminder_task.cancel()
+    tasks = [task for task in (reminder_task, review_expiry_task) if task is not None]
+    for task in tasks:
+        task.cancel()
+    if tasks:
+        await gather(*tasks, return_exceptions=True)
 
 
 app = FastAPI(

@@ -37,6 +37,7 @@ from app.schemas.finance import (
     CreditEvaluationRequest,
     CreditEvaluationSummary,
     CreditPaymentEntry,
+    CreditReviewExpireRead,
     CreditReviewRead,
     DirectCreditCreate,
     FinanceCreditRead,
@@ -49,6 +50,7 @@ from app.services.credit_review import (
     can_assign,
     can_resolve,
     enqueue_review,
+    expire_overdue_reviews,
     resolve_review,
 )
 from app.services.credit_scoring import evaluate_and_record
@@ -79,6 +81,7 @@ can_write = require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.CREDIT)
 can_evaluate_risk = require_roles(
     UserRole.ADMIN, UserRole.OPERATOR, UserRole.CREDIT, UserRole.VIEWER
 )
+admin_only = require_roles(UserRole.ADMIN)
 
 _RISK_ORDER = {
     RiskLevel.VERY_LOW: 0,
@@ -327,6 +330,9 @@ async def list_credit_reviews(
     current_user: User = Depends(can_evaluate_risk),
     db: AsyncSession = Depends(get_db),
 ) -> list[CreditReviewRead]:
+    # Cierra las revisiones vencidas para que la cola nunca muestre items caducados.
+    await expire_overdue_reviews(db)
+    await db.commit()
     query = (
         select(CreditReview, Client)
         .join(Client, Client.id == CreditReview.client_id)
@@ -370,13 +376,26 @@ async def list_credit_reviews(
     return result
 
 
+@router.post("/reviews/expire", response_model=CreditReviewExpireRead)
+async def expire_credit_reviews(
+    _: User = Depends(admin_only),
+    db: AsyncSession = Depends(get_db),
+) -> CreditReviewExpireRead:
+    """Cierre manual de revisiones vencidas; el ciclo del lifespan ya lo hace solo."""
+    expired = await expire_overdue_reviews(db)
+    await db.commit()
+    return CreditReviewExpireRead(expired=expired)
+
+
 @router.post("/reviews/{review_id}/assign", response_model=CreditReviewRead)
 async def assign_credit_review(
     review_id: UUID,
     current_user: User = Depends(can_evaluate_risk),
     db: AsyncSession = Depends(get_db),
 ) -> CreditReviewRead:
-    review = await db.get(CreditReview, review_id)
+    await expire_overdue_reviews(db)
+    await db.commit()
+    review = await db.get(CreditReview, review_id, with_for_update=True)
     if review is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -387,7 +406,13 @@ async def assign_credit_review(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Sin permiso para asignar revisiones",
         )
-    await assign_review(db, review, current_user)
+    try:
+        await assign_review(db, review, current_user)
+    except ValueError as exc:
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from exc
     await db.commit()
     await db.refresh(review)
     client = await db.get(Client, review.client_id)
@@ -429,7 +454,9 @@ async def resolve_credit_review(
     current_user: User = Depends(can_evaluate_risk),
     db: AsyncSession = Depends(get_db),
 ) -> CreditReviewRead:
-    review = await db.get(CreditReview, review_id)
+    await expire_overdue_reviews(db)
+    await db.commit()
+    review = await db.get(CreditReview, review_id, with_for_update=True)
     if review is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
