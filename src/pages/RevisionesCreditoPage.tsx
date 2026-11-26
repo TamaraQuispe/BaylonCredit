@@ -36,6 +36,16 @@ export default function RevisionesCreditoPage() {
     void load()
   }, [])
 
+  async function assign(id: string) {
+    setError(null)
+    try {
+      await apiRequest(`/credits/reviews/${id}/assign`, { method: 'POST' })
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo asignar')
+    }
+  }
+
   async function resolve(id: string, resolution: 'aprobada' | 'rechazada') {
     try {
       await apiRequest(`/credits/reviews/${id}/resolve?resolution=${resolution}`, { method: 'POST' })
@@ -63,6 +73,12 @@ export default function RevisionesCreditoPage() {
             </div>
             {item.reason && <div className="text-sm text-gray-600">{item.reason}</div>}
             <div className="flex gap-2">
+              <button
+                className="px-3 py-1 bg-blue-600 text-white rounded"
+                onClick={() => void assign(item.id)}
+              >
+                Asignar
+              </button>
               <button
                 className="px-3 py-1 bg-green-600 text-white rounded"
                 onClick={() => void resolve(item.id, 'aprobada')}
