@@ -2,3 +2,17 @@
 entregables/** -text
 entregables/**/*.pdf binary
 entregables/**/*.csv whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Fixtures y protocolos congelados: sin conversion de fin de linea (CRLF rompe sus SHA-256).
+backend/tests/fixtures/** -text
+docs/APF3_*.json -text
+# Fuentes cuyos bytes tambien estan congelados por tests de hash.
+backend/app/ml/owner_aligned_synthetic.py -text
+backend/scripts/academic_credit_aligned_v4.py -text
+backend/tests/test_owner_aligned_synthetic.py -text
+backend/app/services/academic_v6_policy.py -text
+backend/app/ml/owner_pending_synthetic.py -text
+backend/app/ml/synthetic.py -text
+backend/app/ml/features.py -text
+backend/app/ml/outcomes.py -text
+backend/scripts/prepare_pending_v6_data.py -text

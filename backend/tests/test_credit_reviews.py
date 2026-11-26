@@ -41,6 +41,14 @@ async def client(monkeypatch) -> AsyncIterator[AsyncClient]:
                 role=UserRole.ADMIN,
             )
         )
+        db.add(
+            User(
+                email="viewer@credify.com",
+                full_name="Consulta Credify",
+                hashed_password=hash_password("secure-password"),
+                role=UserRole.VIEWER,
+            )
+        )
         await db.commit()
 
     async def override_db() -> AsyncIterator[AsyncSession]:
@@ -54,10 +62,10 @@ async def client(monkeypatch) -> AsyncIterator[AsyncClient]:
     await engine.dispose()
 
 
-async def _login(client: AsyncClient) -> dict:
+async def _login(client: AsyncClient, email: str = "admin@credify.com") -> dict:
     response = await client.post(
         "/api/v1/auth/login",
-        data={"username": "admin@credify.com", "password": "secure-password"},
+        data={"username": email, "password": "secure-password"},
     )
     assert response.status_code == 200
     return response.json()
@@ -209,3 +217,36 @@ async def test_review_enqueued_on_direct_credit_without_history(client: AsyncCli
     reviews = await client.get("/api/v1/credits/reviews", headers=headers)
     assert reviews.status_code == 200
     assert len(reviews.json()) >= 1
+
+
+async def test_review_actions_denied_for_viewer_role(client: AsyncClient) -> None:
+    admin = await _login(client)
+    admin_headers = {"Authorization": f"Bearer {admin['access_token']}"}
+    client_id = await _new_client(client, admin_headers, "77770006")
+
+    evaluation = await client.post(
+        "/api/v1/credits/evaluate",
+        headers=admin_headers,
+        json={"client_id": client_id, "amount": "50.00"},
+    )
+    assert evaluation.status_code == 200, evaluation.text
+
+    reviews = await client.get(
+        "/api/v1/credits/reviews?status=pendiente", headers=admin_headers
+    )
+    assert reviews.status_code == 200, reviews.text
+    review_id = reviews.json()[0]["id"]
+
+    viewer = await _login(client, "viewer@credify.com")
+    viewer_headers = {"Authorization": f"Bearer {viewer['access_token']}"}
+
+    assigned = await client.post(
+        f"/api/v1/credits/reviews/{review_id}/assign", headers=viewer_headers
+    )
+    assert assigned.status_code == 403, assigned.text
+
+    resolved = await client.post(
+        f"/api/v1/credits/reviews/{review_id}/resolve?resolution=aprobada",
+        headers=viewer_headers,
+    )
+    assert resolved.status_code == 403, resolved.text
