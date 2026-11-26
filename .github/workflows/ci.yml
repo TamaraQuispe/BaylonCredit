@@ -34,3 +34,37 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check .
       - run: pytest
+
+  backend-postgres:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bayloncredit
+          POSTGRES_USER: baylon
+          POSTGRES_PASSWORD: baylon
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U baylon -d bayloncredit"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ENVIRONMENT: test
+      DATABASE_URL: postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit
+      TEST_DATABASE_URL: postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit
+      JWT_SECRET_KEY: ci-postgres-review-secret-key-0123456789
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: alembic upgrade head
+      - run: pytest -q tests/test_credit_reviews.py

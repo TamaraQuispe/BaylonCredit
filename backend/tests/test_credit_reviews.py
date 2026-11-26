@@ -1,4 +1,5 @@
 import asyncio
+import os
 from collections.abc import AsyncIterator
 from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
@@ -17,6 +18,7 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 from app.models.commerce import CreditReview, CreditReviewStatus
+from app.models.settings import DEFAULT_ORGANIZATION_ID, Organization
 from app.models.user import User, UserRole
 from app.services import credit_review as review_service
 
@@ -35,11 +37,19 @@ async def app_context(
     )
     for module in (scoring, ai_credit, whatsapp):
         monkeypatch.setattr(module, "get_settings", lambda: settings)
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    # SQLite no distingue zonas horarias; TEST_DATABASE_URL permite correr estos
+    # tests contra Postgres real en CI (job backend-postgres).
+    database_url = os.environ.get("TEST_DATABASE_URL")
+    engine = create_async_engine(database_url or "sqlite+aiosqlite:///:memory:")
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
     async with engine.begin() as connection:
+        if database_url:
+            await connection.run_sync(Base.metadata.drop_all)
         await connection.run_sync(Base.metadata.create_all)
     async with session_factory() as db:
+        # La migracion 0013 siembra esta organizacion; SQLite no aplica la FK
+        # de clients.organization_id y sin ella Postgres rechaza el insert.
+        db.add(Organization(id=DEFAULT_ORGANIZATION_ID, name="Credify"))
         db.add(
             User(
                 email="admin@credify.com",
