@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import RevisionesCreditoPage from './RevisionesCreditoPage'
@@ -34,13 +34,15 @@ function jsonResponse({ status, body }: MockReply) {
   } as unknown as Response
 }
 
-function installApi(handler: (method: string, url: URL) => MockReply | undefined) {
+function installApi(
+  handler: (method: string, url: URL) => MockReply | undefined | Promise<MockReply | undefined>,
+) {
   calls = []
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(String(input))
     const method = (init?.method ?? 'GET').toUpperCase()
     calls.push({ method, path: `${url.pathname}${url.search}` })
-    const reply = handler(method, url)
+    const reply = await handler(method, url)
     if (!reply) throw new Error(`Peticion no simulada: ${method} ${url.pathname}${url.search}`)
     return jsonResponse(reply)
   })
@@ -127,6 +129,43 @@ describe('RevisionesCreditoPage', () => {
       })
       expect(calls.filter((call) => call.method === 'GET')).toHaveLength(3)
     })
+  })
+
+  test('disables the action buttons and ignores a double click while a request is in flight', async () => {
+    const user = userEvent.setup()
+    let releaseRequest: (() => void) | undefined
+    const inFlight = new Promise<void>((resolve) => {
+      releaseRequest = resolve
+    })
+    installApi(async (method) => {
+      if (method === 'POST') {
+        await inFlight
+        return { status: 200, body: { ...pendingReview, status: 'asignada' } }
+      }
+      return listOnly()
+    })
+
+    render(<RevisionesCreditoPage />)
+    await screen.findByText('Ana Torres')
+
+    const assign = screen.getByRole('button', { name: 'Asignar' })
+    await user.click(assign)
+
+    await waitFor(() => expect(assign).toBeDisabled())
+    expect(screen.getByRole('button', { name: 'Aprobar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Rechazar' })).toBeDisabled()
+
+    fireEvent.click(assign)
+    fireEvent.click(screen.getByRole('button', { name: 'Aprobar' }))
+    releaseRequest?.()
+
+    await waitFor(() => {
+      expect(assign).toBeEnabled()
+      expect(calls.filter((call) => call.method === 'GET')).toHaveLength(2)
+    })
+    expect(calls.filter((call) => call.method === 'POST')).toEqual([
+      { method: 'POST', path: `${REVIEWS_URL}/rev-1/assign` },
+    ])
   })
 
   test('surfaces the 403 when the role cannot assign', async () => {

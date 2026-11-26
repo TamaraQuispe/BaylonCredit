@@ -18,6 +18,7 @@ export default function RevisionesCreditoPage() {
   const [items, setItems] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -38,20 +39,27 @@ export default function RevisionesCreditoPage() {
 
   async function assign(id: string) {
     setError(null)
+    setBusy(true)
     try {
       await apiRequest(`/credits/reviews/${id}/assign`, { method: 'POST' })
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo asignar')
+    } finally {
+      setBusy(false)
     }
   }
 
   async function resolve(id: string, resolution: 'aprobada' | 'rechazada') {
+    setError(null)
+    setBusy(true)
     try {
       await apiRequest(`/credits/reviews/${id}/resolve?resolution=${resolution}`, { method: 'POST' })
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo resolver')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -74,19 +82,22 @@ export default function RevisionesCreditoPage() {
             {item.reason && <div className="text-sm text-gray-600">{item.reason}</div>}
             <div className="flex gap-2">
               <button
-                className="px-3 py-1 bg-blue-600 text-white rounded"
+                className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
+                disabled={busy}
                 onClick={() => void assign(item.id)}
               >
                 Asignar
               </button>
               <button
-                className="px-3 py-1 bg-green-600 text-white rounded"
+                className="px-3 py-1 bg-green-600 text-white rounded disabled:opacity-50"
+                disabled={busy}
                 onClick={() => void resolve(item.id, 'aprobada')}
               >
                 Aprobar
               </button>
               <button
-                className="px-3 py-1 bg-red-600 text-white rounded"
+                className="px-3 py-1 bg-red-600 text-white rounded disabled:opacity-50"
+                disabled={busy}
                 onClick={() => void resolve(item.id, 'rechazada')}
               >
                 Rechazar
