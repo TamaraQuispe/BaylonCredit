@@ -128,9 +128,10 @@ reconstruirse sin inferencia. No se incluye entrenamiento ni acceso a BD.
 - Doble candado: apagado por defecto (`PROY_EXPERIMENTAL_ENABLED=false`) y el
   validador de configuracion impide habilitarlo fuera de `staging`. Apagado o
   fuera de staging responde 404.
-- Lee el historial real con `app/ml/features.py` (congelado), aplica la compuerta
-  de saldo pendiente y, si el snapshot cae en el dominio de entrenamiento, llama
-  al SVM. Con cualquier deuda pendiente no invoca al modelo.
+- Lee el historial real con `app/ml/features.py` (congelado). La compuerta de
+  saldo pendiente vive en el cargador: con cualquier deuda pendiente responde sin
+  cargar el artefacto ni calcular probabilidad. Si el snapshot cae en el dominio
+  de entrenamiento, infiere con el SVM.
 - Guarda la traza en `proy_experimental_evaluations` (decision, razon,
   probabilidad, umbral, snapshot, versiones). Es una tabla aparte: no escribe en
   `credit_evaluations`, no entra a la cola de revisiones y no crea ni aprueba

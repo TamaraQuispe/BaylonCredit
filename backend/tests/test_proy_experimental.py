@@ -18,6 +18,7 @@ from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+from app.ml import proy_model
 from app.ml.proy_contract import CONTRACT_VERSION, FEATURE_NAMES_PROY
 from app.ml.proy_model import MODEL_VERSION, ProyModelUnavailable
 from app.models.commerce import (
@@ -231,17 +232,18 @@ async def test_unknown_client_returns_404(client: AsyncClient) -> None:
     assert response.status_code == 404, response.text
 
 
-async def test_pending_balance_blocks_without_calling_model(
+async def test_pending_balance_blocks_without_loading_artifact(
     app_context, monkeypatch
 ) -> None:
     client, session_factory = app_context
     headers = await _login(client)
     client_id = await _new_client(client, headers, "88880001")
     await _seed_credit(session_factory, client_id, amount="30.00", pending="30.00")
+    # Se usa el predict_proy real: la compuerta debe cortar antes del loader.
     monkeypatch.setattr(
-        service,
-        "predict_proy_snapshot",
-        lambda *_: pytest.fail("el modelo no debe llamarse con saldo pendiente"),
+        proy_model,
+        "_load",
+        lambda *_: pytest.fail("el artefacto no debe cargarse con saldo pendiente"),
     )
 
     response = await client.post(
@@ -286,7 +288,7 @@ async def test_snapshot_comes_from_database_and_is_persisted(
             "schema_version": CONTRACT_VERSION,
         }
 
-    monkeypatch.setattr(service, "predict_proy_snapshot", fake_predict)
+    monkeypatch.setattr(service, "predict_proy", fake_predict)
 
     response = await client.post(
         "/api/v1/proy-experimental/evaluations",
@@ -324,7 +326,7 @@ async def test_unavailable_model_fails_closed_without_trace(
     def unavailable(*_):
         raise ProyModelUnavailable("Artifact SHA256 mismatch")
 
-    monkeypatch.setattr(service, "predict_proy_snapshot", unavailable)
+    monkeypatch.setattr(service, "predict_proy", unavailable)
 
     response = await client.post(
         "/api/v1/proy-experimental/evaluations",

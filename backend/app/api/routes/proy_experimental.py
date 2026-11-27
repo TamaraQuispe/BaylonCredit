@@ -59,4 +59,4 @@ async def evaluate_client_history(
         ) from None
     await db.commit()
     await db.refresh(evaluation)
-    return service.serialize(evaluation)
+    return ProyExperimentalEvaluationRead.model_validate(evaluation)

@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProyExperimentalEvaluationRequest(BaseModel):
@@ -12,6 +12,8 @@ class ProyExperimentalEvaluationRequest(BaseModel):
 
 
 class ProyExperimentalEvaluationRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     client_id: UUID
     requested_amount: Decimal
