@@ -1,0 +1,8 @@
+# Override opcional para la demo PROY: la API se construye con el runtime exacto
+# del SVM (Linux/aarch64). Requiere un host capaz de ejecutar linux/arm64.
+services:
+  api:
+    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: deploy/proy-demo/Dockerfile

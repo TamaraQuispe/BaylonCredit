@@ -165,8 +165,36 @@ sembrado con una venta y un fiado ya pagado (S/ 80, sin deuda) solicito S/ 40:
   versiones y umbral.
 - Creditos antes/despues: 1/1; `credit_evaluations` y `credit_reviews`: 0/0.
 
+### Runtime exacto de la demo
+
 El endpoint sigue fallando cerrado (503) en cualquier runtime fuera de las dos
-tuplas verificadas, aunque el flag este activo.
+tuplas verificadas, aunque el flag este activo. Para que la demo de staging no
+caiga en ese caso:
+
+- Imagen `deploy/proy-demo/Dockerfile`: base `python:3.12.14-slim-bookworm`
+  (Linux/aarch64, el candidato registrado) con NumPy 2.5.3, scikit-learn 1.9.1,
+  SciPy 1.18.1, joblib 1.6.0 y threadpoolctl 3.7.0. Tras instalar, el build
+  ejecuta `deploy/proy-demo/check-runtime.py`, que carga el artefacto y compara
+  la fila de control (0.13741099608146 +- 1e-9). Si el runtime no es apto, la
+  imagen no se construye.
+- Override `docker-compose.proy-demo.yml` (API con `platform: linux/arm64`); el
+  comando de staging esta en el README.
+- Cualquier entorno puede comprobarse con
+  `python deploy/proy-demo/check-runtime.py`. En la tupla de referencia imprime
+  `RUNTIME_OK credit-proy-svm-v1 prob=0.137410996081460` y en la imagen
+  `...081462`.
+- `backend/pyproject.toml` acepta ahora `>=3.12,<3.15`, para que la tupla de
+  referencia 3.14.6 sea instalable; el CI sigue fijado en 3.12.
+
+E2E a traves de la imagen: PostgreSQL 17, S/ 40, probabilidad 0.106575,
+`MODEL_REVIEW_CANDIDATE`, traza persistida y creditos 1/1.
+
+#### Limite de arquitectura
+
+La imagen es linux/arm64 porque la unica tupla Linux verificada es aarch64. En un
+host amd64 hay que ejecutarla con emulacion arm64 (buildx/qemu) o hacer un probe
+x86_64 propio y anadir la tupla a la evidencia; la emulacion no cuenta como
+verificacion x86_64. Sin una de esas dos cosas el endpoint respondera 503 alli.
 
 ## Dependencias para el siguiente incremento
 
