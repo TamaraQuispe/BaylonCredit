@@ -3,7 +3,7 @@
 Comprueba, contra la API en ejecucion y la base real: inicio de sesion, snapshot
 calculado en el servidor, inferencia del SVM, traza persistida y ausencia de
 efectos de negocio (ni fiado, ni evaluacion, ni revision). No usa mocks ni
-sqlite; pensado para el job ``e2e-postgres`` del workflow PROY SVM x86_64.
+sqlite; es el paso del job ``e2e-postgres`` del workflow PROY SVM x86_64.
 
 Solo stdlib. La base se consulta con ``docker exec ... psql`` para no duplicar
 el cliente SQL en la imagen de la API.
@@ -25,6 +25,8 @@ from pathlib import Path
 
 CLIENT_DOCUMENT = "90000001"
 REQUESTED_AMOUNT = "40.00"
+PG_USER = "demo"
+PG_DATABASE = "credify_demo"
 # La tupla x86_64 difiere de la referencia en ~2.6e-14; 1e-9 deja margen.
 EXPECTED_PROBABILITY = 0.1065748513407444
 PROBABILITY_TOLERANCE = 1e-9
@@ -49,9 +51,9 @@ COUNT_SQL = (
 )
 
 
-def psql(container: str, user: str, database: str, sql: str) -> str:
+def psql(container: str, sql: str) -> str:
     result = subprocess.run(
-        ["docker", "exec", container, "psql", "-U", user, "-d", database, "-tAc", sql],
+        ["docker", "exec", container, "psql", "-U", PG_USER, "-d", PG_DATABASE, "-tAc", sql],
         capture_output=True,
         text=True,
         check=False,
@@ -106,8 +108,8 @@ def wait_ready(base_url: str, timeout: float = 90.0) -> None:
     raise RuntimeError("la API no respondio /health/ready dentro del plazo")
 
 
-def counts(container: str, user: str, database: str) -> dict[str, int]:
-    credits, evaluations, reviews, traces = psql(container, user, database, COUNT_SQL).split("|")
+def counts(container: str) -> dict[str, int]:
+    credits, evaluations, reviews, traces = psql(container, COUNT_SQL).split("|")
     return {
         "credits": int(credits),
         "credit_evaluations": int(evaluations),
@@ -120,10 +122,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--pg-container", required=True)
-    parser.add_argument("--pg-user", default="demo")
-    parser.add_argument("--pg-database", default="credify_demo")
     parser.add_argument("--evidence", required=True)
-    parser.add_argument("--expected-probability", type=float, default=EXPECTED_PROBABILITY)
     args = parser.parse_args()
 
     password = os.environ.get("DEMO_USER_PASSWORD")
@@ -136,10 +135,10 @@ def main() -> int:
         "status": "failed",
         "started_utc": datetime.now(UTC).isoformat(),
         "base_url": args.base_url,
-        "database": f"{args.pg_database}@{args.pg_container}",
+        "database": f"{PG_DATABASE}@{args.pg_container}",
         "client_document": CLIENT_DOCUMENT,
         "requested_amount": REQUESTED_AMOUNT,
-        "expected_probability": args.expected_probability,
+        "expected_probability": EXPECTED_PROBABILITY,
         "checks": [],
     }
     try:
@@ -157,14 +156,12 @@ def main() -> int:
 
         client_id = psql(
             args.pg_container,
-            args.pg_user,
-            args.pg_database,
             f"SELECT id FROM clients WHERE document = '{CLIENT_DOCUMENT}' AND is_active LIMIT 1",
         )
         assert client_id, "cliente de control ausente en la base"
         evidence["client_id"] = client_id
 
-        before = counts(args.pg_container, args.pg_user, args.pg_database)
+        before = counts(args.pg_container)
         evidence["counts_before"] = before
 
         status, body = http(
@@ -185,7 +182,7 @@ def main() -> int:
         assert body["policy_version"] == "proy-pending-balance-v1"
         assert body["research_only"] is True and body["business_approval"] is False
         assert body["requires_human_decision"] is True
-        assert abs(body["probability"] - args.expected_probability) <= PROBABILITY_TOLERANCE, (
+        assert abs(body["probability"] - EXPECTED_PROBABILITY) <= PROBABILITY_TOLERANCE, (
             f"probabilidad {body['probability']} fuera de tolerancia"
         )
         assert body["feature_snapshot"] == EXPECTED_SNAPSHOT, body["feature_snapshot"]
@@ -194,8 +191,6 @@ def main() -> int:
 
         row = psql(
             args.pg_container,
-            args.pg_user,
-            args.pg_database,
             "SELECT decision, model_called, probability, requested_amount::text, "
             "pending_amount::text, feature_snapshot::text, created_by_id IS NOT NULL "
             f"FROM proy_experimental_evaluations WHERE id = '{body['id']}'",
@@ -218,7 +213,7 @@ def main() -> int:
         }
         evidence["checks"].append("traza_persistida")
 
-        after = counts(args.pg_container, args.pg_user, args.pg_database)
+        after = counts(args.pg_container)
         evidence["counts_after"] = after
         assert after["credits"] == before["credits"], "se creo un fiado"
         assert after["credit_evaluations"] == before["credit_evaluations"], "se creo una evaluacion"

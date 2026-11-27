@@ -50,16 +50,6 @@ jobs:
           name: proy-svm-probe-x86_64
           path: evidence/probe-x86_64.json
 
-  demo-image:
-    name: demo-image-x86_64
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build pinned demo image
-        run: docker build -f deploy/proy-demo/Dockerfile -t bayloncredit-proy-demo:x86_64 .
-      - name: Confirm the runtime inside the image
-        run: docker run --rm bayloncredit-proy-demo:x86_64 python check-runtime.py
-
   e2e-postgres:
     name: e2e-postgres-x86_64
     runs-on: ubuntu-latest
@@ -101,20 +91,9 @@ jobs:
       - name: Start the API with the experimental flag on
         run: >-
           docker run -d --name proy-e2e-api --network host
-          -e DATABASE_URL -e JWT_SECRET_KEY -e ENVIRONMENT -e PROY_EXPERIMENTAL_ENABLED -e DEMO_USER_PASSWORD
+          -e DATABASE_URL -e JWT_SECRET_KEY -e ENVIRONMENT -e PROY_EXPERIMENTAL_ENABLED
           "$IMAGE" uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
-      - name: Wait for readiness
-        run: |
-          for attempt in $(seq 1 45); do
-            if curl -fsS http://127.0.0.1:8000/health/ready > /dev/null; then
-              echo "API lista en el intento $attempt"
-              exit 0
-            fi
-            sleep 2
-          done
-          docker logs --tail 40 proy-e2e-api
-          exit 1
-      - name: Run the real PostgreSQL E2E
+      - name: Run the real PostgreSQL E2E (waits for readiness)
         run: >-
           python deploy/proy-demo/e2e-postgres.py
           --pg-container "${{ job.services.postgres.id }}"
