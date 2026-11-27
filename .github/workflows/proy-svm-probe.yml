@@ -49,3 +49,13 @@ jobs:
         with:
           name: proy-svm-probe-x86_64
           path: evidence/probe-x86_64.json
+
+  demo-image:
+    name: demo-image-x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build pinned demo image
+        run: docker build -f deploy/proy-demo/Dockerfile -t bayloncredit-proy-demo:x86_64 .
+      - name: Confirm the runtime inside the image
+        run: docker run --rm bayloncredit-proy-demo:x86_64 python check-runtime.py
