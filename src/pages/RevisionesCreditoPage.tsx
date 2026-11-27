@@ -4,7 +4,7 @@ import { apiRequest } from '@/services/apiClient'
 interface Review {
   id: string
   client_name: string | null
-  requested_amount: number
+  requested_amount: number | string
   score: number
   risk: string
   decision: string
@@ -77,7 +77,7 @@ export default function RevisionesCreditoPage() {
               <span className="text-sm text-gray-500">{item.status}</span>
             </div>
             <div className="text-sm">
-              Monto: S/ {item.requested_amount.toFixed(2)} · Score: {item.score} · Riesgo: {item.risk}
+              Monto: S/ {Number(item.requested_amount).toFixed(2)} · Score: {item.score} · Riesgo: {item.risk}
             </div>
             {item.reason && <div className="text-sm text-gray-600">{item.reason}</div>}
             <div className="flex gap-2">

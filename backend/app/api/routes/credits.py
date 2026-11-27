@@ -393,7 +393,8 @@ async def assign_credit_review(
     current_user: User = Depends(can_evaluate_risk),
     db: AsyncSession = Depends(get_db),
 ) -> CreditReviewRead:
-    await expire_overdue_reviews(db)
+    # Cierra solo esta revision: el listado y el ciclo cubren el resto del backlog.
+    await expire_overdue_reviews(db, review_id=review_id)
     await db.commit()
     review = await db.get(CreditReview, review_id, with_for_update=True)
     if review is None:
@@ -454,7 +455,8 @@ async def resolve_credit_review(
     current_user: User = Depends(can_evaluate_risk),
     db: AsyncSession = Depends(get_db),
 ) -> CreditReviewRead:
-    await expire_overdue_reviews(db)
+    # Cierra solo esta revision: el listado y el ciclo cubren el resto del backlog.
+    await expire_overdue_reviews(db, review_id=review_id)
     await db.commit()
     review = await db.get(CreditReview, review_id, with_for_update=True)
     if review is None:

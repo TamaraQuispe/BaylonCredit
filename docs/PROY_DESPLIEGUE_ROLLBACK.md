@@ -26,9 +26,9 @@
 La API expira sola las revisiones pendientes o asignadas que superan
 `CREDIT_REVIEW_TTL_HOURS` (48 por defecto). Un ciclo interno arranca con el
 lifespan y se repite cada `CREDIT_REVIEW_EXPIRY_INTERVAL_MINUTES` (60 por
-defecto); con `0` se desactiva el ciclo. La cola tambien cierra los items
-vencidos al consultarse, asi que nunca se muestran ni se pueden resolver
-revisiones caducadas.
+defecto); con `0` se desactiva el ciclo. La cola cierra los items vencidos al
+consultarse en lotes acotados, y asignar o resolver comprueba siempre su propia
+revision, asi que no se puede operar sobre una caducada aunque quede backlog.
 
 No hace falta un cron con token: los access tokens duran 30 minutos
 (`ACCESS_TOKEN_EXPIRE_MINUTES`) y un bearer fijo en cron dejaria de autenticar.

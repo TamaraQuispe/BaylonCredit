@@ -28,6 +28,10 @@ from app.models.user import User, UserRole
 
 logger = logging.getLogger(__name__)
 
+# Filas maximas que se cierran por transaccion. Evita que un backlog grande
+# bloquee la cola o supere el command_timeout de la base de datos.
+REVIEW_EXPIRY_BATCH_SIZE = 200
+
 
 def _review_ttl() -> timedelta:
     return timedelta(hours=get_settings().credit_review_ttl_hours)
@@ -86,50 +90,74 @@ async def enqueue_review(
 
 
 async def expire_overdue_reviews(
-    db: AsyncSession, *, now: datetime | None = None
+    db: AsyncSession,
+    *,
+    now: datetime | None = None,
+    batch_size: int = REVIEW_EXPIRY_BATCH_SIZE,
+    review_id: UUID | None = None,
 ) -> int:
     """Marca como expiradas las revisiones pendientes o asignadas vencidas.
 
     Usa ``expires_at``; los items creados antes de existir ese plazo aplican
-    el TTL desde ``created_at``. Devuelve cuantas revisiones se expiraron.
+    el TTL desde ``created_at``. Procesa como maximo ``batch_size`` filas por
+    llamada (o solo ``review_id`` si se indica) y devuelve cuantas revisiones
+    se expiraron.
     """
+    if batch_size < 1:
+        raise ValueError("batch_size must be greater than zero")
     moment = now or datetime.now(UTC)
     stale_created_before = moment - _review_ttl()
+    conditions = [
+        CreditReview.status.in_(
+            [CreditReviewStatus.PENDING, CreditReviewStatus.ASSIGNED]
+        ),
+        or_(
+            CreditReview.expires_at <= moment,
+            and_(
+                CreditReview.expires_at.is_(None),
+                CreditReview.created_at <= stale_created_before,
+            ),
+        ),
+    ]
+    if review_id is not None:
+        conditions.append(CreditReview.id == review_id)
     overdue = list(
         await db.scalars(
             select(CreditReview)
-            .where(
-                CreditReview.status.in_(
-                    [CreditReviewStatus.PENDING, CreditReviewStatus.ASSIGNED]
-                ),
-                or_(
-                    CreditReview.expires_at <= moment,
-                    and_(
-                        CreditReview.expires_at.is_(None),
-                        CreditReview.created_at <= stale_created_before,
-                    ),
-                ),
-            )
+            .where(*conditions)
             # Evita pisar una revision que otra peticion esta resolviendo.
             .with_for_update(skip_locked=True)
+            .order_by(CreditReview.created_at)
+            .limit(1 if review_id is not None else batch_size)
         )
     )
     for review in overdue:
-        await expire_review(db, review)
+        await expire_review(db, review, flush=False)
+    if overdue:
+        await db.flush()
     return len(overdue)
 
 
 async def expire_reviews_once(
     session_factory: async_sessionmaker[AsyncSession] | None = None,
+    *,
+    batch_size: int = REVIEW_EXPIRY_BATCH_SIZE,
 ) -> int:
-    """Ejecuta un ciclo de expiracion con su propia sesion de base de datos."""
+    """Ejecuta un ciclo de expiracion completo, en lotes y con su propia sesion."""
+    if batch_size < 1:
+        raise ValueError("batch_size must be greater than zero")
     factory = session_factory or SessionFactory
-    async with factory() as db:
-        expired = await expire_overdue_reviews(db)
-        await db.commit()
-    if expired:
-        logger.info("Revisiones de credito expiradas: %s", expired)
-    return expired
+    total = 0
+    while True:
+        async with factory() as db:
+            expired = await expire_overdue_reviews(db, batch_size=batch_size)
+            await db.commit()
+        total += expired
+        if expired < batch_size:
+            break
+    if total:
+        logger.info("Revisiones de credito expiradas: %s", total)
+    return total
 
 
 async def review_expiry_loop(interval_minutes: int) -> None:
@@ -174,13 +202,16 @@ async def resolve_review(
     return review
 
 
-async def expire_review(db: AsyncSession, review: CreditReview) -> CreditReview:
+async def expire_review(
+    db: AsyncSession, review: CreditReview, *, flush: bool = True
+) -> CreditReview:
     if review.status == CreditReviewStatus.RESOLVED:
         return review
     review.status = CreditReviewStatus.EXPIRED
     review.resolution = CreditReviewResolution.EXPIRED
     review.resolved_at = datetime.now(UTC)
-    await db.flush()
+    if flush:
+        await db.flush()
     return review
 
 

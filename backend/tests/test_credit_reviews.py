@@ -285,7 +285,8 @@ async def _pending_review_id(
     )
     assert evaluation.status_code == 200, evaluation.text
     reviews = await client.get(
-        "/api/v1/credits/reviews?status=pendiente", headers=headers
+        f"/api/v1/credits/reviews?status=pendiente&client_id={client_id}",
+        headers=headers,
     )
     assert reviews.status_code == 200, reviews.text
     return reviews.json()[0]["id"]
@@ -478,3 +479,94 @@ def test_credit_review_timestamps_match_postgres_timestamptz() -> None:
     # contra una columna timestamp without time zone y rompe la expiracion.
     assert CreditReview.__table__.c.expires_at.type.timezone is True
     assert CreditReview.__table__.c.resolved_at.type.timezone is True
+
+
+async def _create_overdue_reviews(
+    client: AsyncClient, headers: dict, session_factory, documents: list[str]
+) -> list[str]:
+    # Primero se crean todas: el GET de la cola cierra vencidas y, si se
+    # marcase cada una antes de crear la siguiente, el lazy close las
+    # expiraria durante la creacion de las demas.
+    ids = [
+        await _pending_review_id(client, headers, document)
+        for document in documents
+    ]
+    for review_id in ids:
+        await _set_deadline(
+            session_factory,
+            review_id,
+            expires_at=datetime.now(UTC) - timedelta(minutes=5),
+        )
+    return ids
+
+
+async def test_expire_overdue_reviews_processes_only_one_batch(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    ids = await _create_overdue_reviews(
+        client, headers, session_factory, ["77770101", "77770102", "77770103"]
+    )
+
+    async with session_factory() as db:
+        first = await review_service.expire_overdue_reviews(db, batch_size=2)
+        await db.commit()
+    assert first == 2
+
+    statuses = []
+    async with session_factory() as db:
+        for review_id in ids:
+            review = await db.get(CreditReview, UUID(review_id))
+            assert review is not None
+            statuses.append(review.status)
+    assert statuses.count(CreditReviewStatus.EXPIRED) == 2
+    assert statuses.count(CreditReviewStatus.PENDING) == 1
+
+    async with session_factory() as db:
+        second = await review_service.expire_overdue_reviews(db, batch_size=2)
+        await db.commit()
+    assert second == 1
+
+
+async def test_expire_reviews_once_drains_backlog_in_batches(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    ids = await _create_overdue_reviews(
+        client, headers, session_factory, ["77770104", "77770105", "77770106"]
+    )
+
+    expired = await review_service.expire_reviews_once(session_factory, batch_size=2)
+    assert expired == 3
+
+    async with session_factory() as db:
+        for review_id in ids:
+            review = await db.get(CreditReview, UUID(review_id))
+            assert review is not None
+            assert review.status is CreditReviewStatus.EXPIRED
+
+
+async def test_expire_overdue_reviews_can_target_one_review(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    ids = await _create_overdue_reviews(
+        client, headers, session_factory, ["77770107", "77770108", "77770109"]
+    )
+
+    async with session_factory() as db:
+        expired = await review_service.expire_overdue_reviews(
+            db, batch_size=1, review_id=UUID(ids[1])
+        )
+        await db.commit()
+    assert expired == 1
+
+    statuses = []
+    async with session_factory() as db:
+        for review_id in ids:
+            review = await db.get(CreditReview, UUID(review_id))
+            assert review is not None
+            statuses.append(review.status)
+    assert statuses[1] is CreditReviewStatus.EXPIRED
+    assert statuses[0] is CreditReviewStatus.PENDING
+    assert statuses[2] is CreditReviewStatus.PENDING
