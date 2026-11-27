@@ -73,7 +73,7 @@ class RuntimeComparisonTests(unittest.TestCase):
             lambda p: p["runtime"].update(sklearn="1.10.0"),
             lambda p: p["runtime"].update(scipy="1.19.0"),
             lambda p: p["runtime"].update(threadpoolctl="3.8.0"),
-            lambda p: p["runtime"].update(machine="x86_64"),
+            lambda p: p["runtime"].update(machine="riscv64"),
             lambda p: p["scores"][0].update(features=[0] * 11),
             lambda p: p.update(classes=[1, 0]),
             lambda p: p.update(warnings=["version warning"]),
@@ -92,6 +92,10 @@ class RuntimeComparisonTests(unittest.TestCase):
                 mutation(candidate)
                 with self.assertRaises(ValueError):
                     verifier.compare_probes(self.reference, candidate)
+
+    def test_x86_64_probe_is_comparable(self):
+        candidate = fixture(verifier.X86_64_RUNTIME)
+        self.assertTrue(verifier.compare_probes(self.reference, candidate)["compatible"])
 
     def test_outside_tolerance(self):
         self.candidate["scores"][0]["proba"] = [0.8 - 2e-12, 0.2 + 2e-12]

@@ -31,6 +31,10 @@ REFERENCE_RUNTIME = {**COMMON_RUNTIME, "python": "3.14.6", "numpy": "2.5.5",
                      "system": "Darwin", "machine": "arm64"}
 CANDIDATE_RUNTIME = {**COMMON_RUNTIME, "python": "3.12.14", "numpy": "2.5.3",
                      "system": "Linux", "machine": "aarch64"}
+# Servidor de staging: mismo stack que el candidato, otra arquitectura.
+X86_64_RUNTIME = {**COMMON_RUNTIME, "python": "3.12.14", "numpy": "2.5.3",
+                  "system": "Linux", "machine": "x86_64"}
+TESTED_RUNTIMES = (REFERENCE_RUNTIME, CANDIDATE_RUNTIME, X86_64_RUNTIME)
 SCOPE = {"research_only": True, "production_authorized": False,
          "final_test_evaluated": False, "final_contacted": False,
          "fit_calls": 0, "generation_calls": 0, "database_access": False,
@@ -117,7 +121,9 @@ def validate_probe(probe, runtime):
 def compare_probes(reference, candidate):
     """Pure comparison: no model, file, application, or ML imports."""
     validate_probe(reference, REFERENCE_RUNTIME)
-    validate_probe(candidate, CANDIDATE_RUNTIME)
+    if candidate.get("runtime") not in TESTED_RUNTIMES:
+        raise ValueError("Untested runtime: " + str(candidate.get("runtime")))
+    validate_probe(candidate, candidate["runtime"])
     deltas = []
     for left, right in zip(reference["scores"] + [reference["illustrative"]],
                            candidate["scores"] + [candidate["illustrative"]], strict=True):
@@ -250,7 +256,7 @@ def probe(artifact, development_csv):
                          for row, features, probabilities in zip(rows, snapshots, batches[0], strict=True)],
               "illustrative": score("illustrative-six-paid-one-late", ILLUSTRATIVE, batches[1][0]),
               "artifact_after": sha(artifact.read_bytes()), "csv_after": sha(development_csv.read_bytes())}
-    require(runtime in (REFERENCE_RUNTIME, CANDIDATE_RUNTIME), "Untested runtime: " + str(runtime))
+    require(runtime in TESTED_RUNTIMES, "Untested runtime: " + str(runtime))
     validate_probe(result, runtime)
     return result
 
@@ -317,11 +323,10 @@ def main():
                            "candidate_runtime": candidate["runtime"],
                            "illustrative": {"reference": reference["illustrative"],
                                             "candidate": candidate["illustrative"]},
-                           "tested_runtime_whitelist": [REFERENCE_RUNTIME, CANDIDATE_RUNTIME]
+                           "tested_runtime_whitelist": list(TESTED_RUNTIMES)
                            if record["compatible"] else [],
                            "unsupported": ["x86_64", "all other untested runtime/platform tuples"],
-                           "attribution": "Python and NumPy changed together; no single-variable attribution",
-                           "candidate_image": "sha256:b74d8210a0bd791e2386f8c0d70d40737dd4977191ad0f3aeddb8e402a2a185b"})
+                           "attribution": "Python and NumPy changed together; no single-variable attribution"})
             if not record["compatible"]:
                 record["blocker"] = "Probability delta exceeds absolute tolerance"
     except Exception as exc:
