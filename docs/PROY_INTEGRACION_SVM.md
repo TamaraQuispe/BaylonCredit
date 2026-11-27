@@ -191,9 +191,15 @@ tuplas verificadas, aunque el flag este activo. Para la demo de staging:
   referencia 3.14.6 sea instalable; el CI sigue fijado en 3.12.
 
 E2E a traves de la imagen arm64: PostgreSQL 17, S/ 40, probabilidad 0.106575,
-`MODEL_REVIEW_CANDIDATE`, traza persistida y creditos 1/1. En x86_64, el workflow
-`PROY SVM x86_64` corre el probe real y construye la imagen nativa, cuyo build
-ejecuta la misma comprobacion del artefacto.
+`MODEL_REVIEW_CANDIDATE`, traza persistida y creditos 1/1.
+
+En x86_64, el job `e2e-postgres-x86_64` del workflow `PROY SVM x86_64` construye
+la imagen nativa y repite el E2E completo contra un PostgreSQL 17 efimero:
+migracion, seed ficticio, S/ 40 y probabilidad 0.1065748513407444, snapshot de
+once variables calculado en el servidor y guardado, fila en
+`proy_experimental_evaluations` con autor, y contadores sin cambios (54 fiados
+antes y despues, cero `credit_evaluations` y cero `credit_reviews`). La evidencia
+queda como artifact `proy-e2e-x86_64`.
 
 #### Cobertura de arquitectura
 
