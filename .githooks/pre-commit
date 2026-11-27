@@ -1,0 +1,15 @@
+#!/bin/sh
+# Rechaza el commit si hay archivos duplicados tipo "nombre 2.py" preparados.
+# Activar una vez por clon: git config core.hooksPath .githooks
+set -eu
+
+matches=$(git diff --cached --name-only --diff-filter=ACMR -z | tr '\0' '\n' | grep -F ' 2.' || true)
+
+if [ -n "$matches" ]; then
+    echo "ERROR: hay archivos con el patron ' 2.' preparados para commit:" >&2
+    printf '%s\n' "$matches" >&2
+    echo "Renombra o elimina los duplicados antes de commitear." >&2
+    exit 1
+fi
+
+exit 0

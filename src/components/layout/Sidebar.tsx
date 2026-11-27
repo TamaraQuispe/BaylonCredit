@@ -9,6 +9,7 @@ const navItems = [
   { to: '/inicio', label: 'Inicio', icon: 'dashboard' },
   { to: '/ventas', label: 'Ventas', icon: 'point_of_sale' },
   { to: '/creditos', label: 'Créditos', icon: 'receipt_long' },
+  { to: '/revisiones-credito', label: 'Revisiones', icon: 'fact_check' },
   { to: '/clientes', label: 'Clientes', icon: 'group' },
   { to: '/productos', label: 'Productos', icon: 'inventory_2' },
   { to: '/inventario', label: 'Inventario', icon: 'inventory' },

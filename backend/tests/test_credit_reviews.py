@@ -1,23 +1,69 @@
+import asyncio
+import os
 from collections.abc import AsyncIterator
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
+from uuid import UUID
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 import app.services.ai_credit as ai_credit
 import app.services.credit_scoring as scoring
 import app.services.whatsapp as whatsapp
-from app.core.config import Settings
+from app.core.config import Settings, get_settings
 from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+from app.models.commerce import CreditReview, CreditReviewStatus
+from app.models.settings import DEFAULT_ORGANIZATION_ID, Organization
 from app.models.user import User, UserRole
+from app.services import credit_review as review_service
+
+
+def _guard_disposable_test_database(database_url: str) -> None:
+    """Impide borrar datos si TEST_DATABASE_URL apunta a una base compartida."""
+    name = make_url(database_url).database or ""
+    if name == "test" or name.endswith("_test"):
+        return
+    raise RuntimeError(
+        "TEST_DATABASE_URL debe apuntar a una base dedicada llamada 'test' o "
+        f"terminada en '_test' (recibida: {name!r}). El fixture borra los datos "
+        "de esa base para aislar cada test."
+    )
+
+
+async def _reset_migrated_schema(connection) -> None:
+    """Corre los tests de Postgres sobre el esquema que crea Alembic.
+
+    Se valida la migracion real en el job backend-postgres en lugar de recrear
+    las tablas desde ``Base.metadata``. Si la base apunta a una version vieja o
+    sin migrar, se falla con un mensaje accionable en vez de crear un esquema
+    paralelo que oculte el problema.
+    """
+    tables = set(await connection.run_sync(lambda sync: inspect(sync).get_table_names()))
+    if "alembic_version" not in tables:
+        raise RuntimeError(
+            "TEST_DATABASE_URL no tiene el esquema migrado; ejecute "
+            "`alembic upgrade head` contra esa base antes de correr los tests."
+        )
+    # Solo se limpian datos: alembic_version se conserva para seguir validando
+    # el esquema migrado en cada corrida.
+    truncated = sorted(table for table in tables if table != "alembic_version")
+    if not truncated:
+        return
+    quoted = ", ".join(f'"{table}"' for table in truncated)
+    await connection.execute(text(f"TRUNCATE TABLE {quoted} RESTART IDENTITY CASCADE"))
 
 
 @pytest_asyncio.fixture
-async def client(monkeypatch) -> AsyncIterator[AsyncClient]:
+async def app_context(
+    monkeypatch,
+) -> AsyncIterator[tuple[AsyncClient, async_sessionmaker[AsyncSession]]]:
     settings = Settings(
         _env_file=None,
         environment="test",
@@ -28,11 +74,24 @@ async def client(monkeypatch) -> AsyncIterator[AsyncClient]:
     )
     for module in (scoring, ai_credit, whatsapp):
         monkeypatch.setattr(module, "get_settings", lambda: settings)
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    # SQLite no distingue zonas horarias; TEST_DATABASE_URL permite correr estos
+    # tests contra Postgres real en CI (job backend-postgres). En Postgres el
+    # esquema lo crea Alembic y el fixture solo limpia filas; en SQLite se crea
+    # desde los modelos porque no hay migraciones aplicables.
+    database_url = os.environ.get("TEST_DATABASE_URL")
+    if database_url:
+        _guard_disposable_test_database(database_url)
+    engine = create_async_engine(database_url or "sqlite+aiosqlite:///:memory:")
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
     async with engine.begin() as connection:
-        await connection.run_sync(Base.metadata.create_all)
+        if database_url:
+            await _reset_migrated_schema(connection)
+        else:
+            await connection.run_sync(Base.metadata.create_all)
     async with session_factory() as db:
+        # La migracion 0013 siembra esta organizacion; SQLite no aplica la FK
+        # de clients.organization_id y sin ella Postgres rechaza el insert.
+        db.add(Organization(id=DEFAULT_ORGANIZATION_ID, name="Credify"))
         db.add(
             User(
                 email="admin@credify.com",
@@ -57,9 +116,14 @@ async def client(monkeypatch) -> AsyncIterator[AsyncClient]:
 
     app.dependency_overrides[get_db] = override_db
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
-        yield test_client
+        yield test_client, session_factory
     app.dependency_overrides.clear()
     await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def client(app_context) -> AsyncClient:
+    return app_context[0]
 
 
 async def _login(client: AsyncClient, email: str = "admin@credify.com") -> dict:
@@ -250,3 +314,313 @@ async def test_review_actions_denied_for_viewer_role(client: AsyncClient) -> Non
         headers=viewer_headers,
     )
     assert resolved.status_code == 403, resolved.text
+
+
+async def _pending_review_id(
+    client: AsyncClient, headers: dict, document: str
+) -> str:
+    client_id = await _new_client(client, headers, document)
+    evaluation = await client.post(
+        "/api/v1/credits/evaluate",
+        headers=headers,
+        json={"client_id": client_id, "amount": "50.00"},
+    )
+    assert evaluation.status_code == 200, evaluation.text
+    reviews = await client.get(
+        f"/api/v1/credits/reviews?status=pendiente&client_id={client_id}",
+        headers=headers,
+    )
+    assert reviews.status_code == 200, reviews.text
+    return reviews.json()[0]["id"]
+
+
+async def _set_deadline(session_factory, review_id: str, **values) -> None:
+    async with session_factory() as db:
+        review = await db.get(CreditReview, UUID(review_id))
+        assert review is not None
+        for field, value in values.items():
+            setattr(review, field, value)
+        await db.commit()
+
+
+async def test_enqueue_sets_expiry_deadline(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    review_id = await _pending_review_id(client, headers, "77770007")
+
+    async with session_factory() as db:
+        review = await db.get(CreditReview, UUID(review_id))
+        assert review is not None
+        assert review.expires_at is not None
+        assert review.expires_at > review.created_at
+
+
+async def test_expire_endpoint_closes_overdue_reviews(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    review_id = await _pending_review_id(client, headers, "77770008")
+    await _set_deadline(
+        session_factory,
+        review_id,
+        expires_at=datetime.now(UTC) - timedelta(minutes=5),
+    )
+
+    first = await client.post("/api/v1/credits/reviews/expire", headers=headers)
+    assert first.status_code == 200, first.text
+    assert first.json() == {"expired": 1}
+
+    second = await client.post("/api/v1/credits/reviews/expire", headers=headers)
+    assert second.status_code == 200, second.text
+    assert second.json() == {"expired": 0}
+
+    pending = await client.get(
+        "/api/v1/credits/reviews?status=pendiente", headers=headers
+    )
+    assert pending.status_code == 200, pending.text
+    assert pending.json() == []
+
+    expired = await client.get(
+        "/api/v1/credits/reviews?status=expirada", headers=headers
+    )
+    assert expired.status_code == 200, expired.text
+    body = expired.json()
+    assert len(body) == 1
+    assert body[0]["status"] == "expirada"
+    assert body[0]["resolution"] == "expirada"
+    assert body[0]["resolved_at"] is not None
+
+
+async def test_expire_endpoint_requires_admin(client: AsyncClient) -> None:
+    viewer = await _login(client, "viewer@credify.com")
+    headers = {"Authorization": f"Bearer {viewer['access_token']}"}
+
+    response = await client.post("/api/v1/credits/reviews/expire", headers=headers)
+
+    assert response.status_code == 403, response.text
+
+
+async def test_overdue_reviews_without_deadline_use_created_at(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    review_id = await _pending_review_id(client, headers, "77770009")
+    ttl = get_settings().credit_review_ttl_hours
+    await _set_deadline(
+        session_factory,
+        review_id,
+        expires_at=None,
+        created_at=datetime.now(UTC) - timedelta(hours=ttl + 1),
+    )
+
+    response = await client.post("/api/v1/credits/reviews/expire", headers=headers)
+
+    assert response.status_code == 200, response.text
+    assert response.json() == {"expired": 1}
+
+
+async def test_overdue_review_cannot_be_assigned_or_resolved(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    review_id = await _pending_review_id(client, headers, "77770010")
+    await _set_deadline(
+        session_factory,
+        review_id,
+        expires_at=datetime.now(UTC) - timedelta(minutes=5),
+    )
+
+    assigned = await client.post(
+        f"/api/v1/credits/reviews/{review_id}/assign", headers=headers
+    )
+    assert assigned.status_code == 409, assigned.text
+    assert "expiro" in assigned.json()["detail"]
+
+    resolved = await client.post(
+        f"/api/v1/credits/reviews/{review_id}/resolve?resolution=aprobada",
+        headers=headers,
+    )
+    assert resolved.status_code == 409, resolved.text
+
+
+async def test_list_hides_overdue_reviews_before_the_job_runs(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    review_id = await _pending_review_id(client, headers, "77770011")
+    await _set_deadline(
+        session_factory,
+        review_id,
+        expires_at=datetime.now(UTC) - timedelta(minutes=1),
+    )
+
+    pending = await client.get(
+        "/api/v1/credits/reviews?status=pendiente", headers=headers
+    )
+    assert pending.status_code == 200, pending.text
+    assert pending.json() == []
+
+    expired = await client.get(
+        "/api/v1/credits/reviews?status=expirada", headers=headers
+    )
+    assert expired.status_code == 200, expired.text
+    assert len(expired.json()) == 1
+
+
+async def test_expire_reviews_once_closes_overdue_reviews(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    review_id = await _pending_review_id(client, headers, "77770012")
+    await _set_deadline(
+        session_factory,
+        review_id,
+        expires_at=datetime.now(UTC) - timedelta(minutes=5),
+    )
+
+    expired = await review_service.expire_reviews_once(session_factory)
+
+    assert expired == 1
+    async with session_factory() as db:
+        review = await db.get(CreditReview, UUID(review_id))
+        assert review is not None
+        assert review.status is CreditReviewStatus.EXPIRED
+        assert review.resolved_at is not None
+
+
+async def test_review_expiry_loop_runs_a_cycle_then_sleeps(monkeypatch) -> None:
+    cycles: list[int] = []
+
+    async def fake_once(session_factory=None) -> int:
+        cycles.append(1)
+        return 0
+
+    async def stop(_seconds: float) -> None:
+        raise asyncio.CancelledError
+
+    monkeypatch.setattr(review_service, "expire_reviews_once", fake_once)
+    monkeypatch.setattr(review_service.asyncio, "sleep", stop)
+
+    with pytest.raises(asyncio.CancelledError):
+        await review_service.review_expiry_loop(60)
+
+    assert cycles == [1]
+
+
+def test_disposable_database_guard_only_accepts_test_names() -> None:
+    _guard_disposable_test_database(
+        "postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit_test"
+    )
+    _guard_disposable_test_database("postgresql+asyncpg://baylon:baylon@localhost:5432/test")
+
+    with pytest.raises(RuntimeError, match="dedicada"):
+        _guard_disposable_test_database(
+            "postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit"
+        )
+
+
+def test_expiry_interval_setting_allows_disabling_and_rejects_negatives() -> None:
+    disabled = Settings(_env_file=None, credit_review_expiry_interval_minutes=0)
+    assert disabled.credit_review_expiry_interval_minutes == 0
+
+    with pytest.raises(ValueError):
+        Settings(_env_file=None, credit_review_expiry_interval_minutes=-1)
+
+
+def test_credit_review_timestamps_match_postgres_timestamptz() -> None:
+    # SQLite acepta cualquier datetime, pero asyncpg rechaza un datetime UTC
+    # contra una columna timestamp without time zone y rompe la expiracion.
+    assert CreditReview.__table__.c.expires_at.type.timezone is True
+    assert CreditReview.__table__.c.resolved_at.type.timezone is True
+
+
+async def _create_overdue_reviews(
+    client: AsyncClient, headers: dict, session_factory, documents: list[str]
+) -> list[str]:
+    # Primero se crean todas: el GET de la cola cierra vencidas y, si se
+    # marcase cada una antes de crear la siguiente, el lazy close las
+    # expiraria durante la creacion de las demas.
+    ids = [
+        await _pending_review_id(client, headers, document)
+        for document in documents
+    ]
+    for review_id in ids:
+        await _set_deadline(
+            session_factory,
+            review_id,
+            expires_at=datetime.now(UTC) - timedelta(minutes=5),
+        )
+    return ids
+
+
+async def test_expire_overdue_reviews_processes_only_one_batch(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    ids = await _create_overdue_reviews(
+        client, headers, session_factory, ["77770101", "77770102", "77770103"]
+    )
+
+    async with session_factory() as db:
+        first = await review_service.expire_overdue_reviews(db, batch_size=2)
+        await db.commit()
+    assert first == 2
+
+    statuses = []
+    async with session_factory() as db:
+        for review_id in ids:
+            review = await db.get(CreditReview, UUID(review_id))
+            assert review is not None
+            statuses.append(review.status)
+    assert statuses.count(CreditReviewStatus.EXPIRED) == 2
+    assert statuses.count(CreditReviewStatus.PENDING) == 1
+
+    async with session_factory() as db:
+        second = await review_service.expire_overdue_reviews(db, batch_size=2)
+        await db.commit()
+    assert second == 1
+
+
+async def test_expire_reviews_once_drains_backlog_in_batches(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    ids = await _create_overdue_reviews(
+        client, headers, session_factory, ["77770104", "77770105", "77770106"]
+    )
+
+    expired = await review_service.expire_reviews_once(session_factory, batch_size=2)
+    assert expired == 3
+
+    async with session_factory() as db:
+        for review_id in ids:
+            review = await db.get(CreditReview, UUID(review_id))
+            assert review is not None
+            assert review.status is CreditReviewStatus.EXPIRED
+
+
+async def test_expire_overdue_reviews_can_target_one_review(app_context) -> None:
+    client, session_factory = app_context
+    session = await _login(client)
+    headers = {"Authorization": f"Bearer {session['access_token']}"}
+    ids = await _create_overdue_reviews(
+        client, headers, session_factory, ["77770107", "77770108", "77770109"]
+    )
+
+    async with session_factory() as db:
+        expired = await review_service.expire_overdue_reviews(
+            db, batch_size=1, review_id=UUID(ids[1])
+        )
+        await db.commit()
+    assert expired == 1
+
+    statuses = []
+    async with session_factory() as db:
+        for review_id in ids:
+            review = await db.get(CreditReview, UUID(review_id))
+            assert review is not None
+            statuses.append(review.status)
+    assert statuses[1] is CreditReviewStatus.EXPIRED
+    assert statuses[0] is CreditReviewStatus.PENDING
+    assert statuses[2] is CreditReviewStatus.PENDING

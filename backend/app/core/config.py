@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     academic_ml_v4_dir: str = "/app/academic-v4"
     academic_ml_v6_enabled: bool = False
     academic_ml_v6_dir: str = "/app/academic-v6"
+    proy_experimental_enabled: bool = False
     api_v1_prefix: str = "/api/v1"
     database_url: str = "postgresql+asyncpg://credify:credify@localhost:5432/credify"
     database_connect_timeout_seconds: float = Field(default=5, gt=0)
@@ -29,6 +30,8 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 14
     login_attempt_limit: int = 5
     login_attempt_window_minutes: int = 15
+    credit_review_ttl_hours: int = 48
+    credit_review_expiry_interval_minutes: int = 60
     cors_origins: str = "http://localhost:5173,http://localhost:8080"
     webauthn_rp_id: str = "localhost"
     webauthn_origin: str = "http://localhost:5173"
@@ -77,6 +80,8 @@ class Settings(BaseSettings):
             raise ValueError("Academic V4 laboratory is restricted to staging")
         if self.academic_ml_v6_enabled and self.environment != "staging":
             raise ValueError("Academic V6 laboratory is restricted to staging")
+        if self.proy_experimental_enabled and self.environment != "staging":
+            raise ValueError("Experimental PROY endpoint is restricted to staging")
         unsafe_production_secret = (
             self.environment in {"staging", "production"}
             and self.jwt_secret_key == DEVELOPMENT_JWT_SECRET
@@ -87,6 +92,10 @@ class Settings(BaseSettings):
             raise ValueError("ACCESS_TOKEN_EXPIRE_MINUTES must be greater than zero")
         if self.refresh_token_expire_days <= 0:
             raise ValueError("REFRESH_TOKEN_EXPIRE_DAYS must be greater than zero")
+        if self.credit_review_ttl_hours < 1:
+            raise ValueError("CREDIT_REVIEW_TTL_HOURS must be greater than zero")
+        if self.credit_review_expiry_interval_minutes < 0:
+            raise ValueError("CREDIT_REVIEW_EXPIRY_INTERVAL_MINUTES cannot be negative")
         if self.whatsapp_reminder_days_before < 0:
             raise ValueError("WHATSAPP_REMINDER_DAYS_BEFORE cannot be negative")
         if self.whatsapp_reminder_interval_hours < 1:

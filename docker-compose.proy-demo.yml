@@ -1,0 +1,8 @@
+# Override opcional para la demo PROY: la API se construye con el runtime exacto
+# del SVM. Staging es Linux/amd64 nativo; arm64 tambien esta verificado.
+services:
+  api:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: deploy/proy-demo/Dockerfile

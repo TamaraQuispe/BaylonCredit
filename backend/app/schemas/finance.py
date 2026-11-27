@@ -172,6 +172,10 @@ class CreditProfileRead(BaseModel):
     next_due_date: date | None
 
 
+class CreditReviewExpireRead(BaseModel):
+    expired: int
+
+
 class CreditReviewRead(BaseModel):
     id: UUID
     evaluation_id: UUID | None

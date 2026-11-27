@@ -3,7 +3,18 @@ from decimal import Decimal
 from enum import StrEnum
 from uuid import UUID
 
-from sqlalchemy import JSON, Boolean, Date, Enum, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin, UUIDMixin
@@ -192,7 +203,7 @@ class CreditReview(UUIDMixin, TimestampMixin, Base):
     resolved_by_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")
     )
-    resolved_at: Mapped[datetime | None]
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     resolution: Mapped[CreditReviewResolution | None] = mapped_column(
         Enum(CreditReviewResolution, name="credit_review_resolution", native_enum=False)
     )
@@ -201,7 +212,7 @@ class CreditReview(UUIDMixin, TimestampMixin, Base):
     policy_version: Mapped[str | None] = mapped_column(String(40))
     feature_schema_version: Mapped[str | None] = mapped_column(String(40))
     threshold: Mapped[Decimal | None] = mapped_column(Numeric(6, 4))
-    expires_at: Mapped[datetime | None]
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class InventoryMovement(UUIDMixin, TimestampMixin, Base):

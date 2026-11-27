@@ -1,0 +1,128 @@
+{
+  "artifact_name": "credit_proy_svm_v1.joblib",
+  "artifact_sha256": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45",
+  "business_approval": false,
+  "compatibility": {
+    "evidence_sha256": "dadf356badce0f65840d2113f8dc35cd6bffefebbbd2212aab70e2b005b44681",
+    "production_authorized": false,
+    "status": "experimentally_verified_for_exact_runtime_tuples_only",
+    "tested_runtimes": [
+      {
+        "joblib": "1.6.0",
+        "machine": "arm64",
+        "numpy": "2.5.5",
+        "python": "3.14.6",
+        "python_implementation": "CPython",
+        "scipy": "1.18.1",
+        "sklearn": "1.9.1",
+        "system": "Darwin",
+        "threadpoolctl": "3.7.0"
+      },
+      {
+        "joblib": "1.6.0",
+        "machine": "aarch64",
+        "numpy": "2.5.3",
+        "python": "3.12.14",
+        "python_implementation": "CPython",
+        "scipy": "1.18.1",
+        "sklearn": "1.9.1",
+        "system": "Linux",
+        "threadpoolctl": "3.7.0"
+      },
+      {
+        "joblib": "1.6.0",
+        "machine": "x86_64",
+        "numpy": "2.5.3",
+        "python": "3.12.14",
+        "python_implementation": "CPython",
+        "scipy": "1.18.1",
+        "sklearn": "1.9.1",
+        "system": "Linux",
+        "threadpoolctl": "3.7.0"
+      }
+    ]
+  },
+  "family": "svm",
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "final_contacted": false,
+  "final_test_evaluated": false,
+  "frozen_selection_sha256": "90548dcfc7562cf01a8175df99bd4884eee042c473b11818e7210afdec3d046c",
+  "model_version": "credit-proy-svm-v1",
+  "protocol_sha256": "b345352ae4c6539de9abfa0c6e40bdff3ec528ef966b95711d2631cdd50e14c0",
+  "provenance": {
+    "authorization": {
+      "final_contacted": false,
+      "stage": "dev_only_selection"
+    },
+    "code_sha256": {
+      "app/ml/features.py": "ec22f6675b9eab61749a86a0ae613781503fab3905e80da08c73f7b8f568fcc1",
+      "app/ml/proy_contract.py": "ad6d8ee3e8ad1fa4a320879e78afbd28b6f3329e0a3b62d3084bed5c66258da0",
+      "scripts/proy_credit_experiment_v1.py": "c8a2ca8942ecb2104a46d7e196c89329e1ea0c836b2b61cd9fb8a8d1ebfb2c3f"
+    },
+    "development": {
+      "class_counts": {
+        "0": 448,
+        "1": 86
+      },
+      "clients": 24,
+      "rows": 534
+    },
+    "input_sha256": {
+      "development_known_csv_sha256": "4099ddba545eea26681e133c84cbb705488cfe1922c7085ca4ac71ceefafc544",
+      "development_manifest_sha256": "e2e654b57c7ec7173d7098fd52f84ec443bf0d274bbb2a5799463161997704cb",
+      "effective_protocol_sha256": "f4e6fb30c748de9ca6a755c73815bcc91d52c94f5689cce9263b82d772c02c96",
+      "planned_folds_sha256": "5e720c2ad7e078a581ae3a3ad09a4c53c4638e15dfebc0cd33e81229683ae38d"
+    },
+    "protocol_sha256": "b345352ae4c6539de9abfa0c6e40bdff3ec528ef966b95711d2631cdd50e14c0",
+    "recorded_utc": "2026-11-25T00:58:29.505447+00:00",
+    "runtime": {
+      "joblib": "1.6.0",
+      "numpy": "2.5.5",
+      "python": "3.14.6",
+      "sklearn": "1.9.1"
+    },
+    "version": "proy-credit-experiment-v1"
+  },
+  "public": true,
+  "research_only": true,
+  "runtime": {
+    "joblib": "1.6.0",
+    "numpy": "2.5.5",
+    "python": "3.14.6",
+    "sklearn": "1.9.1"
+  },
+  "schema_version": "proy-credit-contract-v1",
+  "source": "academic/proy-p05",
+  "source_files_sha256": {
+    "PROY_P0-05_MODEL_PROTOCOL.json": "b345352ae4c6539de9abfa0c6e40bdff3ec528ef966b95711d2631cdd50e14c0",
+    "artifact_manifest.json": "874c246559a545fad231b1a457fa71f09fe677a60c34bb54ee5962f4e9e063f2",
+    "freeze_before_final.json": "08ffb6bcdf8f23724b3436f7835481a4951996e9cfe199d6fa2fb5e51f7f013e",
+    "frozen_selection.json": "90548dcfc7562cf01a8175df99bd4884eee042c473b11818e7210afdec3d046c",
+    "provenance.json": "a738b147775b574a968dfac55dbe5cd07f5f2b39bf57accac78be2e09703d4ee",
+    "selected_model.joblib": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45",
+    "svm.joblib": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45"
+  },
+  "source_provenance_sha256": "a738b147775b574a968dfac55dbe5cd07f5f2b39bf57accac78be2e09703d4ee",
+  "source_version": "proy-credit-experiment-v1",
+  "stage": "dev_only_selection",
+  "threshold": 0.1,
+  "training_domain": {
+    "completed_sales_equals_paid_credits": true,
+    "not_a_business_limit": true,
+    "reference_cap_soles": 80,
+    "requested_ratio_max": 0.625,
+    "requested_ratio_min": 0.0625
+  }
+}

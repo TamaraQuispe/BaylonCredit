@@ -1,0 +1,111 @@
+name: PROY SVM x86_64
+
+on:
+  push:
+    branches: [feature/proy-v6-transaccional]
+    paths:
+      - "deploy/verify-proy-svm-runtime.py"
+      - "deploy/proy-demo/**"
+      - "backend/app/ml/artifacts/credit_proy_svm_v1.joblib"
+      - "entregables/PROY_Grupo2/materiales/datos/desarrollo_etiquetado.csv"
+      - ".github/workflows/proy-svm-probe.yml"
+  workflow_dispatch:
+
+jobs:
+  probe-x86_64:
+    name: probe-x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.14"
+      - name: Install pinned inference stack
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            "numpy==2.5.3" \
+            "scikit-learn==1.9.1" \
+            "scipy==1.18.1" \
+            "joblib==1.6.0" \
+            "threadpoolctl==3.7.0"
+      - name: Probe frozen SVM on x86_64
+        run: |
+          mkdir -p evidence
+          python deploy/verify-proy-svm-runtime.py probe \
+            --artifact backend/app/ml/artifacts/credit_proy_svm_v1.joblib \
+            --development-csv entregables/PROY_Grupo2/materiales/datos/desarrollo_etiquetado.csv \
+            --output-json evidence/probe-x86_64.json
+          python - <<'PY'
+          import hashlib, json, platform
+          from pathlib import Path
+          path = Path("evidence/probe-x86_64.json")
+          data = json.loads(path.read_text())
+          print("machine", platform.machine())
+          print("runtime", json.dumps(data["runtime"], sort_keys=True))
+          print("sha256", hashlib.sha256(path.read_bytes()).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proy-svm-probe-x86_64
+          path: evidence/probe-x86_64.json
+
+  e2e-postgres:
+    name: e2e-postgres-x86_64
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: demo
+          POSTGRES_PASSWORD: e2e-only-password
+          POSTGRES_DB: credify_demo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U demo -d credify_demo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql+asyncpg://demo:e2e-only-password@127.0.0.1:5432/credify_demo
+      JWT_SECRET_KEY: e2e-staging-only-secret-with-enough-length
+      DEMO_USER_PASSWORD: e2e-demo-user-password
+      DEMO_MODE: "true"
+      ENVIRONMENT: staging
+      PROY_EXPERIMENTAL_ENABLED: "true"
+      IMAGE: bayloncredit-proy-demo:e2e
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build pinned demo image
+        run: docker build -f deploy/proy-demo/Dockerfile -t "$IMAGE" .
+      - name: Require a native amd64 image
+        run: test "$(docker image inspect "$IMAGE" --format '{{.Architecture}}')" = amd64
+      - name: Migrate the ephemeral database
+        run: docker run --rm --network host -e DATABASE_URL -e JWT_SECRET_KEY "$IMAGE" alembic upgrade head
+      - name: Seed fictional demo data
+        run: >-
+          docker run --rm --network host
+          -e DATABASE_URL -e JWT_SECRET_KEY -e DEMO_MODE -e ENVIRONMENT -e DEMO_USER_PASSWORD
+          "$IMAGE" python -m app.scripts.seed_demo
+      - name: Start the API with the experimental flag on
+        run: >-
+          docker run -d --name proy-e2e-api --network host
+          -e DATABASE_URL -e JWT_SECRET_KEY -e ENVIRONMENT -e PROY_EXPERIMENTAL_ENABLED
+          "$IMAGE" uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
+      - name: Run the real PostgreSQL E2E (waits for readiness)
+        run: >-
+          python deploy/proy-demo/e2e-postgres.py
+          --pg-container "${{ job.services.postgres.id }}"
+          --evidence evidence/proy-e2e-x86_64.json
+      - name: Show API logs on failure
+        if: failure()
+        run: docker logs --tail 60 proy-e2e-api
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proy-e2e-x86_64
+          path: evidence/proy-e2e-x86_64.json
+      - name: Remove the API container
+        if: always()
+        run: docker rm -f proy-e2e-api > /dev/null 2>&1 || true

@@ -90,6 +90,33 @@ ruff check .
 pytest
 ```
 
+## Hook De Git: Archivos Duplicados
+
+El repositorio versiona `.githooks/pre-commit`, que rechaza el commit si algún
+archivo preparado con `git add` contiene el patrón `' 2.'` en su ruta (por
+ejemplo `credit_review 2.py`). El mismo control corre en CI en el job
+`no-duplicates`.
+
+Se activa automáticamente al instalar las dependencias del frontend
+(`npm install` o `npm ci`), mediante el script `postinstall` →
+`scripts/setup-git-hooks.mjs`. Si el clon ya tiene otro `core.hooksPath`
+configurado, el script no lo sobrescribe y avisa.
+
+Si trabajas solo con el backend o no ejecutas npm, actívalo a mano una vez por
+clon desde la raíz del repositorio:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Para comprobar que funciona sin commitear:
+
+```bash
+.githooks/pre-commit   # sale 0 si no hay duplicados preparados
+```
+
+Para desactivarlo: `git config --unset core.hooksPath`.
+
 ## Endpoints
 
 - `GET /health/live`: proceso activo.
@@ -152,7 +179,18 @@ docker compose --env-file .env.staging \
   up --build -d
 ```
 
-El override añade una tarea `bootstrap` que crea el primer `admin` tras aplicar las migraciones, aplica límites de memoria a la API y exige valores explícitos para staging en las variables críticas. El despliegue sobre un proveedor (AWS, Google Cloud, Render, Railway, una VPS...) solo requiere exportar las mismas variables y conservar los health checks, la task de release de migraciones y los headers `X-Forwarded-*` en el balanceador.
+El override añade una tarea `bootstrap` que crea el primer `admin` tras aplicar las migraciones, aplica límites de memoria a la API y exige valores explícitos para staging en las variables críticas.
+
+Para la demo del endpoint experimental PROY, suma el override del runtime verificado del SVM (Linux/amd64 nativo; Linux/arm64 tambien verificado):
+
+```bash
+docker compose --env-file .env.staging \
+  -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.proy-demo.yml \
+  up --build -d
+```
+
+Esa imagen fija Python 3.12.14, NumPy 2.5.3, scikit-learn 1.9.1, SciPy 1.18.1, joblib 1.6.0 y threadpoolctl 3.7.0, y el build falla si el SVM no carga. La tupla Linux/amd64 esta verificada con un probe real en un runner x86_64; ver `docs/PROY_INTEGRACION_SVM.md`.
+ El despliegue sobre un proveedor (AWS, Google Cloud, Render, Railway, una VPS...) solo requiere exportar las mismas variables y conservar los health checks, la task de release de migraciones y los headers `X-Forwarded-*` en el balanceador.
 
 ## Despliegue En La Nube
 

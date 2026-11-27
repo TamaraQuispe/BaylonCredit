@@ -1,0 +1,4470 @@
+{
+  "absolute_tolerance": 1e-12,
+  "artifact_sha256": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45",
+  "attribution": "Python and NumPy changed together; no single-variable attribution",
+  "candidate_runtime": {
+    "joblib": "1.6.0",
+    "machine": "x86_64",
+    "numpy": "2.5.3",
+    "python": "3.12.14",
+    "python_implementation": "CPython",
+    "scipy": "1.18.1",
+    "sklearn": "1.9.1",
+    "system": "Linux",
+    "threadpoolctl": "3.7.0"
+  },
+  "classes": [
+    0,
+    1
+  ],
+  "classes_match": true,
+  "compatible": true,
+  "development_csv_sha256": "4099ddba545eea26681e133c84cbb705488cfe1922c7085ca4ac71ceefafc544",
+  "development_rows": 534,
+  "feature_names": [
+    "completed_sales",
+    "paid_credits",
+    "paid_late",
+    "pending_overdue",
+    "pending_current",
+    "outstanding",
+    "utilization",
+    "requested_ratio",
+    "tenure_days",
+    "punctuality_rate",
+    "overdue_rate"
+  ],
+  "illustrative": {
+    "candidate": {
+      "features": [
+        6.0,
+        6.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.25,
+        180.0,
+        0.8333333333333334,
+        0.0
+      ],
+      "loan_id": "illustrative-six-paid-one-late",
+      "predicted": 1,
+      "proba": [
+        0.8625890039185382,
+        0.1374109960814618
+      ]
+    },
+    "reference": {
+      "features": [
+        6.0,
+        6.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.25,
+        180.0,
+        0.8333333333333334,
+        0.0
+      ],
+      "loan_id": "illustrative-six-paid-one-late",
+      "predicted": 1,
+      "proba": [
+        0.86258900391854,
+        0.13741099608146004
+      ]
+    }
+  },
+  "illustrative_rows": 1,
+  "internal_label_encoder_fit_allowance": true,
+  "internal_label_encoder_fit_explanation": "Only exact LabelEncoder.fit on frozen classes [0,1] inside calibrated predict_proba; class encoding only, no model, preprocessing, or calibration fitting",
+  "learned_state_serialization": {
+    "candidate": {
+      "internal_label_encoder_fit_calls": 2,
+      "learned_state_after_sha256": "b723681390974dff4b7e0aeec57c4d0e67fb42385291be03e14b625972c7552d",
+      "learned_state_before_sha256": "b723681390974dff4b7e0aeec57c4d0e67fb42385291be03e14b625972c7552d"
+    },
+    "reference": {
+      "internal_label_encoder_fit_calls": 2,
+      "learned_state_after_sha256": "24b0a1e76cd6563390345121fcd79450585e9a78a792d14f3b102726ff2748ec",
+      "learned_state_before_sha256": "24b0a1e76cd6563390345121fcd79450585e9a78a792d14f3b102726ff2748ec"
+    }
+  },
+  "learned_state_unchanged": true,
+  "max_absolute_delta": 2.581268532253489e-14,
+  "model_identity": {
+    "C": 1.0,
+    "class": "sklearn.calibration.CalibratedClassifierCV",
+    "class_weight": "balanced",
+    "ensemble": false,
+    "imputer_strategy": "median",
+    "kernel": "linear",
+    "method": "sigmoid",
+    "pipeline": [
+      "sklearn.impute._base.SimpleImputer",
+      "sklearn.preprocessing._data.StandardScaler",
+      "sklearn.svm._classes.SVC"
+    ],
+    "probability": false
+  },
+  "per_row_deltas": [
+    {
+      "absolute_delta": [
+        6.106226635438361e-15,
+        6.175615574477433e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00047",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.774758283725532e-15,
+        3.6637359812630166e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00048",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.992007221626409e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00049",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.9984014443252818e-15,
+        1.9984014443252818e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00050",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.7755575615628914e-15,
+        2.761679773755077e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00051",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.549516567451064e-15,
+        7.480127628411992e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00052",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.552713678800501e-15,
+        3.622102617839573e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00053",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.2490009027033011e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00054",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        8.465450562766819e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00055",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        1.0547118733938987e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00056",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.3322676295501878e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00057",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.1102230246251565e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00058",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.5959455978986625e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00059",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.216449660063518e-15,
+        7.271960811294775e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00060",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.1518563880486e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00061",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.107825191113079e-15,
+        4.08006961549745e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00062",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.995204332975845e-15,
+        5.9674487573602164e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00063",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.327471962526033e-15,
+        7.355227538141662e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00064",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.865174681370263e-14,
+        1.865174681370263e-14
+      ],
+      "loan_id": "PND6F-R1-D1-L00065",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.549516567451064e-15,
+        7.577272143066693e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00066",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.249000902703301e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00067",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.6645352591003757e-15,
+        2.581268532253489e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00068",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        4.163336342344337e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00069",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.689893001203927e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00070",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.218048215738236e-15,
+        5.245803791353865e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00071",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        8.049116928532385e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00072",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.163336342344337e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00073",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.106226635438361e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00074",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.4432899320127035e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00075",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.579669976578771e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00076",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        5.551115123125783e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00077",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.1094237467877974e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00078",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.551115123125783e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00079",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.9976021664879227e-15,
+        2.9698465908722937e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00080",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.522560269672795e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00081",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.0658141036401503e-14,
+        1.0658141036401503e-14
+      ],
+      "loan_id": "PND6F-R1-D1-L00082",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        9.71445146547012e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00083",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00084",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.886579864025407e-15,
+        2.858824288409778e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00085",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.881784197001252e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00086",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.3021142204224816e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00087",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.774758283725532e-15,
+        3.747002708109903e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00088",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.9976021664879227e-15,
+        2.9698465908722937e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00089",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00090",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        2.914335439641036e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00091",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00092",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.4849232954361469e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00093",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.582067810090848e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00094",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.0539125955565396e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00095",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.773959005888173e-15,
+        4.704570066849101e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00096",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.4424906541753444e-15,
+        2.4980018054066022e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00097",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.7755575615628914e-15,
+        2.7478019859472624e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00098",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        9.298117831235686e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00099",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-15,
+        3.4139358007223564e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00100",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.5265566588595902e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00101",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.412337245047638e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00102",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.6637359812630166e-15,
+        3.608224830031759e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00103",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.105427357601002e-15,
+        7.105427357601002e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00104",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.6629367034256575e-15,
+        4.6074255521944e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00105",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        3.885780586188048e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00106",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.552713678800501e-15,
+        3.469446951953614e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00107",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.3314683517128287e-15,
+        2.2343238370581275e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00108",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        1.0130785099704553e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00109",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00110",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.773959005888173e-15,
+        4.801714581503802e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00111",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        5.551115123125783e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00112",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.8596235662471372e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00113",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.4016565685892601e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00114",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.800116025829084e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00115",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.9976021664879227e-15,
+        3.039235529911366e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00116",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.8596235662471372e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00117",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.773159728050814e-15,
+        5.773159728050814e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00118",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        7.216449660063518e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00119",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.8318679906315083e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00120",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        8.326672684688674e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00121",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.096345236817342e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00122",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.609823385706477e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00123",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.885780586188048e-15,
+        3.885780586188048e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00124",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        6.38378239159465e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00125",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.1102230246251565e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00126",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        2.498001805406602e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00127",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.43689570931383e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00128",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.582067810090848e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00129",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.9976021664879227e-15,
+        2.9976021664879227e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00130",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2628786905111156e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00131",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.217248937900877e-15,
+        6.2727600891321345e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00132",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.85722573273506e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00133",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.7755575615628914e-15,
+        2.7200464103316335e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00134",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.1102230246251565e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00135",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.3600232051658168e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00136",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.3322676295501878e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00137",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.1102230246251565e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00138",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.6637359812630166e-15,
+        3.635980405647388e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00139",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.216449660063518e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00140",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1102230246251565e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00141",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1102230246251565e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00142",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        5.551115123125783e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00143",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.163336342344337e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00144",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.886579864025407e-15,
+        2.942091015256665e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00145",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.1657341758564144e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00146",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.43689570931383e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00147",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00148",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        6.938893903907228e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00149",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00150",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.273559366969494e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00151",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        1.5265566588595902e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00152",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.3877787807814457e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00153",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.8318679906315083e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00154",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.9976021664879227e-15,
+        2.9698465908722937e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00155",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.914335439641036e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00156",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.3877787807814457e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00157",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        5.134781488891349e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00158",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.3877787807814457e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00159",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        3.0531133177191805e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00160",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.5265566588595902e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00161",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.659739592076221e-15,
+        8.715250743307479e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00162",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.1518563880486e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00163",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        0.0
+      ],
+      "loan_id": "PND6F-R1-D1-L00164",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.9984014443252818e-15,
+        1.9984014443252818e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00165",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        7.91033905045424e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00166",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.3877787807814457e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00167",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.106226635438361e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00168",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00169",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.1086244689504383e-15,
+        3.219646771412954e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00170",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1102230246251565e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00171",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.1102230246251565e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00172",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1379786002407855e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00173",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.71445146547012e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00174",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.881784197001252e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00175",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.773159728050814e-15,
+        5.773159728050814e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00176",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.4710455076283324e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00177",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.3877787807814457e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00178",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.220446049250313e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00179",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.942890293094024e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00180",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2212453270876722e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00181",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.3021142204224816e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00182",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.1371793224034263e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00183",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.457167719820518e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00184",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        6.938893903907228e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00185",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        1.0547118733938987e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00186",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.3314683517128287e-15,
+        2.3869795029440866e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00187",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        1.8041124150158794e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00188",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.4424906541753444e-15,
+        2.4424906541753444e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00189",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00190",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.0816681711721685e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00191",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.43769498715119e-15,
+        8.465450562766819e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00192",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        3.885780586188048e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00193",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.3877787807814457e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00194",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.4424906541753444e-15,
+        2.4424906541753444e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00195",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        3.677613769070831e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00196",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        3.885780586188048e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00197",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.4432899320127035e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00198",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.551115123125783e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00199",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.886579864025407e-15,
+        2.942091015256665e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00200",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.9984014443252818e-15,
+        2.0816681711721685e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00201",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.582067810090848e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00202",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.636779683484747e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00203",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.551115123125783e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00204",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2351231148954867e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00205",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.216449660063518e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00206",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.1371793224034263e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00207",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.4416913763379853e-15,
+        3.4416913763379853e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00208",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.522560269672795e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00209",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-15,
+        6.661338147750939e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00210",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.457167719820518e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00211",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1657341758564144e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00212",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.8041124150158794e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00213",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.3600232051658168e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00214",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.0245584642661925e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00215",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.942890293094024e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00216",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.4988010832439613e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00217",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.636779683484747e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00218",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.1934897514720433e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00219",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        0.0
+      ],
+      "loan_id": "PND6F-R1-D1-L00220",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-15,
+        6.716849298982197e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00221",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.5265566588595902e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00222",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.6653345369377348e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00223",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        4.163336342344337e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00224",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.304512053934559e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00225",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        4.718447854656915e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00226",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.8735013540549517e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00227",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.886579864025407e-15,
+        2.886579864025407e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00228",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.134781488891349e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00229",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-15,
+        2.248201624865942e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00230",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.967448757360216e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00231",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.1086244689504383e-15,
+        3.164135620181696e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00232",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.8735013540549517e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00233",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.8318679906315083e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00234",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.220446049250313e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00235",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.4710455076283324e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00236",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.689893001203927e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00237",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.9984014443252818e-15,
+        2.067790383364354e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00238",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.914335439641036e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00239",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.8318679906315083e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00240",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2212453270876722e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00241",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00242",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        9.992007221626409e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00243",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.9984014443252818e-15,
+        1.970645868709653e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00244",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.887379141862766e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00245",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.7208456881689926e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00246",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.6514567491299204e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00247",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        1.0547118733938987e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00248",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-15,
+        2.2620794126737565e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00249",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.3314683517128287e-15,
+        2.3592239273284576e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00250",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.772360450213455e-15,
+        6.813993813636898e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00251",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.096345236817342e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00252",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00253",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.5681900222830336e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00254",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.218847493575595e-15,
+        4.163336342344337e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00255",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.774758283725532e-15,
+        3.885780586188048e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00256",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.552713678800501e-15,
+        3.635980405647388e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00257",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        9.159339953157541e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00258",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.609823385706477e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00259",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.0269562977782698e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00260",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.8318679906315083e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00261",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.552713678800501e-15,
+        3.566591466608315e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00262",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.552713678800501e-15,
+        3.6637359812630166e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00263",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.3592239273284576e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00264",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.689893001203927e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00265",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.1086244689504383e-15,
+        2.9976021664879227e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00266",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.881784197001252e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00267",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.219646771412954e-15,
+        3.2057689836051395e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00268",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.551914400963142e-15,
+        4.496403249731884e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00269",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        5.551115123125783e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00270",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.9984014443252818e-15,
+        2.040034807748725e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00271",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.6645352591003757e-15,
+        2.7755575615628914e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00272",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.1510571102112408e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00273",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.6637359812630166e-15,
+        3.7192471324942744e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00274",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.6375789613221059e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00275",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.549516567451064e-15,
+        7.438494264988549e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00276",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.6645352591003757e-15,
+        2.699229728619912e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00277",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.438494264988549e-15,
+        7.438494264988549e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00278",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.773959005888173e-15,
+        4.704570066849101e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00279",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        5.551115123125783e-17
+      ],
+      "loan_id": "PND6F-R1-D1-L00280",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.216449660063518e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00281",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.329070518200751e-15,
+        5.398459457239824e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00282",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.103828801926284e-15,
+        9.103828801926284e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00283",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.55351295663786e-15,
+        2.5118795932144167e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00284",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.992806499463768e-15,
+        8.93729534823251e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00285",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        8.049116928532385e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00286",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.6375789613221059e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00287",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.3298697960381105e-15,
+        4.343747583845925e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00288",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.27675647831893e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00289",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.771561172376096e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00290",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.1649348980190553e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00291",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.4424906541753444e-15,
+        2.4702462297909733e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00292",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.9976021664879227e-15,
+        2.9351521213527576e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00293",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.7486012637846216e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00294",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.3877787807814457e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00295",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.106226635438361e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00296",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.8735013540549517e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00297",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.885780586188048e-15,
+        3.83026943495679e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00298",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-15,
+        6.6058269965196814e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00299",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.432187701766452e-14,
+        1.4377388168895777e-14
+      ],
+      "loan_id": "PND6F-R1-D1-L00300",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.4849232954361469e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00301",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.9968028886505635e-15,
+        3.941291737419306e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00302",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.429412144204889e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00303",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.1102230246251565e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00304",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        5.689893001203927e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00305",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-15,
+        6.675215935558754e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00306",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4654943925052066e-14,
+        1.459943277382081e-14
+      ],
+      "loan_id": "PND6F-R1-D1-L00307",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.506284648352903e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00308",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.27675647831893e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00309",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.661338147750939e-16
+      ],
+      "loan_id": "PND6F-R1-D1-L00310",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-15,
+        5.495603971894525e-15
+      ],
+      "loan_id": "PND6F-R1-D1-L00311",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.773159728050814e-15,
+        5.662137425588298e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00045",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1379786002407855e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00046",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.5959455978986625e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00047",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.329070518200751e-15,
+        5.218048215738236e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00048",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1657341758564144e-14,
+        1.1657341758564144e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00049",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.942890293094024e-14,
+        1.9484414082171497e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00050",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        2.636779683484747e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00051",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.218048215738236e-15,
+        5.2735593669694936e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00052",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-15,
+        2.248201624865942e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00053",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.9984014443252818e-15,
+        2.067790383364354e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00054",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.0816681711721685e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00055",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.438494264988549e-15,
+        7.466249840604178e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00056",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.4432899320127035e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00057",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2628786905111156e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00058",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        7.494005416219807e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00059",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.326672684688674e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00060",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        5.828670879282072e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00061",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.104628079763643e-15,
+        8.076872504148014e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00062",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.886579864025407e-15,
+        2.8171909249863347e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00063",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.9968028886505635e-15,
+        3.9968028886505635e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00064",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        3.885780586188048e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00065",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        3.191891195797325e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00066",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.123301534595612e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00067",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.219646771412954e-15,
+        3.219646771412954e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00068",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.6237011735142914e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00069",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.4988010832439613e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00070",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.3322676295501878e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00071",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.996003610813204e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00072",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        3.7470027081099033e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00073",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.10702591327572e-15,
+        4.9960036108132044e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00074",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.992806499463768e-15,
+        8.992806499463768e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00075",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.7755575615628914e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00076",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-15,
+        4.538036613155327e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00077",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.4155343563970746e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00078",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.886579864025407e-15,
+        2.858824288409778e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00079",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.5265566588595902e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00080",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        1.0547118733938987e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00081",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.0685896612017132e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00082",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.887379141862766e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00083",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2490009027033011e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00084",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1102230246251565e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00085",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        9.103828801926284e-15,
+        9.103828801926284e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00086",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.6237011735142914e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00087",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.3877787807814457e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00088",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.0261570199409107e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00089",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.8735013540549517e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00090",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-15,
+        3.3029134982598407e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00091",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.5757174171303632e-14,
+        2.581268532253489e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00092",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.55351295663786e-15,
+        2.525757381022231e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00093",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.1371793224034263e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00094",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.3592239273284576e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00095",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.412337245047638e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00096",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.217248937900877e-15,
+        6.189493362285248e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00097",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-15,
+        5.6343818499726694e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00098",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.218048215738236e-15,
+        5.162537064506978e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00099",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.609823385706477e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00100",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.1102230246251565e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00101",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        3.7470027081099033e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00102",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.38378239159465e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00103",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.494005416219807e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00104",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-15,
+        3.3306690738754696e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00105",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.3877787807814457e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00106",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.249000902703301e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00107",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.881784197001252e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00108",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        1.0130785099704553e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00109",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.881784197001252e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00110",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        6.106226635438361e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00111",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.6645352591003757e-15,
+        2.6229018956769323e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00112",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.552713678800501e-15,
+        3.594347042223944e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00113",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        8.187894806610529e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00114",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.0685896612017132e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00115",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        3.7470027081099033e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00116",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.5503158452884236e-15,
+        6.522560269672795e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00117",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.661338147750939e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00118",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.4416913763379853e-15,
+        3.469446951953614e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00119",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        0.0
+      ],
+      "loan_id": "PND6F-R1-D2-L00120",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        4.163336342344337e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00121",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        5.551115123125783e-17
+      ],
+      "loan_id": "PND6F-R1-D2-L00122",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2212453270876722e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00123",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00124",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.0539125955565396e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00125",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.27675647831893e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00126",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        4.996003610813204e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00127",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        3.885780586188048e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00128",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.1379786002407855e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00129",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.163336342344337e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00130",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.2906342661267445e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00131",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.273559366969494e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00132",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-14,
+        1.1157741397482823e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00133",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2351231148954867e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00134",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.38378239159465e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00135",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00136",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.107825191113079e-15,
+        4.107825191113079e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00137",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.4416913763379853e-15,
+        3.3861802251067274e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00138",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.9968028886505635e-15,
+        3.9968028886505635e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00139",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2490009027033011e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00140",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        2.7755575615628914e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00141",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        7.216449660063518e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00142",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.326672684688674e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00143",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.549516567451064e-15,
+        7.438494264988549e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00144",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        9.020562075079397e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00145",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.27675647831893e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00146",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.55351295663786e-15,
+        2.55351295663786e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00147",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        6.938893903907228e-17
+      ],
+      "loan_id": "PND6F-R1-D2-L00148",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.885780586188048e-15,
+        3.885780586188048e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00149",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2351231148954867e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00150",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.992007221626409e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00151",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.273559366969494e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00152",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        2.7755575615628914e-17
+      ],
+      "loan_id": "PND6F-R1-D2-L00153",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.995204332975845e-15,
+        5.995204332975845e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00154",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2212453270876722e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00155",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.124100812432971e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00156",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.3314683517128287e-15,
+        2.4147350785597155e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00157",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.996003610813204e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00158",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.6629367034256575e-15,
+        4.6074255521944e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00159",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        3.0531133177191805e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00160",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.498001805406602e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00161",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.661338147750939e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00162",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        3.7470027081099033e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00163",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        9.575673587391975e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00164",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        9.71445146547012e-17
+      ],
+      "loan_id": "PND6F-R1-D2-L00165",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.106226635438361e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00166",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        7.077671781985373e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00167",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.0816681711721685e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00168",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.995204332975845e-15,
+        5.88418203051333e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00169",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00170",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        3.7470027081099033e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00171",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.9984014443252818e-15,
+        1.970645868709653e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00172",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00173",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.7069679003611782e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00174",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.494005416219807e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00175",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        1.3877787807814457e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00176",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        5.967448757360216e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00177",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.915134717478395e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00178",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.10702591327572e-15,
+        5.10702591327572e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00179",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.9960036108132044e-15,
+        5.051514762044462e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00180",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.886579864025407e-15,
+        2.942091015256665e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00181",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1324274851176597e-14,
+        1.1324274851176597e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00182",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.298117831235686e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00183",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        2.7755575615628914e-17
+      ],
+      "loan_id": "PND6F-R1-D2-L00184",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.298117831235686e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00185",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2351231148954867e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00186",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.881784197001252e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00187",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        6.106226635438361e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00188",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        3.7470027081099033e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00189",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.8318679906315083e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00190",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.412337245047638e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00191",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.020562075079397e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00192",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.817990202823694e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00193",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.298161660974074e-14,
+        2.298161660974074e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00194",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.552713678800501e-15,
+        3.58046925441613e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00195",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.55351295663786e-15,
+        2.4980018054066022e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00196",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00197",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.0547118733938987e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00198",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-15,
+        2.2898349882893854e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00199",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.249000902703301e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00200",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        4.163336342344337e-17
+      ],
+      "loan_id": "PND6F-R1-D2-L00201",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.582067810090848e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00202",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.549516567451064e-15,
+        7.605027718682322e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00203",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.219646771412954e-15,
+        3.164135620181696e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00204",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-15,
+        1.27675647831893e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00205",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        7.494005416219807e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00206",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.887379141862766e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00207",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        0.0
+      ],
+      "loan_id": "PND6F-R1-D2-L00208",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        9.159339953157541e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00209",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.887379141862766e-15,
+        1.942890293094024e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00210",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-15,
+        3.400058012914542e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00211",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.0824674490095276e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00212",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        5.828670879282072e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00213",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        5.828670879282072e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00214",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        0.0
+      ],
+      "loan_id": "PND6F-R1-D2-L00215",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.6375789613221059e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00216",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.9968028886505635e-15,
+        3.9968028886505635e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00217",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.429412144204889e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00218",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.55351295663786e-15,
+        2.5396351688300456e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00219",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.938893903907228e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00220",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.218048215738236e-15,
+        5.218048215738236e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00221",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3655743202889425e-14,
+        1.3655743202889425e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00222",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00223",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.800116025829084e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00224",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.219646771412954e-15,
+        3.1363800445660672e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00225",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.3433698597964394e-14,
+        1.3433698597964394e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00226",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.7069679003611782e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00227",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.551115123125783e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00228",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.743006318923108e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00229",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.3021142204224816e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00230",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00231",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.582067810090848e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00232",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.5543122344752192e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00233",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.163336342344337e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00234",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        0.0
+      ],
+      "loan_id": "PND6F-R1-D2-L00235",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-15,
+        2.1510571102112408e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00236",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.498001805406602e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00237",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.43769498715119e-15,
+        8.382183835919932e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00238",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.440892098500626e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00239",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.774758283725532e-15,
+        3.774758283725532e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00240",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.661338147750939e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00241",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.662137425588298e-15,
+        5.6066262743570405e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00242",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.6375789613221059e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00243",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.1086244689504383e-15,
+        3.0253577421035516e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00244",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-15,
+        3.316791286067655e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00245",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.0539125955565396e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00246",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.828670879282072e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00247",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.6167622796103842e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00248",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.1086244689504383e-15,
+        3.0531133177191805e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00249",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2323475573339238e-14,
+        1.2323475573339238e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00250",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-15,
+        7.882583474838611e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00251",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.1086244689504383e-15,
+        3.164135620181696e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00252",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.4432899320127035e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00253",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        0.0
+      ],
+      "loan_id": "PND6F-R1-D2-L00254",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.1379786002407855e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00255",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        0.0,
+        0.0
+      ],
+      "loan_id": "PND6F-R1-D2-L00256",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        6.245004513516506e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00257",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2878587085651816e-14,
+        1.2878587085651816e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00258",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.4424906541753444e-15,
+        2.4424906541753444e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00259",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.440892098500626e-16,
+        4.579669976578771e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00260",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.661338147750939e-16,
+        6.245004513516506e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00261",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        9.71445146547012e-17
+      ],
+      "loan_id": "PND6F-R1-D2-L00262",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        2.498001805406602e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00263",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.4155343563970746e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00264",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.771561172376096e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00265",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.7069679003611782e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00266",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.3298697960381105e-15,
+        4.413136522884997e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00267",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.218048215738236e-15,
+        5.204170427930421e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00268",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-16,
+        2.7755575615628914e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00269",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.3306690738754696e-16,
+        3.469446951953614e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00270",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.7208456881689926e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00271",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.219646771412954e-15,
+        3.2335245592207684e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00272",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.71445146547012e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00273",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        6.328271240363392e-15,
+        6.328271240363392e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00274",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.662137425588298e-15,
+        5.731526364627371e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00275",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.494005416219807e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00276",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.0539125955565396e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00277",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1102230246251565e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00278",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-16,
+        1.6653345369377348e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00279",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        4.107825191113079e-15,
+        4.052314039881821e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00280",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.885780586188048e-15,
+        3.913536161803677e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00281",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.1102230246251565e-15,
+        1.1102230246251565e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00282",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.4432899320127035e-15,
+        1.429412144204889e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00283",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.4424906541753444e-15,
+        2.3592239273284576e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00284",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.5404344466674047e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00285",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.021405182655144e-14,
+        1.0269562977782698e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00286",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.217248937900877e-15,
+        6.217248937900877e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00287",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.773159728050814e-15,
+        5.828670879282072e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00288",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.1094237467877974e-15,
+        2.067790383364354e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00289",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        4.107825191113079e-15,
+        4.093947403305265e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00290",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.995204332975845e-15,
+        5.995204332975845e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00291",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.5543122344752192e-15,
+        1.6167622796103842e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00292",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        9.992007221626409e-16,
+        9.992007221626409e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00293",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.771561172376096e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00294",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        9.298117831235686e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00295",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.8540724511240114e-14,
+        1.8540724511240114e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00296",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.659739592076221e-15,
+        8.548717289613705e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00297",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        5.551115123125783e-16,
+        5.412337245047638e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00298",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.55351295663786e-15,
+        2.609024107869118e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00299",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-15,
+        2.1788126858268697e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00300",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.4424906541753444e-15,
+        2.4147350785597155e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00301",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.609823385706477e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00302",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        3.219646771412954e-15,
+        3.164135620181696e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00303",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.2212453270876722e-15,
+        1.2004286453759505e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00304",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.886579864025407e-15,
+        2.831068712794149e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00305",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        5.662137425588298e-15,
+        5.662137425588298e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00306",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        8.881784197001252e-16,
+        8.881784197001252e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00307",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        2.6645352591003757e-15,
+        2.609024107869118e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00308",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        6.106226635438361e-15,
+        6.147859998861804e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00309",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        2.220446049250313e-15,
+        2.3314683517128287e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00310",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        7.771561172376096e-16,
+        7.424616477180734e-16
+      ],
+      "loan_id": "PND6F-R1-D2-L00311",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.3322676295501878e-14,
+        1.3322676295501878e-14
+      ],
+      "loan_id": "PND6F-R1-D2-L00312",
+      "predicted": 1
+    },
+    {
+      "absolute_delta": [
+        1.6653345369377348e-15,
+        1.582067810090848e-15
+      ],
+      "loan_id": "PND6F-R1-D2-L00313",
+      "predicted": 0
+    },
+    {
+      "absolute_delta": [
+        1.7763568394002505e-15,
+        1.7486012637846216e-15
+      ],
+      "loan_id": "illustrative-six-paid-one-late",
+      "predicted": 1
+    }
+  ],
+  "probes": {
+    "candidate": {
+      "name": "probe-x86_64.json",
+      "sha256": "33e77e56233cb74496d9b90943f4a4a360d7dd9a4f4acc381c55f2e56705ab2e"
+    },
+    "reference": {
+      "name": "ref-probe-v2.json",
+      "sha256": "5f4c7e117e01ba62ea5ab09240016e0b592a37c43d433c75a13ab8e59c57b153"
+    }
+  },
+  "recorded_utc": "2026-11-27T14:42:52.732757+00:00",
+  "reference_runtime": {
+    "joblib": "1.6.0",
+    "machine": "arm64",
+    "numpy": "2.5.5",
+    "python": "3.14.6",
+    "python_implementation": "CPython",
+    "scipy": "1.18.1",
+    "sklearn": "1.9.1",
+    "system": "Darwin",
+    "threadpoolctl": "3.7.0"
+  },
+  "relative_tolerance": 0,
+  "schema": "proy-runtime-compatibility-v1",
+  "scope": {
+    "database_access": false,
+    "final_contacted": false,
+    "final_test_evaluated": false,
+    "fit_calls": 0,
+    "generation_calls": 0,
+    "labels_evaluated": false,
+    "production_authorized": false,
+    "research_only": true,
+    "stage": "dev_only_selection"
+  },
+  "tested_runtime_whitelist": [
+    {
+      "joblib": "1.6.0",
+      "machine": "arm64",
+      "numpy": "2.5.5",
+      "python": "3.14.6",
+      "python_implementation": "CPython",
+      "scipy": "1.18.1",
+      "sklearn": "1.9.1",
+      "system": "Darwin",
+      "threadpoolctl": "3.7.0"
+    },
+    {
+      "joblib": "1.6.0",
+      "machine": "aarch64",
+      "numpy": "2.5.3",
+      "python": "3.12.14",
+      "python_implementation": "CPython",
+      "scipy": "1.18.1",
+      "sklearn": "1.9.1",
+      "system": "Linux",
+      "threadpoolctl": "3.7.0"
+    },
+    {
+      "joblib": "1.6.0",
+      "machine": "x86_64",
+      "numpy": "2.5.3",
+      "python": "3.12.14",
+      "python_implementation": "CPython",
+      "scipy": "1.18.1",
+      "sklearn": "1.9.1",
+      "system": "Linux",
+      "threadpoolctl": "3.7.0"
+    }
+  ],
+  "threshold": 0.1,
+  "unsupported": [
+    "x86_64",
+    "all other untested runtime/platform tuples"
+  ]
+}

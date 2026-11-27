@@ -11,6 +11,7 @@ from app.models.commerce import (
     SaleItem,
 )
 from app.models.idempotency import IdempotencyKey
+from app.models.proy_experimental import ProyExperimentalEvaluation
 from app.models.settings import BusinessSettings
 from app.models.user import AuditLog, RefreshToken, User, UserRole, WebauthnCredential
 from app.models.whatsapp import NotificationStatus, WhatsappNotification
@@ -24,6 +25,7 @@ __all__ = [
     "InventoryMovement",
     "Payment",
     "PaymentAllocation",
+    "ProyExperimentalEvaluation",
     "Product",
     "Sale",
     "SaleItem",
