@@ -127,7 +127,9 @@ reconstruirse sin inferencia. No se incluye entrenamiento ni acceso a BD.
 - Requiere autenticacion con rol ADMIN, OPERATOR o CREDIT; un VIEWER recibe 403.
 - Doble candado: apagado por defecto (`PROY_EXPERIMENTAL_ENABLED=false`) y el
   validador de configuracion impide habilitarlo fuera de `staging`. Apagado o
-  fuera de staging responde 404.
+  fuera de staging responde 404. En `docker-compose.staging.yml` la demo lo deja
+  activado por defecto (`${PROY_EXPERIMENTAL_ENABLED:-true}`), siempre con
+  autenticacion y solo en staging.
 - Lee el historial real con `app/ml/features.py` (congelado). La compuerta de
   saldo pendiente vive en el cargador: con cualquier deuda pendiente responde sin
   cargar el artefacto ni calcular probabilidad. Si el snapshot cae en el dominio
@@ -146,6 +148,25 @@ reconstruirse sin inferencia. No se incluye entrenamiento ni acceso a BD.
 La migracion `20261127_0018` crea la tabla y se comprobo con upgrade, downgrade y
 nuevo upgrade en Postgres 17. Esto sigue siendo demostracion, no aprobacion
 comercial ni via transaccional de produccion.
+
+### E2E verificado contra Postgres (2026-11-27)
+
+Se ejecuto la API real (`uvicorn`) contra PostgreSQL 17 migrado, con
+`ENVIRONMENT=staging`, `PROY_EXPERIMENTAL_ENABLED=true` y la tupla de referencia
+(CPython 3.14.6, Darwin arm64, NumPy 2.5.5, threadpoolctl 3.7.0). Un cliente
+sembrado con una venta y un fiado ya pagado (S/ 80, sin deuda) solicito S/ 40:
+
+- Snapshot leido de la base: `completed_sales=1`, `paid_credits=1`, `paid_late=0`,
+  `outstanding=0`, `utilization=0`, `requested_ratio=0.2`, `punctuality_rate=1`,
+  `overdue_rate=0`.
+- SVM real, sin stub: probabilidad 0.106575, `predicted=1`,
+  `MODEL_REVIEW_CANDIDATE`, `model_called=true`, umbral 0.1.
+- Traza guardada en `proy_experimental_evaluations` con el mismo snapshot,
+  versiones y umbral.
+- Creditos antes/despues: 1/1; `credit_evaluations` y `credit_reviews`: 0/0.
+
+El endpoint sigue fallando cerrado (503) en cualquier runtime fuera de las dos
+tuplas verificadas, aunque el flag este activo.
 
 ## Dependencias para el siguiente incremento
 

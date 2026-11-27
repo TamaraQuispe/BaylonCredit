@@ -8,6 +8,8 @@ services:
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
       CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}
+      # Demo PROY: lectura de historial real y traza de investigacion, sin aprobar creditos.
+      PROY_EXPERIMENTAL_ENABLED: ${PROY_EXPERIMENTAL_ENABLED:-true}
       OPENROUTER_ENABLED: ${OPENROUTER_ENABLED:-false}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-liquid/lfm-2.5-2.6b:free}
