@@ -186,7 +186,7 @@ tuplas verificadas, aunque el flag este activo. Para la demo de staging:
 - Cualquier entorno puede comprobarse con
   `python deploy/proy-demo/check-runtime.py`. En la tupla de referencia imprime
   `RUNTIME_OK credit-proy-svm-v1 prob=0.137410996081460` y en las imagenes Linux
-  `...081462` (aarch64) y `...0814618` (x86_64).
+  `...081462` (aarch64 y x86_64).
 - `backend/pyproject.toml` acepta ahora `>=3.12,<3.15`, para que la tupla de
   referencia 3.14.6 sea instalable; el CI sigue fijado en 3.12.
 
