@@ -6,6 +6,9 @@ DEV y un ejemplo manual de 180 dias de antiguedad. No hubo ajuste ni acceso a FI
 
 - `ref-probe-v2.json`: CPython 3.14.6, Darwin arm64, NumPy 2.5.5.
 - `candidate-probe-v2.json`: CPython 3.12.14, Linux aarch64, NumPy 2.5.3.
+- `probe-x86_64.json`: CPython 3.12.14, Linux x86_64 (runner de GitHub Actions,
+  sin emulacion), NumPy 2.5.3. Su comparacion contra la referencia esta en
+  `../PROY_SVM_COMPATIBILIDAD_X86_64.json`, con delta maximo 2.58e-14.
 
 Sus SHA-256 estan fijados en `../PROY_SVM_COMPATIBILIDAD.json`. Ambos conservan los
 vectores, scores, runtime y hashes de estado antes/despues. La comparacion es pura

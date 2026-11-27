@@ -29,7 +29,7 @@ META_NAME = "credit_proy_svm_v1_meta.json"
 MODEL_VERSION = "credit-proy-svm-v1"
 SOURCE_VERSION = "proy-credit-experiment-v1"
 RUNTIME = {"python": "3.14.6", "sklearn": "1.9.1", "numpy": "2.5.5", "joblib": "1.6.0"}
-COMPATIBILITY_SHA256 = "3daed68193f3cd328949e3b2412646394f1a82b6580bc094665107422924aa30"
+COMPATIBILITY_SHA256 = "dadf356badce0f65840d2113f8dc35cd6bffefebbbd2212aab70e2b005b44681"
 _COMMON_RUNTIME = {
     "sklearn": "1.9.1", "joblib": "1.6.0", "scipy": "1.18.1",
     "threadpoolctl": "3.7.0", "python_implementation": "CPython",
@@ -39,6 +39,9 @@ TESTED_RUNTIMES = (
      "system": "Darwin", "machine": "arm64"},
     {**_COMMON_RUNTIME, "python": "3.12.14", "numpy": "2.5.3",
      "system": "Linux", "machine": "aarch64"},
+    # Servidor de staging; probe ejecutado en un runner Linux x86_64 real.
+    {**_COMMON_RUNTIME, "python": "3.12.14", "numpy": "2.5.3",
+     "system": "Linux", "machine": "x86_64"},
 )
 COMPATIBILITY = {
     "status": "experimentally_verified_for_exact_runtime_tuples_only",

@@ -1,7 +1,7 @@
-# Runtime exacto del SVM PROY para la demo: Linux/aarch64 (candidato registrado
-# en docs/PROY_SVM_COMPATIBILIDAD.json). El build falla si el artefacto no carga
-# o si la probabilidad de control se sale de tolerancia, asi que una imagen que
-# responderia 503 no llega a construirse.
+# Runtime exacto del SVM PROY para la demo: Linux/amd64 (staging) y Linux/aarch64,
+# ambas tuplas registradas en docs/PROY_SVM_COMPATIBILIDAD_X86_64.json. El build
+# falla si el artefacto no carga o si la probabilidad de control se sale de
+# tolerancia, asi que una imagen que responderia 503 no llega a construirse.
 FROM python:3.12.14-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -16,17 +16,12 @@ COPY backend/pyproject.toml ./
 COPY backend/app ./app
 COPY backend/alembic ./alembic
 COPY backend/alembic.ini ./
+COPY deploy/proy-demo/constraints.txt ./constraints.txt
 
-# Las versiones del SVM se fijan despues de las dependencias de la app para que
-# pip no las sustituya por las ultimas al resolver el proyecto.
+# Las restricciones fijan el stack del SVM desde la primera resolucion, sin
+# instalar una version y degradarla despues.
 RUN pip install --upgrade pip \
- && pip install . \
- && pip install \
-      "numpy==2.5.3" \
-      "scikit-learn==1.9.1" \
-      "scipy==1.18.1" \
-      "joblib==1.6.0" \
-      "threadpoolctl==3.7.0"
+ && pip install -c constraints.txt .
 
 COPY deploy/proy-demo/check-runtime.py ./check-runtime.py
 RUN python check-runtime.py

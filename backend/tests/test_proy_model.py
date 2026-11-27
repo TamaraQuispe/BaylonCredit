@@ -241,7 +241,7 @@ def test_only_exact_verified_runtime_tuples_are_allowed(monkeypatch, runtime):
         with pytest.raises(proy.ProyModelUnavailable, match="compatibility BLOCKED"):
             proy._validate_runtime()
         versions[key] = current
-    monkeypatch.setattr(proy.platform, "machine", lambda: "x86_64")
+    monkeypatch.setattr(proy.platform, "machine", lambda: "riscv64")
     with pytest.raises(proy.ProyModelUnavailable, match="compatibility BLOCKED"):
         proy._validate_runtime()
 
@@ -313,7 +313,7 @@ def test_generator_cli_and_source_unchanged(tmp_path):
         "--artifact-dir",
         str(tmp_path),
         "--compatibility-record",
-        str(root / "docs/PROY_SVM_COMPATIBILIDAD.json"),
+        str(root / "docs/PROY_SVM_COMPATIBILIDAD_X86_64.json"),
     ]
     subprocess.run(command, check=True, capture_output=True)
     assert (

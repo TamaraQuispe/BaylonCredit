@@ -16,7 +16,7 @@ PINS = {
 }
 MODEL_NAME = "credit_proy_svm_v1.joblib"
 META_NAME = "credit_proy_svm_v1_meta.json"
-COMPATIBILITY_SHA256 = "3daed68193f3cd328949e3b2412646394f1a82b6580bc094665107422924aa30"
+COMPATIBILITY_SHA256 = "dadf356badce0f65840d2113f8dc35cd6bffefebbbd2212aab70e2b005b44681"
 
 
 def prepare(source: Path, artifact_dir: Path, compatibility_record: Path | None = None) -> None:
@@ -26,7 +26,7 @@ def prepare(source: Path, artifact_dir: Path, compatibility_record: Path | None 
     if any(path.exists() or path.is_symlink() for path in targets):
         raise ValueError("Refusing to overwrite an existing artifact or metadata")
     record_path = compatibility_record or (
-        Path(__file__).resolve().parents[1] / "docs/PROY_SVM_COMPATIBILIDAD.json"
+        Path(__file__).resolve().parents[1] / "docs/PROY_SVM_COMPATIBILIDAD_X86_64.json"
     )
     if record_path.is_symlink() or not record_path.is_file():
         raise ValueError("Missing trusted compatibility evidence")
@@ -115,6 +115,6 @@ if __name__ == "__main__":
         "--artifact-dir", type=Path, default=root / "backend/app/ml/artifacts"
     )
     parser.add_argument("--compatibility-record", type=Path,
-                        default=root / "docs/PROY_SVM_COMPATIBILIDAD.json")
+                        default=root / "docs/PROY_SVM_COMPATIBILIDAD_X86_64.json")
     args = parser.parse_args()
     prepare(args.source, args.artifact_dir, args.compatibility_record)

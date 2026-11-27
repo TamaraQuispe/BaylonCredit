@@ -97,6 +97,24 @@ class RuntimeComparisonTests(unittest.TestCase):
         candidate = fixture(verifier.X86_64_RUNTIME)
         self.assertTrue(verifier.compare_probes(self.reference, candidate)["compatible"])
 
+    def test_x86_64_evidence_record_is_recomputable(self):
+        root = Path(__file__).resolve().parents[2] / "docs"
+        record_path = root / "PROY_SVM_COMPATIBILIDAD_X86_64.json"
+        if not record_path.is_file():
+            self.skipTest("Read-only compatibility evidence not mounted")
+        record = json.loads(record_path.read_bytes())
+        probes = {}
+        for name in ("reference", "candidate"):
+            source = root / "PROY_SVM_EVIDENCIAS" / record["probes"][name]["name"]
+            content = source.read_bytes()
+            self.assertEqual(hashlib.sha256(content).hexdigest(), record["probes"][name]["sha256"])
+            probes[name] = json.loads(content)
+        comparison = verifier.compare_probes(probes["reference"], probes["candidate"])
+        for name, value in comparison.items():
+            self.assertEqual(record[name], value, name)
+        self.assertEqual(record["candidate_runtime"], verifier.X86_64_RUNTIME)
+        self.assertEqual(record["tested_runtime_whitelist"], list(verifier.TESTED_RUNTIMES))
+
     def test_outside_tolerance(self):
         self.candidate["scores"][0]["proba"] = [0.8 - 2e-12, 0.2 + 2e-12]
         self.assertFalse(verifier.compare_probes(self.reference, self.candidate)["compatible"])

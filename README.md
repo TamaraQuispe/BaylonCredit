@@ -181,7 +181,7 @@ docker compose --env-file .env.staging \
 
 El override añade una tarea `bootstrap` que crea el primer `admin` tras aplicar las migraciones, aplica límites de memoria a la API y exige valores explícitos para staging en las variables críticas.
 
-Para la demo del endpoint experimental PROY, suma el override del runtime verificado del SVM (Linux/arm64):
+Para la demo del endpoint experimental PROY, suma el override del runtime verificado del SVM (Linux/amd64 nativo; Linux/arm64 tambien verificado):
 
 ```bash
 docker compose --env-file .env.staging \
@@ -189,7 +189,7 @@ docker compose --env-file .env.staging \
   up --build -d
 ```
 
-Esa imagen fija Python 3.12.14, NumPy 2.5.3, scikit-learn 1.9.1, SciPy 1.18.1, joblib 1.6.0 y threadpoolctl 3.7.0, y el build falla si el SVM no carga. En un host amd64 requiere emulación arm64 o una verificación x86_64 propia; ver `docs/PROY_INTEGRACION_SVM.md`.
+Esa imagen fija Python 3.12.14, NumPy 2.5.3, scikit-learn 1.9.1, SciPy 1.18.1, joblib 1.6.0 y threadpoolctl 3.7.0, y el build falla si el SVM no carga. La tupla Linux/amd64 esta verificada con un probe real en un runner x86_64; ver `docs/PROY_INTEGRACION_SVM.md`.
  El despliegue sobre un proveedor (AWS, Google Cloud, Render, Railway, una VPS...) solo requiere exportar las mismas variables y conservar los health checks, la task de release de migraciones y los headers `X-Forwarded-*` en el balanceador.
 
 ## Despliegue En La Nube

@@ -3,8 +3,9 @@
   "artifact_sha256": "f89db794fc657c3c0f858b1392e26474bc15577facd38ac49355b19a6834db45",
   "business_approval": false,
   "compatibility": {
+    "evidence_sha256": "dadf356badce0f65840d2113f8dc35cd6bffefebbbd2212aab70e2b005b44681",
+    "production_authorized": false,
     "status": "experimentally_verified_for_exact_runtime_tuples_only",
-    "evidence_sha256": "3daed68193f3cd328949e3b2412646394f1a82b6580bc094665107422924aa30",
     "tested_runtimes": [
       {
         "joblib": "1.6.0",
@@ -27,9 +28,19 @@
         "sklearn": "1.9.1",
         "system": "Linux",
         "threadpoolctl": "3.7.0"
+      },
+      {
+        "joblib": "1.6.0",
+        "machine": "x86_64",
+        "numpy": "2.5.3",
+        "python": "3.12.14",
+        "python_implementation": "CPython",
+        "scipy": "1.18.1",
+        "sklearn": "1.9.1",
+        "system": "Linux",
+        "threadpoolctl": "3.7.0"
       }
-    ],
-    "production_authorized": false
+    ]
   },
   "family": "svm",
   "feature_names": [

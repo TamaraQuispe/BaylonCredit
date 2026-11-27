@@ -3,19 +3,23 @@
 ## Estado
 
 Se comprobo inferencia REAL del mismo artefacto, sin reentrenarlo ni tocar FINAL,
-en el runtime registrado y en una combinacion admitida por la API. No se amplio
-la declaracion Python >=3.12,<3.14 de la API ni se instalaron dependencias globales.
-El cargador acepta SOLO las dos combinaciones comprobadas:
+en el runtime registrado, en el candidato Linux/aarch64 y en un runner Linux/x86_64
+real (GitHub Actions, sin emulacion). El `pyproject` admite `>=3.12,<3.15` para
+que la tupla de referencia sea instalable; el CI sigue en 3.12.
+El cargador acepta SOLO las tres combinaciones comprobadas:
 
 | Entorno | Python | NumPy | Sistema / arquitectura |
 | --- | --- | --- | --- |
 | Referencia de entrenamiento | 3.14.6 | 2.5.5 | CPython / Darwin / arm64 |
 | Candidato local de API | 3.12.14 | 2.5.3 | CPython / Linux / aarch64 |
+| Servidor de staging | 3.12.14 | 2.5.3 | CPython / Linux / x86_64 |
 
-Ambos: scikit-learn 1.9.1, joblib 1.6.0, SciPy 1.18.1 y threadpoolctl 3.7.0.
-No se presume compatibilidad con x86_64, otras versiones de Python, librerias,
+Los tres: scikit-learn 1.9.1, joblib 1.6.0, SciPy 1.18.1 y threadpoolctl 3.7.0.
+No se presume compatibilidad con otras versiones de Python, librerias,
 arquitecturas o sistemas. La metadata conserva el runtime original; la comprobacion
-actual se agrega separadamente, sin reescribir la procedencia.
+se agrega separadamente, sin reescribir la procedencia. El probe x86_64 queda en
+`docs/PROY_SVM_EVIDENCIAS/probe-x86_64.json` y su comparacion en
+`docs/PROY_SVM_COMPATIBILIDAD_X86_64.json` (delta maximo 2.58e-14).
 
 Esto permite avanzar en pruebas locales de integracion, NO habilita produccion
 ni valida el modelo comercialmente. Ya existe una ruta experimental apagada por
@@ -167,40 +171,42 @@ sembrado con una venta y un fiado ya pagado (S/ 80, sin deuda) solicito S/ 40:
 
 ### Runtime exacto de la demo
 
-El endpoint sigue fallando cerrado (503) en cualquier runtime fuera de las dos
-tuplas verificadas, aunque el flag este activo. Para que la demo de staging no
-caiga en ese caso:
+El endpoint sigue fallando cerrado (503) en cualquier runtime fuera de las tres
+tuplas verificadas, aunque el flag este activo. Para la demo de staging:
 
-- Imagen `deploy/proy-demo/Dockerfile`: base `python:3.12.14-slim-bookworm`
-  (Linux/aarch64, el candidato registrado) con NumPy 2.5.3, scikit-learn 1.9.1,
-  SciPy 1.18.1, joblib 1.6.0 y threadpoolctl 3.7.0. Tras instalar, el build
-  ejecuta `deploy/proy-demo/check-runtime.py`, que carga el artefacto y compara
-  la fila de control (0.13741099608146 +- 1e-9). Si el runtime no es apto, la
-  imagen no se construye.
-- Override `docker-compose.proy-demo.yml` (API con `platform: linux/arm64`); el
+- Imagen `deploy/proy-demo/Dockerfile`: base `python:3.12.14-slim-bookworm` con
+  NumPy 2.5.3, scikit-learn 1.9.1, SciPy 1.18.1, joblib 1.6.0 y threadpoolctl
+  3.7.0. En staging (Linux/amd64) compila y corre nativa; en arm64 tambien esta
+  verificada. Tras instalar, el build ejecuta
+  `deploy/proy-demo/check-runtime.py`, que carga el artefacto y compara la fila
+  de control (0.13741099608146 +- 1e-9). Si el runtime no es apto, la imagen no
+  se construye.
+- Override `docker-compose.proy-demo.yml` (API con `platform: linux/amd64`); el
   comando de staging esta en el README.
 - Cualquier entorno puede comprobarse con
   `python deploy/proy-demo/check-runtime.py`. En la tupla de referencia imprime
-  `RUNTIME_OK credit-proy-svm-v1 prob=0.137410996081460` y en la imagen
-  `...081462`.
+  `RUNTIME_OK credit-proy-svm-v1 prob=0.137410996081460` y en las imagenes Linux
+  `...081462` (aarch64) y `...0814618` (x86_64).
 - `backend/pyproject.toml` acepta ahora `>=3.12,<3.15`, para que la tupla de
   referencia 3.14.6 sea instalable; el CI sigue fijado en 3.12.
 
-E2E a traves de la imagen: PostgreSQL 17, S/ 40, probabilidad 0.106575,
-`MODEL_REVIEW_CANDIDATE`, traza persistida y creditos 1/1.
+E2E a traves de la imagen arm64: PostgreSQL 17, S/ 40, probabilidad 0.106575,
+`MODEL_REVIEW_CANDIDATE`, traza persistida y creditos 1/1. En x86_64, el workflow
+`PROY SVM x86_64` corre el probe real y construye la imagen nativa, cuyo build
+ejecuta la misma comprobacion del artefacto.
 
-#### Limite de arquitectura
+#### Cobertura de arquitectura
 
-La imagen es linux/arm64 porque la unica tupla Linux verificada es aarch64. En un
-host amd64 hay que ejecutarla con emulacion arm64 (buildx/qemu) o hacer un probe
-x86_64 propio y anadir la tupla a la evidencia; la emulacion no cuenta como
-verificacion x86_64. Sin una de esas dos cosas el endpoint respondera 503 alli.
+Linux/amd64 (staging) y Linux/aarch64 estan verificados; otras arquitecturas
+exigen su propio probe y anadir la tupla a la evidencia. La emulacion no cuenta
+como verificacion de la arquitectura emulada.
 
 ## Dependencias para el siguiente incremento
 
 Un despliegue API debera fijar y comprobar el tuple candidato, no depender de los
 rangos amplios del pyproject. El registro solo comprueba la pila de inferencia;
 no acredita el resto de FastAPI, SQLAlchemy o una peticion transaccional completa.
-Para el servidor amd64 actual hace falta otra prueba aislada de arquitectura o
-una publicacion entrenada/verificada para ese entorno. No deshabilitar esta
+El servidor amd64 ya tiene su probe en un runner Linux x86_64 real y su
+tupla quedo admitida; otras arquitecturas siguen necesitando su propia prueba
+aislada o una publicacion entrenada/verificada para ese entorno. No deshabilitar esta
 comprobacion para que el arranque pase ni sustituir el artefacto silenciosamente.
