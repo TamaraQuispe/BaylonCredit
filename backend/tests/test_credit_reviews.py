@@ -7,6 +7,8 @@ from uuid import UUID
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 import app.services.ai_credit as ai_credit
@@ -21,6 +23,41 @@ from app.models.commerce import CreditReview, CreditReviewStatus
 from app.models.settings import DEFAULT_ORGANIZATION_ID, Organization
 from app.models.user import User, UserRole
 from app.services import credit_review as review_service
+
+
+def _guard_disposable_test_database(database_url: str) -> None:
+    """Impide borrar datos si TEST_DATABASE_URL apunta a una base compartida."""
+    name = make_url(database_url).database or ""
+    if name == "test" or name.endswith("_test"):
+        return
+    raise RuntimeError(
+        "TEST_DATABASE_URL debe apuntar a una base dedicada llamada 'test' o "
+        f"terminada en '_test' (recibida: {name!r}). El fixture borra los datos "
+        "de esa base para aislar cada test."
+    )
+
+
+async def _reset_migrated_schema(connection) -> None:
+    """Corre los tests de Postgres sobre el esquema que crea Alembic.
+
+    Se valida la migracion real en el job backend-postgres en lugar de recrear
+    las tablas desde ``Base.metadata``. Si la base apunta a una version vieja o
+    sin migrar, se falla con un mensaje accionable en vez de crear un esquema
+    paralelo que oculte el problema.
+    """
+    tables = set(await connection.run_sync(lambda sync: inspect(sync).get_table_names()))
+    if "alembic_version" not in tables:
+        raise RuntimeError(
+            "TEST_DATABASE_URL no tiene el esquema migrado; ejecute "
+            "`alembic upgrade head` contra esa base antes de correr los tests."
+        )
+    # Solo se limpian datos: alembic_version se conserva para seguir validando
+    # el esquema migrado en cada corrida.
+    truncated = sorted(table for table in tables if table != "alembic_version")
+    if not truncated:
+        return
+    quoted = ", ".join(f'"{table}"' for table in truncated)
+    await connection.execute(text(f"TRUNCATE TABLE {quoted} RESTART IDENTITY CASCADE"))
 
 
 @pytest_asyncio.fixture
@@ -38,14 +75,19 @@ async def app_context(
     for module in (scoring, ai_credit, whatsapp):
         monkeypatch.setattr(module, "get_settings", lambda: settings)
     # SQLite no distingue zonas horarias; TEST_DATABASE_URL permite correr estos
-    # tests contra Postgres real en CI (job backend-postgres).
+    # tests contra Postgres real en CI (job backend-postgres). En Postgres el
+    # esquema lo crea Alembic y el fixture solo limpia filas; en SQLite se crea
+    # desde los modelos porque no hay migraciones aplicables.
     database_url = os.environ.get("TEST_DATABASE_URL")
+    if database_url:
+        _guard_disposable_test_database(database_url)
     engine = create_async_engine(database_url or "sqlite+aiosqlite:///:memory:")
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
     async with engine.begin() as connection:
         if database_url:
-            await connection.run_sync(Base.metadata.drop_all)
-        await connection.run_sync(Base.metadata.create_all)
+            await _reset_migrated_schema(connection)
+        else:
+            await connection.run_sync(Base.metadata.create_all)
     async with session_factory() as db:
         # La migracion 0013 siembra esta organizacion; SQLite no aplica la FK
         # de clients.organization_id y sin ella Postgres rechaza el insert.
@@ -464,6 +506,18 @@ async def test_review_expiry_loop_runs_a_cycle_then_sleeps(monkeypatch) -> None:
         await review_service.review_expiry_loop(60)
 
     assert cycles == [1]
+
+
+def test_disposable_database_guard_only_accepts_test_names() -> None:
+    _guard_disposable_test_database(
+        "postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit_test"
+    )
+    _guard_disposable_test_database("postgresql+asyncpg://baylon:baylon@localhost:5432/test")
+
+    with pytest.raises(RuntimeError, match="dedicada"):
+        _guard_disposable_test_database(
+            "postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit"
+        )
 
 
 def test_expiry_interval_setting_allows_disabling_and_rejects_negatives() -> None:

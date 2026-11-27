@@ -44,20 +44,20 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_DB: bayloncredit
+          POSTGRES_DB: bayloncredit_test
           POSTGRES_USER: baylon
           POSTGRES_PASSWORD: baylon
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U baylon -d bayloncredit"
+          --health-cmd "pg_isready -U baylon -d bayloncredit_test"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
       ENVIRONMENT: test
-      DATABASE_URL: postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit
-      TEST_DATABASE_URL: postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit
+      DATABASE_URL: postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit_test
+      TEST_DATABASE_URL: postgresql+asyncpg://baylon:baylon@localhost:5432/bayloncredit_test
       JWT_SECRET_KEY: ci-postgres-review-secret-key-0123456789
     steps:
       - uses: actions/checkout@v4
@@ -67,6 +67,15 @@ jobs:
           cache: pip
       - run: pip install -e ".[dev]"
       - run: alembic upgrade head
+      # Los tests corren sobre el esquema que crea Alembic (el fixture no lo
+      # recrea); se comprueba que quedó en la última revisión.
+      - name: Validar que el esquema migrado está en head
+        run: |
+          current=$(psql postgresql://baylon:baylon@localhost:5432/bayloncredit_test \
+            -v ON_ERROR_STOP=1 -tAc "SELECT version_num FROM alembic_version")
+          expected=$(alembic heads | awk '{print $1}')
+          echo "Esquema migrado: $current (head: $expected)"
+          test "$current" = "$expected"
       - run: pytest -q tests/test_credit_reviews.py
 
   no-duplicates:
