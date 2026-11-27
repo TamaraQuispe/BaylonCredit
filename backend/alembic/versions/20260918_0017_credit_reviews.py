@@ -31,7 +31,7 @@ def upgrade() -> None:
         sa.Column(
             "status",
             sa.String(length=20),
-            server_default="pendiente",
+            server_default="PENDING",
             nullable=False,
         ),
         sa.Column("assigned_to_id", sa.Uuid(), nullable=True),

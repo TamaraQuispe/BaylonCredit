@@ -69,7 +69,7 @@ describe('RevisionesCreditoPage', () => {
     expect(screen.getByText(/Riesgo: medio/)).toBeInTheDocument()
     expect(screen.getByText('Score en el limite')).toBeInTheDocument()
     expect(calls).toEqual([
-      { method: 'GET', path: `${REVIEWS_URL}?status=pendiente` },
+      { method: 'GET', path: `${REVIEWS_URL}` },
     ])
   })
 
@@ -200,5 +200,17 @@ describe('RevisionesCreditoPage', () => {
 
     expect(await screen.findByText('Sin permiso para resolver revisiones')).toBeInTheDocument()
     expect(screen.getByText('Ana Torres')).toBeInTheDocument()
+  })
+
+  test('formats an amount serialized as a decimal string', async () => {
+    installApi(() => ({
+      status: 200,
+      body: [{ ...pendingReview, requested_amount: '1500.00' }],
+    }))
+
+    render(<RevisionesCreditoPage />)
+
+    expect(await screen.findByText('Ana Torres')).toBeInTheDocument()
+    expect(screen.getByText(/Monto: S\/ 1500\.00/)).toBeInTheDocument()
   })
 })

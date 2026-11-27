@@ -90,6 +90,33 @@ ruff check .
 pytest
 ```
 
+## Hook De Git: Archivos Duplicados
+
+El repositorio versiona `.githooks/pre-commit`, que rechaza el commit si algún
+archivo preparado con `git add` contiene el patrón `' 2.'` en su ruta (por
+ejemplo `credit_review 2.py`). El mismo control corre en CI en el job
+`no-duplicates`.
+
+Se activa automáticamente al instalar las dependencias del frontend
+(`npm install` o `npm ci`), mediante el script `postinstall` →
+`scripts/setup-git-hooks.mjs`. Si el clon ya tiene otro `core.hooksPath`
+configurado, el script no lo sobrescribe y avisa.
+
+Si trabajas solo con el backend o no ejecutas npm, actívalo a mano una vez por
+clon desde la raíz del repositorio:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Para comprobar que funciona sin commitear:
+
+```bash
+.githooks/pre-commit   # sale 0 si no hay duplicados preparados
+```
+
+Para desactivarlo: `git config --unset core.hooksPath`.
+
 ## Endpoints
 
 - `GET /health/live`: proceso activo.

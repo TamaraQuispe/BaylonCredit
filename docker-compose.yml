@@ -23,6 +23,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-baylon}:${POSTGRES_PASSWORD:-baylon-local-password}@database:5432/${POSTGRES_DB:-bayloncredit}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-development-secret-change-before-deploy}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:8080}
+      CREDIT_REVIEW_TTL_HOURS: ${CREDIT_REVIEW_TTL_HOURS:-48}
+      CREDIT_REVIEW_EXPIRY_INTERVAL_MINUTES: ${CREDIT_REVIEW_EXPIRY_INTERVAL_MINUTES:-60}
     depends_on:
       database:
         condition: service_healthy

@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 14
     login_attempt_limit: int = 5
     login_attempt_window_minutes: int = 15
+    credit_review_ttl_hours: int = 48
+    credit_review_expiry_interval_minutes: int = 60
     cors_origins: str = "http://localhost:5173,http://localhost:8080"
     webauthn_rp_id: str = "localhost"
     webauthn_origin: str = "http://localhost:5173"
@@ -87,6 +89,10 @@ class Settings(BaseSettings):
             raise ValueError("ACCESS_TOKEN_EXPIRE_MINUTES must be greater than zero")
         if self.refresh_token_expire_days <= 0:
             raise ValueError("REFRESH_TOKEN_EXPIRE_DAYS must be greater than zero")
+        if self.credit_review_ttl_hours < 1:
+            raise ValueError("CREDIT_REVIEW_TTL_HOURS must be greater than zero")
+        if self.credit_review_expiry_interval_minutes < 0:
+            raise ValueError("CREDIT_REVIEW_EXPIRY_INTERVAL_MINUTES cannot be negative")
         if self.whatsapp_reminder_days_before < 0:
             raise ValueError("WHATSAPP_REMINDER_DAYS_BEFORE cannot be negative")
         if self.whatsapp_reminder_interval_hours < 1:
