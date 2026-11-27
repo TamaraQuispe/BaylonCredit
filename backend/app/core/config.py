@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     academic_ml_v4_dir: str = "/app/academic-v4"
     academic_ml_v6_enabled: bool = False
     academic_ml_v6_dir: str = "/app/academic-v6"
+    proy_experimental_enabled: bool = False
     api_v1_prefix: str = "/api/v1"
     database_url: str = "postgresql+asyncpg://credify:credify@localhost:5432/credify"
     database_connect_timeout_seconds: float = Field(default=5, gt=0)
@@ -79,6 +80,8 @@ class Settings(BaseSettings):
             raise ValueError("Academic V4 laboratory is restricted to staging")
         if self.academic_ml_v6_enabled and self.environment != "staging":
             raise ValueError("Academic V6 laboratory is restricted to staging")
+        if self.proy_experimental_enabled and self.environment != "staging":
+            raise ValueError("Experimental PROY endpoint is restricted to staging")
         unsafe_production_secret = (
             self.environment in {"staging", "production"}
             and self.jwt_secret_key == DEVELOPMENT_JWT_SECRET

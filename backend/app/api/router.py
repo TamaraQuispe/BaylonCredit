@@ -9,6 +9,7 @@ from app.api.routes import (
     credits,
     payments,
     products,
+    proy_experimental,
     reports,
     sales,
     settings,
@@ -29,6 +30,7 @@ api_router.include_router(products.router)
 api_router.include_router(sales.router)
 api_router.include_router(credits.router)
 api_router.include_router(payments.router)
+api_router.include_router(proy_experimental.router)
 api_router.include_router(settings.router)
 api_router.include_router(reports.router)
 api_router.include_router(whatsapp.router)
