@@ -137,7 +137,9 @@ reconstruirse sin inferencia. No se incluye entrenamiento ni acceso a BD.
 - Lee el historial real con `app/ml/features.py` (congelado). La compuerta de
   saldo pendiente vive en el cargador: con cualquier deuda pendiente responde sin
   cargar el artefacto ni calcular probabilidad. Si el snapshot cae en el dominio
-  de entrenamiento, infiere con el SVM.
+  de entrenamiento, infiere con el SVM. El ratio se normaliza con el cupo de
+  referencia del entrenamiento (S/ 80), no con `max_credit_amount` de la demo
+  (S/ 200): el tope vivo movia S/ 40 de 0.5 a 0.2 y cambiaba la decision.
 - Guarda la traza en `proy_experimental_evaluations` (decision, razon,
   probabilidad, umbral, snapshot, versiones). Es una tabla aparte: no escribe en
   `credit_evaluations`, no entra a la cola de revisiones y no crea ni aprueba
@@ -161,10 +163,10 @@ Se ejecuto la API real (`uvicorn`) contra PostgreSQL 17 migrado, con
 sembrado con una venta y un fiado ya pagado (S/ 80, sin deuda) solicito S/ 40:
 
 - Snapshot leido de la base: `completed_sales=1`, `paid_credits=1`, `paid_late=0`,
-  `outstanding=0`, `utilization=0`, `requested_ratio=0.2`, `punctuality_rate=1`,
+  `outstanding=0`, `utilization=0`, `requested_ratio=0.5`, `punctuality_rate=1`,
   `overdue_rate=0`.
-- SVM real, sin stub: probabilidad 0.106575, `predicted=1`,
-  `MODEL_REVIEW_CANDIDATE`, `model_called=true`, umbral 0.1.
+- SVM real, sin stub: probabilidad 0.094189, `predicted=0`,
+  `BELOW_REVIEW_THRESHOLD`, `model_called=true`, umbral 0.1.
 - Traza guardada en `proy_experimental_evaluations` con el mismo snapshot,
   versiones y umbral.
 - Creditos antes/despues: 1/1; `credit_evaluations` y `credit_reviews`: 0/0.
@@ -190,12 +192,12 @@ tuplas verificadas, aunque el flag este activo. Para la demo de staging:
 - `backend/pyproject.toml` acepta ahora `>=3.12,<3.15`, para que la tupla de
   referencia 3.14.6 sea instalable; el CI sigue fijado en 3.12.
 
-E2E a traves de la imagen arm64: PostgreSQL 17, S/ 40, probabilidad 0.106575,
-`MODEL_REVIEW_CANDIDATE`, traza persistida y creditos 1/1.
+E2E a traves de la imagen arm64: PostgreSQL 17, S/ 40, probabilidad 0.094189,
+`BELOW_REVIEW_THRESHOLD`, traza persistida y creditos 1/1.
 
 En x86_64, el job `e2e-postgres-x86_64` del workflow `PROY SVM x86_64` construye
 la imagen nativa y repite el E2E completo contra un PostgreSQL 17 efimero:
-migracion, seed ficticio, S/ 40 y probabilidad 0.1065748513407444, snapshot de
+migracion, seed ficticio, S/ 40 y probabilidad 0.094189, snapshot de
 once variables calculado en el servidor y guardado, fila en
 `proy_experimental_evaluations` con autor, y contadores sin cambios (54 fiados
 antes y despues, cero `credit_evaluations` y cero `credit_reviews`). La evidencia

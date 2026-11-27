@@ -27,8 +27,9 @@ CLIENT_DOCUMENT = "90000001"
 REQUESTED_AMOUNT = "40.00"
 PG_USER = "demo"
 PG_DATABASE = "credify_demo"
+# S/ 40 / cupo de referencia S/ 80 = 0.5, por debajo del umbral 0.1.
 # La tupla x86_64 difiere de la referencia en ~2.6e-14; 1e-9 deja margen.
-EXPECTED_PROBABILITY = 0.1065748513407444
+EXPECTED_PROBABILITY = 0.0941887300703799
 PROBABILITY_TOLERANCE = 1e-9
 EXPECTED_SNAPSHOT = {
     "completed_sales": 1.0,
@@ -38,7 +39,7 @@ EXPECTED_SNAPSHOT = {
     "pending_current": 0.0,
     "outstanding": 0.0,
     "utilization": 0.0,
-    "requested_ratio": 0.2,
+    "requested_ratio": 0.5,
     "tenure_days": 0.0,
     "punctuality_rate": 1.0,
     "overdue_rate": 0.0,
@@ -172,10 +173,10 @@ def main() -> int:
         )
         assert status == 201, f"evaluacion devolvio {status}"
         evidence["response"] = body
-        assert body["decision"] == "MODEL_REVIEW_CANDIDATE", body["decision"]
+        assert body["decision"] == "BELOW_REVIEW_THRESHOLD", body["decision"]
         assert body["reason"] == "human_decision_required", body["reason"]
         assert body["model_called"] is True
-        assert body["predicted"] == 1
+        assert body["predicted"] == 0
         assert float(body["threshold"]) == 0.1
         assert body["model_version"] == "credit-proy-svm-v1"
         assert body["schema_version"] == "proy-credit-contract-v1"

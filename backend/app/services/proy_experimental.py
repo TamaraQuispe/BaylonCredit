@@ -23,6 +23,10 @@ from app.models.settings import SETTINGS_ID, BusinessSettings
 from app.services.credit_scoring import DEFAULT_MAX_CREDIT_AMOUNT
 
 POLICY_VERSION = "proy-pending-balance-v1"
+# Denominador con el que se entreno el artefacto: requested_ratio = monto / 80.
+# No es el tope comercial de la demo (S/ 200): con ese tope S/ 40 daba 0.2,
+# cuando el modelo espera 0.5, y la decision se invertia.
+REFERENCE_CAP_PEN = Decimal("80")
 
 
 class ProyClientNotFound(LookupError):
@@ -55,7 +59,8 @@ async def evaluate_client_history(
         "pending_current": features.pending_current,
         "outstanding": features.outstanding,
         "utilization": features.utilization,
-        "requested_ratio": features.requested_ratio,
+        # Normalizado con el cupo de referencia del entrenamiento, no con el tope vivo.
+        "requested_ratio": float(amount / REFERENCE_CAP_PEN),
         "tenure_days": features.tenure_days,
         "punctuality_rate": features.punctuality_rate,
         "overdue_rate": features.overdue_rate,

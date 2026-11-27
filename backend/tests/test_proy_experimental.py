@@ -301,7 +301,8 @@ async def test_snapshot_comes_from_database_and_is_persisted(
     assert set(captured) == set(FEATURE_NAMES_PROY)
     assert captured["completed_sales"] == 1 and captured["paid_credits"] == 1
     assert captured["outstanding"] == Decimal("0")
-    assert captured["requested_ratio"] == pytest.approx(0.2)
+    # S/ 40 sobre el cupo de referencia S/ 80, no sobre el tope vivo (S/ 200).
+    assert captured["requested_ratio"] == pytest.approx(0.5)
     assert body["decision"] == "MODEL_REVIEW_CANDIDATE"
     assert body["probability"] == pytest.approx(0.42)
     assert Decimal(body["threshold"]) == Decimal("0.1000")
