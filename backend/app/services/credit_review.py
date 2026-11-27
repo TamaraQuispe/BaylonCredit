@@ -25,6 +25,7 @@ from app.models.commerce import (
     CreditReviewStatus,
 )
 from app.models.user import User, UserRole
+from app.services.audit import add_audit_log
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +179,15 @@ async def assign_review(
     review.status = CreditReviewStatus.ASSIGNED
     review.assigned_to_id = user.id
     await db.flush()
+    add_audit_log(
+        db,
+        "credit_review_assigned",
+        "credit_review",
+        actor=user,
+        entity_id=review.id,
+        details={"assigned_to_id": str(user.id)},
+        description="Revision de credito asignada.",
+    )
     return review
 
 
@@ -199,6 +209,18 @@ async def resolve_review(
     review.resolved_by_id = user.id
     review.resolved_at = datetime.now(UTC)
     await db.flush()
+    add_audit_log(
+        db,
+        "credit_review_resolved",
+        "credit_review",
+        actor=user,
+        entity_id=review.id,
+        details={
+            "resolution": resolution.value,
+            "note": (note or "").strip() or None,
+        },
+        description="Revision de credito resuelta.",
+    )
     return review
 
 
@@ -207,11 +229,21 @@ async def expire_review(
 ) -> CreditReview:
     if review.status == CreditReviewStatus.RESOLVED:
         return review
+    if review.status == CreditReviewStatus.EXPIRED:
+        return review
     review.status = CreditReviewStatus.EXPIRED
     review.resolution = CreditReviewResolution.EXPIRED
     review.resolved_at = datetime.now(UTC)
     if flush:
         await db.flush()
+    add_audit_log(
+        db,
+        "credit_review_expired",
+        "credit_review",
+        entity_id=review.id,
+        details={"expired": True},
+        description="Revision de credito expirada por vencimiento.",
+    )
     return review
 
 

@@ -69,7 +69,7 @@ describe('RevisionesCreditoPage', () => {
     expect(screen.getByText(/Riesgo: medio/)).toBeInTheDocument()
     expect(screen.getByText('Score en el limite')).toBeInTheDocument()
     expect(calls).toEqual([
-      { method: 'GET', path: `${REVIEWS_URL}?status=pendiente` },
+      { method: 'GET', path: `${REVIEWS_URL}` },
     ])
   })
 

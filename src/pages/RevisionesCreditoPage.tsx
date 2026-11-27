@@ -24,8 +24,12 @@ export default function RevisionesCreditoPage() {
     setLoading(true)
     setError(null)
     try {
-      const data = await apiRequest<Review[]>('/credits/reviews?status=pendiente')
-      setItems(data)
+      const data = await apiRequest<Review[]>('/credits/reviews')
+      setItems(
+        data.filter(
+          (item) => item.status === 'pendiente' || item.status === 'asignada',
+        ),
+      )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo cargar la cola')
     } finally {
